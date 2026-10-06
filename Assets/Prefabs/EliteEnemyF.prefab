@@ -356,9 +356,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EliteSelfDestructPattern
   fuseRadius: 5
-  fuseDuration: 3
+  fuseDuration: 2.5
   minSpeed: 3
-  blastRadius: 15
+  blastRadius: 18
   damagePercent: 20
   tauntDuration: 30
   confusionDuration: 8
