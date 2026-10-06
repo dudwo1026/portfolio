@@ -34,12 +34,12 @@ MonoBehaviour:
     charHeightPx: 166
     charBottomPx: 17
     footCenterPx: 91.5
-    sizeScale: 1
+    sizeScale: 1.5
   - texture: {fileID: 2800000, guid: 56440eddc32343f42b99979333b23c2d, type: 3}
     charHeightPx: 166
     charBottomPx: 21
     footCenterPx: 125
-    sizeScale: 1
+    sizeScale: 1.5
   - texture: {fileID: 2800000, guid: 33681926eb5eb794f9d424321c82482b, type: 3}
     charHeightPx: 166
     charBottomPx: 26
