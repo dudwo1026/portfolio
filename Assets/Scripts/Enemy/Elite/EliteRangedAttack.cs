@@ -23,7 +23,6 @@ public class EliteRangedAttack : MonoBehaviour, IElitePatternVisual
 
     [Header("Aim prediction")]
     public float predictionStrength = 1f; // 0 = aim where the player is, 1 = full lead
-    public int predictionIterations = 3;  // flight time depends on the lead, so solve it a few times
 
     EnemyAI ai;
     Renderer rend;
@@ -134,29 +133,31 @@ Vector3 PredictAimPoint(Transform p)
     {
         if (playerMover == null) playerMover = p.GetComponent<TopDownMove>();
 
-        Vector3 velocity = Vector3.zero;
-        if (playerMover != null) velocity = playerMover.MoveDirection * playerMover.CurrentSpeed * predictionStrength;
+        Vector3 v = Vector3.zero;
+        if (playerMover != null) v = playerMover.MoveDirection * playerMover.CurrentSpeed * predictionStrength;
+        v.y = 0f;
 
-        Vector3 aim = p.position;
-        for (int i = 0; i < predictionIterations; i++)
+        // 포탄은 수평 속도 s가 일정하다(FlightTimeFor). |P + v*t| = s*t 를 t에 대해 정확히 푼다.
+        // 예전엔 반복 3회 근사 + 사거리 18 제한이었는데, 멀어지는 표적에선 수렴 비율이 v/s(=0.67)라
+        // 덜 수렴한 데다 조준점이 18에서 잘려 한참 못 미쳤다 (거리 13.5에서 도망치면 40.5를 노려야 함)
+        float s = range / flightTimeAtMaxRange;
+        Vector3 P = p.position - transform.position;
+        P.y = 0f;
+        float a = Vector3.Dot(v, v) - s * s;
+        float b = 2f * Vector3.Dot(P, v);
+        float c = Vector3.Dot(P, P);
+        float t = -1f;
+        if (Mathf.Abs(a) < 0.0001f) { if (b < 0f) t = -c / b; }
+        else
         {
-            Vector3 flat = aim - transform.position;
-            flat.y = 0f;
-            aim = p.position + velocity * FlightTimeFor(flat.magnitude);
-            aim = ClampToRange(aim); // never lead past our own range (the lead would otherwise feed itself)
+            float disc = b * b - 4f * a * c;
+            if (disc >= 0f)
+            {
+                float sq = Mathf.Sqrt(disc);
+                float t1 = (-b - sq) / (2f * a), t2 = (-b + sq) / (2f * a);
+                t = (t1 > 0f && t2 > 0f) ? Mathf.Min(t1, t2) : Mathf.Max(t1, t2);
+            }
         }
-        return aim;
-    }
-
-
-Vector3 ClampToRange(Vector3 aim)
-    {
-        Vector3 flat = aim - transform.position;
-        flat.y = 0f;
-        if (flat.magnitude <= range) return aim;
-
-        Vector3 clamped = transform.position + flat.normalized * range;
-        clamped.y = aim.y;
-        return clamped;
+        return t > 0f ? p.position + v * t : p.position; // 따라잡을 수 없으면 지금 위치를 노린다
     }
 }
