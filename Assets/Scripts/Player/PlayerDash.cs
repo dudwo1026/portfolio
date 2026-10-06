@@ -9,9 +9,12 @@ public class PlayerDash : MonoBehaviour
 {
     // dash distance so that (dash + remaining walk during cooldown) totals 10% more
     // than plain walking over one full cooldown cycle:
-    // target = walkSpeed(6)*cooldown(0.8)*1.1 = 5.28; minus walking the leftover
-    // (cooldown-dashDuration)=0.6s at walkSpeed = 3.6 => dashDistance = 1.68.
-    public float dashDistance = 3.36f; // 2x the 10%-cycle-target value above
+    // target = walkSpeed(9)*cooldown(0.8)*1.1 = 7.92; minus walking the leftover
+    // (cooldown-dashDuration)=0.6s at walkSpeed = 5.4 => dashDistance = 2.52.
+    //
+    // walkSpeed가 바뀌면 이 값도 같이 바꿔야 한다. 안 그러면 대시가 그냥 걷기보다
+    // 느려져서 쓸 이유가 없어진다 (이동속도 1.5배 때 6->9 가 되면서 3.36 -> 5.04 로 올렸다)
+    public float dashDistance = 5.04f; // 2x the 10%-cycle-target value above
     public float dashDuration = 0.2f;
     public float cooldown = 0.8f;
 

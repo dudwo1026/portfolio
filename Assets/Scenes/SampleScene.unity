@@ -372,8 +372,8 @@ Transform:
   m_GameObject: {fileID: 14298232}
   serializedVersion: 2
   m_LocalRotation: {x: 0.34202012, y: -0.000000029802319, z: -0.0000000074505797, w: 0.9396926}
-  m_LocalPosition: {x: 0.52495575, y: 0.033605814, z: -0.0000011920929}
-  m_LocalScale: {x: 2.269368, y: 2.2106774, z: 1}
+  m_LocalPosition: {x: -0.13529277, y: 0.6523111, z: -0.000002026558}
+  m_LocalScale: {x: 2.3581781, y: 3.3786454, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1878695940}
@@ -29454,7 +29454,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 189a66961dd99a1458a9aa0839ba84ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerRoll
-  dashDistance: 3.36
+  dashDistance: 5.04
   dashDuration: 0.2
   cooldown: 0.8
 --- !u!114 &1878695943
