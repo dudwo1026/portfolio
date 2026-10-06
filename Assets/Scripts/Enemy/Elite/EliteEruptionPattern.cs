@@ -4,7 +4,7 @@ using UnityEngine;
 // The blast sweeps a 45-degree sector of radius 14 outward over 0.3s, in the LOCKED direction
 // (turning away during the wind-up does not save the player; stepping out of the sector does).
 [RequireComponent(typeof(EnemyAI))]
-public class EliteEruptionPattern : MonoBehaviour
+public class EliteEruptionPattern : MonoBehaviour, IElitePatternVisual
 {
     public float cooldown = 13f;         // counted from the wind-up start, hit or miss
     public float windupDuration = 0.5f;  // 방향 확정 후 정지 시간
@@ -36,6 +36,21 @@ public class EliteEruptionPattern : MonoBehaviour
     bool playerHit;
     float groundY;
     float nextCastTime;
+
+    // 특수 모션 4장 = 선딜 2장(1·2) + 분출 2장(3·4). 선딜과 분출 길이가 달라도 3번째 장(내려찍기)이
+    // 분출이 시작되는 순간에 정확히 나오도록, 두 구간을 진행도의 앞뒤 절반에 하나씩 배정한다
+    public bool PatternActive { get { return phase != Phase.Idle; } }
+    public float PatternProgress
+    {
+        get
+        {
+            if (phase == Phase.Windup)
+                return windupDuration <= 0f ? 0.5f : 0.5f * Mathf.Clamp01(1f - phaseTimer / windupDuration);
+            if (phase == Phase.Erupt)
+                return spreadDuration <= 0f ? 1f : 0.5f + 0.5f * Mathf.Clamp01(phaseTimer / spreadDuration);
+            return 1f;
+        }
+    }
 
     void Awake()
     {
@@ -81,7 +96,9 @@ public class EliteEruptionPattern : MonoBehaviour
         lockedOrigin = transform.position;
 
         ai.patternDriving = true; // 정지: 시전 내내 제자리
-        groundY = rend != null ? rend.bounds.min.y : transform.position.y;
+        // 바닥은 콜라이더로 잰다. 스프라이트 몹은 큐브 렌더러가 몸보다 작아 장판이 공중에 뜬다
+        Collider body = GetComponent<Collider>();
+        groundY = body != null ? body.bounds.min.y : transform.position.y;
         SetCastVisual(true);
     }
 
