@@ -83,6 +83,6 @@ MonoBehaviour:
   moveFramesPerSecond: 2
   scaleFpsBySpeed: 0
   referenceSpeed: 2.5
-  artFacesScreenLeft: 1
+  artFacesScreenLeft: 0
   faceKnockbackDirection: 0
   attackArtFlipped: 0
