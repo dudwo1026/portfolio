@@ -322,8 +322,8 @@ MonoBehaviour:
   attackCooldown: 2
   attackWindup: 0.5
   attackRange: 1.8
-  keepMinDistance: 12
-  keepMaxDistance: 15
+  keepMinDistance: 5
+  keepMaxDistance: 8
   loseTargetGraceTime: 5
   persistentAggro: 1
   isElite: 1
@@ -371,6 +371,5 @@ MonoBehaviour:
   specialMaterial: {fileID: 2100000, guid: c4fe21d1e26257947a47aacfdbf0634d, type: 2}
   launchHeight: 1
   predictionStrength: 1
-  predictionIterations: 3
   shotMotionTime: 0.6
   fireAtProgress: 0.5
