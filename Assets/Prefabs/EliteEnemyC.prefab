@@ -357,7 +357,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EliteKnockbackPattern
   cooldown: 15
   triggerRange: 2.5
-  applyRange: 5
+  applyRange: 5.5
   castTime: 0.3
   recoverTime: 0.2
   damagePercent: 10

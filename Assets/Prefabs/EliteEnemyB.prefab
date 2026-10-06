@@ -357,7 +357,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EliteGrabPattern
   cooldown: 15
   triggerRange: 2.5
-  applyRange: 4.5
+  applyRange: 5
   holdDistance: 1.32
   pullDuration: 0.15
   castTime: 0.25
