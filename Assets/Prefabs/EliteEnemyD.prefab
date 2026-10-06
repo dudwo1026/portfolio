@@ -359,7 +359,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EliteRangedAttack
   attackInterval: 4
   range: 18
-  flightTimeAtMaxRange: 1.3333334
+  flightTimeAtMaxRange: 1.0256411
   minFlightTime: 0.15
   gravity: 9.81
   projectileScale: 1
