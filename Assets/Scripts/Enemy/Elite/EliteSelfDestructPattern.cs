@@ -190,7 +190,8 @@ public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
         marker.name = "Blast";
         Destroy(marker.GetComponent<Collider>()); // visual only
         Vector3 pos = transform.position;
-        pos.y = rend != null ? rend.bounds.min.y : pos.y;
+        Collider body = GetComponent<Collider>(); // 렌더러가 아니라 콜라이더 바닥 (스프라이트 몹은 큐브가 몸보다 작다)
+        pos.y = body != null ? body.bounds.min.y : pos.y;
         marker.transform.position = pos;
         marker.transform.localScale = new Vector3(radius * 2f, 0.15f, radius * 2f);
         marker.GetComponent<Renderer>().sharedMaterial = mat;
