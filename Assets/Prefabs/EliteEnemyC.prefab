@@ -294,8 +294,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42530bb6880a71348b148ed43d1923c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
-  wanderSpeed: 1
-  attackSpeed: 6
+  wanderSpeed: 1.5
+  attackSpeed: 9
   wanderDecisionInterval: 4
   wanderMoveChance: 0.75
   wanderConeAngle: 300

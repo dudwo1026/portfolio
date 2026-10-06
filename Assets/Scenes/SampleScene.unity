@@ -29272,7 +29272,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30d420133a2cc804ab26107af87d2b70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TopDownMove
-  moveSpeed: 6
+  moveSpeed: 9
   speedMultiplier: 1
   movementLocked: 0
   inputInverted: 0
