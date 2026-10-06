@@ -67,13 +67,14 @@ MonoBehaviour:
     footCenterPx: 202.5
     sizeScale: 0.7
   chargeFramesPerSecond: 10
+  chargeFrameEasing: 1
   stun:
     texture: {fileID: 0}
     charHeightPx: 1
     charBottomPx: 0
     footCenterPx: 0
     sizeScale: 1
-  characterHeight: 2.2
+  characterHeight: 2.86
   moveFramesPerSecond: 2
   scaleFpsBySpeed: 0
   referenceSpeed: 2.5
