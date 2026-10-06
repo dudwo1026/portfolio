@@ -12,6 +12,7 @@ public class EnemyProjectile : MonoBehaviour
     public float blindDuration = 10f;
 
     Vector3 velocity;
+    public Vector3 Velocity { get { return velocity; } } // 그림을 진행 방향으로 돌리는 데 쓴다
     float elapsed;
     GameObject owner;
     bool spent;

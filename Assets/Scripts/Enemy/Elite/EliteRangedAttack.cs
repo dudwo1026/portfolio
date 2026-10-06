@@ -21,6 +21,12 @@ public class EliteRangedAttack : MonoBehaviour, IElitePatternVisual
     public Material specialMaterial;     // dark grey, so the blind shell reads differently
     public float launchHeight = 1f;
 
+    [Header("투사체 그림 (비워 두면 구체)")]
+    public Texture2D normalBallTexture;  // 일반탄
+    public Texture2D blindBallTexture;   // 암흑탄
+    public Material ballMaterial;        // 반투명 (빛번짐 가장자리를 살린다)
+    public float ballVisualScale = 1.3f; // 공 지름 = 판정 구체 지름 x 이 값
+
     [Header("Aim prediction")]
     public float predictionStrength = 1f; // 0 = aim where the player is, 1 = full lead
 
@@ -108,6 +114,14 @@ void Fire(Vector3 aimPoint)
         prb.useGravity = false;
         prb.isKinematic = true; // the shell integrates its own arc
 
+        // 그림이 있으면 구체는 판정용으로만 남기고 그림을 띄운다
+        Texture2D ballTex = special ? blindBallTexture : normalBallTexture;
+        if (ballTex != null && ballMaterial != null)
+        {
+            proj.GetComponent<Renderer>().enabled = false;
+            ProjectileSprite.Attach(proj, ballTex, ballMaterial, ballVisualScale);
+        }
+
         EnemyProjectile ep = proj.AddComponent<EnemyProjectile>();
         ep.Launch(velocity, gravity, ai.PercentOfPlayerMaxHealth(damagePercent), radius, time, gameObject);
         if (special) ep.SetBlind(blindDuration);
@@ -159,5 +173,48 @@ Vector3 PredictAimPoint(Transform p)
             }
         }
         return t > 0f ? p.position + v * t : p.position; // 따라잡을 수 없으면 지금 위치를 노린다
+    }
+}
+
+// 투사체 그림. 카메라를 정면으로 보되, 화면상 진행 방향으로 돌려 꼬리가 뒤에 오게 한다.
+// 그림은 공이 정중앙, 꼬리가 왼쪽(= 그림의 +x가 진행 방향)이 되도록 잘라 둔 것을 쓴다
+public class ProjectileSprite : MonoBehaviour
+{
+    EnemyProjectile shell;
+    float angle;
+
+    public static void Attach(GameObject proj, Texture2D tex, Material mat, float visualScale)
+    {
+        GameObject q = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        q.name = "BallSprite";
+        Object.Destroy(q.GetComponent<Collider>()); // 판정은 구체가 한다
+        q.transform.SetParent(proj.transform, false);
+
+        // 공 지름 = 판정 구체 지름 x visualScale. 부모 스케일이 균일하므로 로컬은 그 배율만 곱하면 된다
+        float h = visualScale;
+        q.transform.localScale = new Vector3(h * tex.width / tex.height, h, 1f);
+
+        Renderer r = q.GetComponent<Renderer>();
+        r.sharedMaterial = mat;
+        r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        var mpb = new MaterialPropertyBlock();
+        mpb.SetTexture("_BaseMap", tex);
+        r.SetPropertyBlock(mpb);
+
+        q.AddComponent<ProjectileSprite>().shell = proj.GetComponent<EnemyProjectile>();
+    }
+
+    void LateUpdate()
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return;
+        if (shell == null) shell = GetComponentInParent<EnemyProjectile>(); // Attach 직후엔 아직 안 붙어 있다
+        if (shell != null)
+        {
+            Vector3 v = shell.Velocity;
+            float x = Vector3.Dot(v, cam.transform.right), y = Vector3.Dot(v, cam.transform.up);
+            if (x * x + y * y > 0.0001f) angle = Mathf.Atan2(y, x) * Mathf.Rad2Deg; // 거의 카메라 축 방향이면 직전 각도 유지
+        }
+        transform.rotation = cam.transform.rotation * Quaternion.Euler(0f, 0f, angle);
     }
 }

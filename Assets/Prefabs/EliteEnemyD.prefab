@@ -370,6 +370,10 @@ MonoBehaviour:
   blindDuration: 10
   specialMaterial: {fileID: 2100000, guid: c4fe21d1e26257947a47aacfdbf0634d, type: 2}
   launchHeight: 1
+  normalBallTexture: {fileID: 2800000, guid: 47be320cc8b98574f9b010f401dc35db, type: 3}
+  blindBallTexture: {fileID: 2800000, guid: 20d53fd5c1cbee147871cd4935f112b5, type: 3}
+  ballMaterial: {fileID: 2100000, guid: 6a744249ff735044e89ed5706a18bdc1, type: 2}
+  ballVisualScale: 1.3
   predictionStrength: 1
   shotMotionTime: 0.6
   fireAtProgress: 0.5
