@@ -299,7 +299,7 @@ MonoBehaviour:
   wanderDecisionInterval: 4
   wanderMoveChance: 0.75
   wanderConeAngle: 300
-  avoidDistance: 1.5
+  avoidDistance: 2.25
   avoidRadius: 0.4
   wanderDirectionTries: 6
   wanderArriveDistance: 2

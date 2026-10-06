@@ -174,7 +174,7 @@ MonoBehaviour:
   wanderDecisionInterval: 4
   wanderMoveChance: 0.75
   wanderConeAngle: 300
-  avoidDistance: 1.5
+  avoidDistance: 2.25
   avoidRadius: 0.4
   wanderDirectionTries: 6
   wanderArriveDistance: 2
@@ -232,7 +232,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EliteRangedAttack
   attackInterval: 4
   range: 18
-  flightTimeAtMaxRange: 2
+  flightTimeAtMaxRange: 1.3333334
   minFlightTime: 0.15
   gravity: 9.81
   projectileScale: 1

@@ -29419,8 +29419,8 @@ MonoBehaviour:
   meleeCooldown: 0.5
   meleeRange: 1.96
   meleeRadius: 0.8
-  bulletSpeed: 30
-  bulletLifeTime: 2
+  bulletSpeed: 45
+  bulletLifeTime: 1.3333334
   bulletDamage: 20
   meleeDamage: 50
   meleeKnockbackForce: 4
