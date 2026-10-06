@@ -43,7 +43,13 @@ public class WeaponSlotsUI : MonoBehaviour
     {
         if (slot == null) return;
 
-        slot.sizeDelta = selected ? selectedSize : normalSize;
+        Vector2 size = selected ? selectedSize : normalSize;
+        if (slot.sizeDelta != size)
+        {
+            slot.sizeDelta = size;
+            // 슬롯들이 세로 정렬 상자(WeaponSlots) 안에 있으므로, 크기가 바뀌면 간격을 다시 맞춘다
+            UnityEngine.UI.LayoutRebuilder.MarkLayoutForRebuild(slot.parent as RectTransform);
+        }
 
         Image img = slot.GetComponent<Image>();
         if (img == null) return;
