@@ -31,9 +31,12 @@ public class EliteRangedAttack : MonoBehaviour, IElitePatternVisual
     float nextShotTime;
     int shotCount;
 
-    // 선딜 없이 즉시 쏘므로, 쏜 직후 이 시간 동안 사격 모션을 보여 준다 (EnemySpriteAnimator)
+    // 사격 모션 전체 길이. 모션이 시작되고 fireAtProgress 지점에서 실제로 발사한다 (EnemySpriteAnimator)
     public float shotMotionTime = 0.6f;
+    // 4장 중 3번째 장(attack3)이 시작되는 지점 = 2/4. 장수를 바꾸면 이것도 맞춘다
+    public float fireAtProgress = 0.5f;
     float lastShotTime = -999f;
+    float fireAt = -1f; // 발사 예약 시각. -1이면 예약 없음
     public bool PatternActive { get { return Time.time - lastShotTime < shotMotionTime; } }
     public float PatternProgress { get { return Mathf.Clamp01((Time.time - lastShotTime) / shotMotionTime); } }
 
@@ -45,21 +48,31 @@ public class EliteRangedAttack : MonoBehaviour, IElitePatternVisual
 
 void FixedUpdate()
     {
-        if (ai.IsStunned || ai.patternDriving) return;
-        if (ai.State != EnemyState.Attack) return;
-        if (Time.time < nextShotTime) return;
-
+        if (ai.IsStunned || ai.patternDriving) { fireAt = -1f; return; } // 선딜 중 기절하면 취소
         Transform p = ai.PlayerTransform;
         if (p == null) return;
+
+        // 예약된 발사. 조준은 이 순간에 다시 잡는다 — 선딜 동안 플레이어가 움직였으므로
+        if (fireAt >= 0f)
+        {
+            if (Time.time < fireAt) return;
+            fireAt = -1f;
+            Fire(PredictAimPoint(p));
+            return;
+        }
+
+        if (ai.State != EnemyState.Attack) return;
+        if (Time.time < nextShotTime) return;
 
         Vector3 flat = p.position - transform.position;
         flat.y = 0f;
         float dist = flat.magnitude;
         if (dist > range || dist < 0.01f) return;
 
+        // 모션을 먼저 시작하고, attack3이 나오는 순간에 쏜다
         nextShotTime = Time.time + attackInterval;
         lastShotTime = Time.time;
-        Fire(PredictAimPoint(p));
+        fireAt = Time.time + shotMotionTime * fireAtProgress;
     }
 
 void Fire(Vector3 aimPoint)
