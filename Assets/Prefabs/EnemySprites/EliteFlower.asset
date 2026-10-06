@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7809889133a0fa648b11ffd32f01476e, type: 3}
+  m_Name: EliteFlower
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySpriteSet
+  idle:
+    texture: {fileID: 2800000, guid: 6d790ff26fc79d34e845e332da97ebd4, type: 3}
+    charHeightPx: 986
+    charBottomPx: 17
+    footCenterPx: 558
+    sizeScale: 1
+  moveFrames:
+  - texture: {fileID: 2800000, guid: b720bd4bce9fbbe4fa8351c67fc35835, type: 3}
+    charHeightPx: 378
+    charBottomPx: 9
+    footCenterPx: 140.5
+    sizeScale: 1
+  - texture: {fileID: 2800000, guid: 3bd580c75c6616e4e966e5a5e14a2628, type: 3}
+    charHeightPx: 390
+    charBottomPx: 4
+    footCenterPx: 207
+    sizeScale: 1
+  attackFrames:
+  - texture: {fileID: 2800000, guid: a9b15892f7b151145a16ac9af180fbfd, type: 3}
+    charHeightPx: 298
+    charBottomPx: 8
+    footCenterPx: 208
+    sizeScale: 1
+  - texture: {fileID: 2800000, guid: c232241fba3c3fa4c8d38eb31d70ef8b, type: 3}
+    charHeightPx: 247
+    charBottomPx: 14
+    footCenterPx: 224.5
+    sizeScale: 1
+  - texture: {fileID: 2800000, guid: 60b84be5389d6984b8a3155cf1a10663, type: 3}
+    charHeightPx: 331
+    charBottomPx: 10
+    footCenterPx: 182
+    sizeScale: 1
+  - texture: {fileID: 2800000, guid: bc668585354e366449dd9c48fddf2870, type: 3}
+    charHeightPx: 298
+    charBottomPx: 41
+    footCenterPx: 208
+    sizeScale: 1
+  chargeFrames:
+  - texture: {fileID: 2800000, guid: a9b15892f7b151145a16ac9af180fbfd, type: 3}
+    charHeightPx: 298
+    charBottomPx: 8
+    footCenterPx: 208
+    sizeScale: 1
+  - texture: {fileID: 2800000, guid: c232241fba3c3fa4c8d38eb31d70ef8b, type: 3}
+    charHeightPx: 247
+    charBottomPx: 14
+    footCenterPx: 224.5
+    sizeScale: 1
+  - texture: {fileID: 2800000, guid: 60b84be5389d6984b8a3155cf1a10663, type: 3}
+    charHeightPx: 331
+    charBottomPx: 10
+    footCenterPx: 182
+    sizeScale: 1
+  - texture: {fileID: 2800000, guid: bc668585354e366449dd9c48fddf2870, type: 3}
+    charHeightPx: 298
+    charBottomPx: 41
+    footCenterPx: 208
+    sizeScale: 1
+  chargeFramesPerSecond: 10
+  chargeFrameEasing: 1
+  stun:
+    texture: {fileID: 0}
+    charHeightPx: 1
+    charBottomPx: 0
+    footCenterPx: 0
+    sizeScale: 1
+  characterHeight: 2.2
+  moveFramesPerSecond: 2
+  scaleFpsBySpeed: 0
+  referenceSpeed: 2.5
+  artFacesScreenLeft: 1
+  faceKnockbackDirection: 0
+  attackArtFlipped: 0

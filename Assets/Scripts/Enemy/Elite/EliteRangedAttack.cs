@@ -3,7 +3,7 @@ using UnityEngine;
 // Lobs an AoE shell at the player on a fixed interval. The arc is solved for a fixed flight time
 // under normal gravity, so launch speed/angle follow from the distance instead of being pinned.
 [RequireComponent(typeof(EnemyAI))]
-public class EliteRangedAttack : MonoBehaviour
+public class EliteRangedAttack : MonoBehaviour, IElitePatternVisual
 {
     public float attackInterval = 4f;
     public float range = 20f;
@@ -31,6 +31,12 @@ public class EliteRangedAttack : MonoBehaviour
     float nextShotTime;
     int shotCount;
 
+    // 선딜 없이 즉시 쏘므로, 쏜 직후 이 시간 동안 사격 모션을 보여 준다 (EnemySpriteAnimator)
+    public float shotMotionTime = 0.6f;
+    float lastShotTime = -999f;
+    public bool PatternActive { get { return Time.time - lastShotTime < shotMotionTime; } }
+    public float PatternProgress { get { return Mathf.Clamp01((Time.time - lastShotTime) / shotMotionTime); } }
+
     void Awake()
     {
         ai = GetComponent<EnemyAI>();
@@ -52,6 +58,7 @@ void FixedUpdate()
         if (dist > range || dist < 0.01f) return;
 
         nextShotTime = Time.time + attackInterval;
+        lastShotTime = Time.time;
         Fire(PredictAimPoint(p));
     }
 
