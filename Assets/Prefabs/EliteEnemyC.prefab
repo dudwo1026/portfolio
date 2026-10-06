@@ -316,7 +316,7 @@ MonoBehaviour:
   cornerArriveDistance: 1
   pathClearRadius: 0.45
   navSampleRadius: 4
-  recognitionRadius: 15
+  recognitionRadius: 22.5
   visionAngle: 180
   attackDamage: 15
   attackCooldown: 2

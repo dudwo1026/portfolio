@@ -372,8 +372,8 @@ Transform:
   m_GameObject: {fileID: 14298232}
   serializedVersion: 2
   m_LocalRotation: {x: 0.34202012, y: -0.000000029802319, z: -0.0000000074505797, w: 0.9396926}
-  m_LocalPosition: {x: 0.52495575, y: 0.033605814, z: -0.0000011920929}
-  m_LocalScale: {x: 2.269368, y: 2.2106774, z: 1}
+  m_LocalPosition: {x: 0.33405402, y: 0.024077892, z: -0.0000026524067}
+  m_LocalScale: {x: 2.2789338, y: 2.0943112, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1878695940}
@@ -19033,7 +19033,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EliteThreatIndicator
   viewCamera: {fileID: 330585545}
   player: {fileID: 1878695940}
-  showRadius: 22
+  showRadius: 33
   refreshInterval: 0.25
   aimHeight: 1
   edgeMargin: 120
@@ -19043,7 +19043,7 @@ MonoBehaviour:
   outlineColor: {r: 0, g: 0, b: 0, a: 0.7}
   outlineScale: 1.32
   scaleByDistance: 1
-  nearDistance: 8
+  nearDistance: 12
   nearScale: 1.3
   farScale: 0.78
 --- !u!114 &1176907073
@@ -33541,7 +33541,7 @@ MonoBehaviour:
   areaSize: {x: 160, y: 150}
   spawnY: 1
   clearRadius: 1.5
-  minPlayerDistance: 20
+  minPlayerDistance: 30
   placementTries: 30
 --- !u!4 &2142319069
 Transform:
