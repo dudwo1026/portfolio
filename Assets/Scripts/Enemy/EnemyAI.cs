@@ -54,7 +54,10 @@ public class EnemyAI : MonoBehaviour
     public float attackDamage = 10f;
     public float attackCooldown = 2f;
     public float attackWindup = 0.5f; // 휘두르기 시작 후 판정까지의 선딜레이. 이 사이에 피하면 헛친다
-    public float attackRange = 1.8f; // shorter than player's melee reach (meleeRange 1.96 + meleeRadius 0.8 = 2.76)
+    public float attackRange = 1.8f;
+    // 둘 다 0이면 꺼짐. 원거리형이 플레이어와 이 거리 띠를 유지하며 싸운다 (정예D: 12~15)
+    public float keepMinDistance = 0f;
+    public float keepMaxDistance = 0f; // shorter than player's melee reach (meleeRange 1.96 + meleeRadius 0.8 = 2.76)
     public float loseTargetGraceTime = 5f;
     public bool persistentAggro = false; // 정예몹: 한 번 발견하면 인식범위 밖으로 나가도 계속 추적
     public bool isElite = false;         // 처치 게이지 가산량 구분용
@@ -497,7 +500,16 @@ void FixedUpdate()
             // 직선이 막혀 있으면 내비메시가 뽑은 우회 경로의 다음 꺾임점 쪽으로 돈다
             Vector3 dir = SteerTowards(targetPos, toTarget.normalized);
             transform.rotation = Quaternion.LookRotation(dir);
-            if (dist > attackRange)
+            if (keepMaxDistance > 0f && sensed)
+            {
+                // 원거리형: 띠 바깥이면 다가가고, 너무 가까우면 물러나고, 띠 안에서는 멈춰서 쏜다
+                // ponytail: 후퇴는 내비메시를 안 탄다. 벽을 등지면 거기서 막힌다 — 끼임이 보이면 경로 후퇴로
+                if (dist > keepMaxDistance)
+                    rb.MovePosition(StepUpAdjusted(rb.position + dir * attackSpeed * Time.fixedDeltaTime));
+                else if (dist < keepMinDistance)
+                    rb.MovePosition(StepUpAdjusted(rb.position - toTarget.normalized * attackSpeed * Time.fixedDeltaTime));
+            }
+            else if (dist > attackRange)
                 rb.MovePosition(StepUpAdjusted(rb.position + dir * attackSpeed * Time.fixedDeltaTime));
         }
 

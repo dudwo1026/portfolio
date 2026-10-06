@@ -29,8 +29,8 @@ Transform:
   m_GameObject: {fileID: 2825145785972486611}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0.09071909, y: 0.28057805, z: -0.090719074}
+  m_LocalScale: {x: 2.8559837, y: 2.8559837, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5655839940764055549}
@@ -322,6 +322,8 @@ MonoBehaviour:
   attackCooldown: 2
   attackWindup: 0.5
   attackRange: 1.8
+  keepMinDistance: 12
+  keepMaxDistance: 15
   loseTargetGraceTime: 5
   persistentAggro: 1
   isElite: 1
@@ -371,3 +373,4 @@ MonoBehaviour:
   predictionStrength: 1
   predictionIterations: 3
   shotMotionTime: 0.6
+  fireAtProgress: 0.5

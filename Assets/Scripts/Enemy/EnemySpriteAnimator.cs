@@ -159,8 +159,9 @@ public class EnemySpriteAnimator : MonoBehaviour
                 ci = Mathf.Clamp(Mathf.FloorToInt(shaped * set.chargeFrames.Length), 0, last);
             }
 
-            // 달려가는 중이면 가는 쪽을, 제자리 시전이면 플레이어를 본다
-            if (delta.sqrMagnitude > 0.000001f) UpdateFacing(delta);
+            // 돌진(길이 모름)만 달려가는 쪽을 본다. 나머지(넉백·잡기·사격·자폭)는 전부 플레이어를 노리므로
+            // 플레이어를 본다 — 원거리 정예가 물러나며 쏠 때 등을 돌리고 쏘지 않도록
+            if (progress < 0f && delta.sqrMagnitude > 0.000001f) UpdateFacing(delta);
             else if (ai != null && ai.PlayerTransform != null) UpdateFacing(ai.PlayerTransform.position - now);
 
             speed = 0f;
