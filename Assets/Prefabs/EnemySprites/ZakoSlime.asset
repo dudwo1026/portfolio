@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7809889133a0fa648b11ffd32f01476e, type: 3}
+  m_Name: ZakoSlime
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySpriteSet
+  idle:
+    texture: {fileID: 2800000, guid: ba4d0e3ea7dc38f40aa0105f397531c1, type: 3}
+    charHeightPx: 122
+    charBottomPx: 12
+    footCenterPx: 121
+    sizeScale: 0.75
+  moveFrames:
+  - texture: {fileID: 2800000, guid: 837714544b4b94345815832e752e1e7f, type: 3}
+    charHeightPx: 85
+    charBottomPx: 12
+    footCenterPx: 99.5
+    sizeScale: 0.75
+  attackFrames:
+  - texture: {fileID: 2800000, guid: fe8222bcacc618d4387d848f4cfd9790, type: 3}
+    charHeightPx: 133
+    charBottomPx: 7
+    footCenterPx: 105.5
+    sizeScale: 1
+  chargeFrames: []
+  chargeFramesPerSecond: 10
+  stun:
+    texture: {fileID: 0}
+    charHeightPx: 1
+    charBottomPx: 0
+    footCenterPx: 0
+    sizeScale: 1
+  characterHeight: 1.5
+  moveFramesPerSecond: 2
+  scaleFpsBySpeed: 0
+  referenceSpeed: 2.5
+  artFacesScreenLeft: 1
+  faceKnockbackDirection: 1
+  attackArtFlipped: 1

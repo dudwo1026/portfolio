@@ -1,0 +1,144 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+// 보스 특수패턴 1: 체력이 일정 비율씩 깎일 때마다 정해진 구역에 장애물을 떨군다.
+// 시전 → 예고 표시 → castTime 뒤 장애물 생성. 그 순간 구역 안에 있으면 즉사.
+// 장애물은 보스가 죽을 때까지 남는다.
+[RequireComponent(typeof(Health))]
+public class BossObstaclePattern : MonoBehaviour
+{
+    [Header("구역 (순서대로 시전)")]
+    public Vector3[] zonePositions;
+    public Vector3[] zoneSizes;
+
+    [Header("발동")]
+    public float hpStepPercent = 20f;  // 이만큼 깎일 때마다 한 번
+    public float castTime = 3f;
+
+    [Header("연출")]
+    public Color warningColor = new Color(1f, 0.25f, 0.1f, 1f);
+    public Color obstacleColor = new Color(0.12f, 0.14f, 0.18f);
+    public float warningThickness = 0.15f;
+
+    Health health;
+    int triggered;          // 지금까지 시전한 횟수
+
+    public int TriggeredCount { get { return triggered; } }
+    public bool AllZonesSpawned { get { return zonePositions != null && triggered >= zonePositions.Length; } }
+    bool casting;
+    float castTimer;
+    int castingZone;
+    GameObject warning;
+    readonly List<GameObject> obstacles = new List<GameObject>();
+
+    void Awake()
+    {
+        health = GetComponent<Health>();
+        health.Damaged += OnDamaged;
+    }
+
+    void OnDamaged()
+    {
+        TryStartCast();
+    }
+
+    void TryStartCast()
+    {
+        if (casting) return;
+        if (zonePositions == null || triggered >= zonePositions.Length) return;
+        if (health.maxHealth <= 0f) return;
+
+        float lostRatio = 1f - Mathf.Clamp01(health.CurrentHealth / health.maxHealth);
+        // 1 - 1600f/2000f 가 0.19999... 로 떨어져 한 단계 늦게 발동하므로 아주 작은 여유를 준다
+        int steps = Mathf.FloorToInt(lostRatio / (hpStepPercent * 0.01f) + 0.0001f);
+        if (steps <= triggered) return;
+
+        BeginCast(triggered);
+    }
+
+    void BeginCast(int zone)
+    {
+        casting = true;
+        castingZone = zone;
+        castTimer = castTime;
+        warning = MakeWarning(zone);
+    }
+
+    void Update()
+    {
+        if (!casting) return;
+
+        castTimer -= Time.deltaTime;
+        if (castTimer > 0f) return;
+
+        casting = false;
+        if (warning != null) Destroy(warning);
+
+        SpawnObstacle(castingZone);
+        triggered = castingZone + 1;
+
+        TryStartCast(); // 한 번에 여러 단계가 깎였으면 이어서 시전
+    }
+
+    GameObject MakeWarning(int zone)
+    {
+        Vector3 size = zoneSizes[zone];
+        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        go.name = "BossObstacleWarning";
+        Destroy(go.GetComponent<Collider>()); // 예고는 막지 않는다
+        go.transform.position = new Vector3(zonePositions[zone].x,
+                                            zonePositions[zone].y - size.y * 0.5f + warningThickness * 0.5f,
+                                            zonePositions[zone].z);
+        go.transform.localScale = new Vector3(size.x, warningThickness, size.z);
+        go.GetComponent<Renderer>().sharedMaterial = MakeMaterial(warningColor);
+        return go;
+    }
+
+    void SpawnObstacle(int zone)
+    {
+        Vector3 size = zoneSizes[zone];
+        Vector3 pos = zonePositions[zone];
+
+        // 생성 순간 그 자리에 있으면 즉사
+        Collider[] hits = Physics.OverlapBox(pos, size * 0.5f, Quaternion.identity, ~0, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            if (hits[i].GetComponent<PlayerCombat>() == null) continue;
+            Health ph = hits[i].GetComponent<Health>();
+            if (ph != null) ph.TakeDamage(ph.maxHealth * 1000f); // 확실히 즉사
+        }
+
+        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        go.name = "BossObstacle_" + (zone + 1);
+        go.transform.position = pos;
+        go.transform.localScale = size;
+        go.GetComponent<Renderer>().sharedMaterial = MakeMaterial(obstacleColor);
+        obstacles.Add(go);
+    }
+
+    Material MakeMaterial(Color c)
+    {
+        Material m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        m.color = c;
+        return m;
+    }
+
+    void OnDestroy()
+    {
+        // 보스가 죽으면 장애물도 같이 치운다
+        if (warning != null) Destroy(warning);
+        for (int i = 0; i < obstacles.Count; i++)
+            if (obstacles[i] != null) Destroy(obstacles[i]);
+        obstacles.Clear();
+
+        if (health != null) health.Damaged -= OnDamaged;
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        if (zonePositions == null) return;
+        Gizmos.color = new Color(1f, 0.3f, 0.1f, 0.5f);
+        for (int i = 0; i < zonePositions.Length && i < zoneSizes.Length; i++)
+            Gizmos.DrawWireCube(zonePositions[i], zoneSizes[i]);
+    }
+}

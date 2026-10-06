@@ -1,0 +1,53 @@
+# Unity가 에셋에서 다시 만들어내는 것들. 용량이 수 GB에 달하고 머신마다 달라진다
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# 패키지 매니저가 복원한다 (manifest.json / packages-lock.json은 추적한다)
+/[Pp]ackages/com.unity.*
+!/[Pp]ackages/manifest.json
+!/[Pp]ackages/packages-lock.json
+
+# IDE가 생성하는 프로젝트 파일. .sln/.csproj는 Unity가 다시 뽑는다
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+.vs/
+.vscode/
+.idea/
+.consulo/
+.vsconfig
+
+# 빌드 산출물
+*.apk
+*.aab
+*.unitypackage
+*.app
+ExportedObj/
+/*.Backup*/
+
+# 크래시 리포트
+sysinfo.txt
+crashlytics-build.properties
+
+# OS 부산물
+.DS_Store
+Thumbs.db
+desktop.ini

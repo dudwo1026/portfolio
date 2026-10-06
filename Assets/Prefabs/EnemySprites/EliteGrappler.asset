@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7809889133a0fa648b11ffd32f01476e, type: 3}
+  m_Name: EliteGrappler
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySpriteSet
+  idle:
+    texture: {fileID: 2800000, guid: 1e8e7061ad9b0434bbc801426b0f22a9, type: 3}
+    charHeightPx: 185
+    charBottomPx: 18
+    footCenterPx: 202.5
+    sizeScale: 0.7
+  moveFrames:
+  - texture: {fileID: 2800000, guid: d0131c08ed0113743a15d6ae85638e95, type: 3}
+    charHeightPx: 348
+    charBottomPx: 16
+    footCenterPx: 342
+    sizeScale: 0.7
+  attackFrames:
+  - texture: {fileID: 2800000, guid: 9c62129862faf5d4da14c8d01d566435, type: 3}
+    charHeightPx: 337
+    charBottomPx: 293
+    footCenterPx: 500
+    sizeScale: 0.6
+  - texture: {fileID: 2800000, guid: ff8a09458c5d29344bace79c0c99959f, type: 3}
+    charHeightPx: 337
+    charBottomPx: 244
+    footCenterPx: 682.5
+    sizeScale: 0.6
+  - texture: {fileID: 2800000, guid: 9385215971953034688655c6c334f081, type: 3}
+    charHeightPx: 337
+    charBottomPx: 224
+    footCenterPx: 830.5
+    sizeScale: 0.6
+  chargeFrames:
+  - texture: {fileID: 2800000, guid: 04528f55ade1fc24caa31e5f9d5d31d1, type: 3}
+    charHeightPx: 196
+    charBottomPx: 27
+    footCenterPx: 239.5
+    sizeScale: 1.2
+  - texture: {fileID: 2800000, guid: a0e1399d94f2e3e42ae097a078ad4431, type: 3}
+    charHeightPx: 196
+    charBottomPx: 37
+    footCenterPx: 268.5
+    sizeScale: 1.2
+  - texture: {fileID: 2800000, guid: b57c3957c4cc3f544b87759d8a5143d5, type: 3}
+    charHeightPx: 196
+    charBottomPx: 87
+    footCenterPx: 298
+    sizeScale: 1.6
+  - texture: {fileID: 2800000, guid: a0e1399d94f2e3e42ae097a078ad4431, type: 3}
+    charHeightPx: 196
+    charBottomPx: 37
+    footCenterPx: 268.5
+    sizeScale: 1.2
+  - texture: {fileID: 2800000, guid: 1e8e7061ad9b0434bbc801426b0f22a9, type: 3}
+    charHeightPx: 185
+    charBottomPx: 18
+    footCenterPx: 202.5
+    sizeScale: 0.7
+  chargeFramesPerSecond: 10
+  stun:
+    texture: {fileID: 0}
+    charHeightPx: 1
+    charBottomPx: 0
+    footCenterPx: 0
+    sizeScale: 1
+  characterHeight: 2.2
+  moveFramesPerSecond: 2
+  scaleFpsBySpeed: 0
+  referenceSpeed: 2.5
+  artFacesScreenLeft: 0
+  faceKnockbackDirection: 0
+  attackArtFlipped: 0
