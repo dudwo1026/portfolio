@@ -29,8 +29,8 @@ Transform:
   m_GameObject: {fileID: 1734686174770280428}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.0988387, y: 0.11546959, z: 0.09883869}
-  m_LocalScale: {x: 4.472928, y: 2.722652, z: 1}
+  m_LocalPosition: {x: -0.12849031, y: 0.48011038, z: 0.1284903}
+  m_LocalScale: {x: 5.8148065, y: 3.5394473, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 56460053059964797}
@@ -191,8 +191,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.6, y: 2.2, z: 1.6}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 2.08, y: 2.86, z: 2.08}
+  m_Center: {x: 0, y: 0.32999992, z: 0}
 --- !u!23 &3003964405689338946
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -322,6 +322,8 @@ MonoBehaviour:
   attackCooldown: 2
   attackWindup: 0.5
   attackRange: 1.8
+  keepMinDistance: 0
+  keepMaxDistance: 0
   loseTargetGraceTime: 5
   persistentAggro: 1
   isElite: 1
