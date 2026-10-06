@@ -235,7 +235,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EliteEruptionPattern
   cooldown: 13
   windupDuration: 0.5
-  radius: 14
+  radius: 18.199999
   coneAngle: 45
   spreadDuration: 0.3
   damagePercent: 15
@@ -275,8 +275,8 @@ Transform:
   m_GameObject: {fileID: 2158220174122581900}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.09137014, y: 0.78441256, z: 0.09137013}
+  m_LocalScale: {x: 4.6518073, y: 3.9841866, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6000035285051239522}
