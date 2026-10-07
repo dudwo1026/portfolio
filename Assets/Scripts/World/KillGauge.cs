@@ -13,8 +13,8 @@ public class KillGauge : MonoBehaviour
     public float eliteKillValue = 5f;
 
     [Header("정예 스포너 개방")]
-    public float unlockStep = 50f;      // 이만큼 찰 때마다
-    public int spawnersPerStep = 2;     // 이만큼씩 열린다
+    public float[] unlockAt = { 50f, 100f, 200f }; // 게이지가 각 값에 닿을 때마다
+    public int spawnersPerStep = 2;     // 이만큼씩 열린다 (50 → 2, 100 → 4, 200 → 6)
     public int maxSpawners = 6;
     public EliteSpawner eliteSpawner;
 
@@ -88,7 +88,9 @@ public class KillGauge : MonoBehaviour
 
     void UpdateUnlocks()
     {
-        int want = Mathf.Clamp(Mathf.FloorToInt(Value / unlockStep) * spawnersPerStep, 0, maxSpawners);
+        int steps = 0;
+        foreach (float at in unlockAt) if (Value >= at) steps++;
+        int want = Mathf.Clamp(steps * spawnersPerStep, 0, maxSpawners);
         if (want == UnlockedSpawners) return;
 
         UnlockedSpawners = want;
