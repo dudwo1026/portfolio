@@ -152,9 +152,9 @@ RectTransform:
   - {fileID: 394626963}
   m_Father: {fileID: 190361842}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 67.5, y: -220}
   m_SizeDelta: {x: 135, y: 90}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &6130951
@@ -2509,6 +2509,9 @@ MonoBehaviour:
   lockedColor: {r: 1, g: 0.1, b: 0.05, a: 1}
   beamColor: {r: 1, g: 0.25, b: 0.6, a: 1}
   beamEffectPrefab: {fileID: 7478731271839673279, guid: a81d754f5aa107d4e9816ae2616a778e, type: 3}
+  effectOrbitRadius: 4.5
+  effectCircleScale: 0.525
+  effectLift: 0.5
 --- !u!114 &146723436
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10063,9 +10066,9 @@ RectTransform:
   - {fileID: 831078566}
   m_Father: {fileID: 190361842}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 67.5, y: -128}
   m_SizeDelta: {x: 135, y: 90}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &601263527
@@ -30215,9 +30218,9 @@ RectTransform:
   - {fileID: 1121133827}
   m_Father: {fileID: 190361842}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 92.5, y: 0}
   m_SizeDelta: {x: 185, y: 126}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1947055346

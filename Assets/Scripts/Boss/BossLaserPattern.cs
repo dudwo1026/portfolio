@@ -40,8 +40,10 @@ public class BossLaserPattern : MonoBehaviour
     // 마법진은 보스 주변을 레이저 방향으로 따라 돌고, 레이저는 그 중심에서 나간다.
     // 보스(한 변 6) 모서리(중심에서 4.24)에 묻히지 않는 거리
     public float effectOrbitRadius = 4.5f;
-    // 원본 마법진 지름 약 12.8 → 4.5. 보스 중심이 바닥 위 3이라 반지름이 그보다 작아야 바닥에 안 박힌다
-    public float effectCircleScale = 0.35f;
+    // 원본 마법진 지름 약 12.8 → 6.7 (반지름 3.36)
+    public float effectCircleScale = 0.525f;
+    // 보스 중심은 바닥 위 3이라 반지름 3.36짜리 마법진은 바닥에 박힌다. 그만큼 이펙트를 띄운다 (판정은 평면이라 무관)
+    public float effectLift = 0.5f;
 
     EnemyAI ai;
     BossObstaclePattern obstacles;
@@ -176,7 +178,7 @@ public class BossLaserPattern : MonoBehaviour
     float PlaceEffect(GameObject fx, Vector3 dir)
     {
         float length = ClearLength(dir, beamWidth, beamHeight);
-        fx.transform.SetPositionAndRotation(transform.position + dir * effectOrbitRadius, Quaternion.FromToRotation(Vector3.up, dir));
+        fx.transform.SetPositionAndRotation(transform.position + dir * effectOrbitRadius + Vector3.up * effectLift, Quaternion.FromToRotation(Vector3.up, dir));
 
         float visible = Mathf.Max(0.5f, length - effectOrbitRadius);
         foreach (ParticleSystemRenderer r in fx.GetComponentsInChildren<ParticleSystemRenderer>())
