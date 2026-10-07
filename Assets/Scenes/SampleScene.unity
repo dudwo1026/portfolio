@@ -19040,7 +19040,8 @@ MonoBehaviour:
   - {fileID: 1365062596}
   - {fileID: 1248517111}
   keysRequired: 7
-  gaugeStep: 50
+  firstKeyAt: 20
+  gaugeStep: 40
   keyColor: {r: 1, g: 0.8, b: 0.1, a: 1}
   spinSpeed: 90
   countLabel: {fileID: 80719181}
