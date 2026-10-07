@@ -49,6 +49,8 @@ public class PlayerCombat : MonoBehaviour
     public int primaryMaxReserveMags = 8;
     public int secondaryMagSize = 10;
     public int secondaryMaxReserveMags = 6;
+    public float reloadTime = 1f; // 실제로 장전되면 이 시간 동안 원거리 사격 불가 (근접은 가능)
+    float reloadEndTime;
 
 
 
@@ -184,6 +186,8 @@ void Fire()
             return;
         }
 
+        if (Time.time < reloadEndTime) return; // 장전 중
+
         if (currentSlot == WeaponSlot.Primary)
         {
             if (primaryAmmo <= 0) return;
@@ -208,6 +212,7 @@ void Fire()
         if (dash != null && dash.IsDashing) return;          // 대시 중에는 공격 불가
         if (bound != null && bound.IsActive) return;         // 구속 중에는 원거리 불가
         if (grenadeLoaded <= 0) return; // 비었으면 R로 재장전해야 한다
+        if (Time.time < reloadEndTime) return; // 장전 중
 
         grenadeLoaded--;
         nextGrenadeTime = Time.time + grenadeCooldown;
@@ -311,22 +316,26 @@ void Reload()
         if (currentSlot == WeaponSlot.Primary)
         {
             // 유탄은 1발씩 장전한다. 소총 재장전과 같은 R키로 같이 처리
+            bool loaded = false;
             if (grenadeLoaded <= 0 && grenadeReserve > 0)
             {
                 grenadeReserve--;
                 grenadeLoaded = 1;
+                loaded = true;
             }
 
             // 남은 탄은 버리지 않는다. 빈 만큼만 예비에서 채운다
             int take = Mathf.Min(primaryMagSize - primaryAmmo, primaryReserve);
             primaryReserve -= take;
             primaryAmmo += take;
+            if (loaded || take > 0) reloadEndTime = Time.time + reloadTime;
         }
         else if (currentSlot == WeaponSlot.Secondary)
         {
             int take = Mathf.Min(secondaryMagSize - secondaryAmmo, secondaryReserve);
             secondaryReserve -= take;
             secondaryAmmo += take;
+            if (take > 0) reloadEndTime = Time.time + reloadTime; // 꽉 찬 상태에서 R은 아무 일도 없다
         }
     }
 
