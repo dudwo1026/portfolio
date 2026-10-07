@@ -37,6 +37,14 @@ public class KillGauge : MonoBehaviour
     public float glowMaxAlpha = 0.85f;
     public float glowPulseSpeed = 3f;
 
+    [Header("공세 경보")]
+    public float[] warnAt = { 50f, 100f, 200f, 250f }; // 게이지가 각 값을 넘는 순간 경보
+    public string warnMessage = "적들의 공세가 더욱 거세집니다";
+    public Text warnLabel;               // 화면 중상단, 빨간 글씨
+    public float warnTime = 2.5f;        // 떠 있는 전체 시간
+    public float warnFade = 0.5f;        // 그중 끝에서 서서히 사라지는 시간
+    float warnTimer;
+
     public float Value { get; private set; }
     public bool IsFull { get { return Value >= maxValue; } }
     public int UnlockedSpawners { get; private set; }
@@ -71,7 +79,10 @@ public class KillGauge : MonoBehaviour
     {
         if (amount <= 0f) return;
 
+        float before = Value;
         Value = Mathf.Clamp(Value + amount, 0f, maxValue);
+        foreach (float at in warnAt)
+            if (before < at && Value >= at) ShowWarning(); // 한 번에 여러 개를 넘어도 같은 문구라 한 번 뜬 것과 같다
         UpdateUnlocks();
         Refresh();
 
@@ -205,9 +216,26 @@ public class KillGauge : MonoBehaviour
             if (alive[i].GetComponent<BossDefeat>() == null) Destroy(alive[i].gameObject);
     }
 
+    void ShowWarning()
+    {
+        if (warnLabel == null) return;
+        warnLabel.text = warnMessage;
+        warnLabel.enabled = true;
+        warnTimer = warnTime;
+    }
+
     void Update()
     {
         HandleDebugKeys();
+
+        if (warnTimer > 0f && warnLabel != null)
+        {
+            warnTimer -= Time.deltaTime;
+            Color wc = warnLabel.color;
+            wc.a = warnFade > 0f ? Mathf.Clamp01(warnTimer / warnFade) : 1f;
+            warnLabel.color = wc;
+            if (warnTimer <= 0f) warnLabel.enabled = false;
+        }
 
         if (glow == null) return;
 
