@@ -25,10 +25,11 @@ public class EliteThreatIndicator : MonoBehaviour
     public float aimHeight = 1f;          // 몹의 발밑이 아니라 몸통을 기준으로 방향을 잡는다
 
     [Header("모양")]
-    public float edgeMargin = 70f;        // 화면 가장자리에서 이만큼 안쪽에 찍는다 (캔버스 단위)
-    // 아래쪽만 따로 둔다. 좌하단 초상화(210)·우하단 미니맵(270)에 화살표가 묻혀서 구분이 안 됐다.
-    // 균일 마진으로 맞추면 좌우·위까지 같이 좁아져 고리가 너무 작아진다
-    public float bottomMargin = 330f;
+    // 화면 가장자리에서 이만큼 안쪽에 찍는다 (캔버스 단위). 화살표(가장 클 때 약 80)가 HUD에 겹치지 않게 변마다 따로 둔다
+    public float leftMargin = 265f;   // 왼쪽 무기슬롯(왼끝에서 215)
+    public float rightMargin = 120f;
+    public float topMargin = 190f;    // 좌상단 초상화·회복약(위끝에서 ~140), 우상단 게이지·열쇠 개수(~110)
+    public float bottomMargin = 90f;  // 아래쪽 HUD는 없다 (초상화는 좌상단으로, 미니맵은 제거)
     public float arrowSize = 46f;
     public Color arrowColor = new Color(1f, 0.24f, 0.18f, 0.92f);
     public Color outlineColor = new Color(0f, 0f, 0f, 0.7f);
@@ -105,8 +106,8 @@ public class EliteThreatIndicator : MonoBehaviour
         }
 
         Vector2 size = container.rect.size;
-        Vector2 inner = size * 0.5f - Vector2.one * edgeMargin;
-        if (inner.x <= 1f || inner.y <= 1f) { HideFrom(0); return; }
+        Vector2 half = size * 0.5f;
+        if (half.x - Mathf.Max(leftMargin, rightMargin) <= 1f || half.y - Mathf.Max(topMargin, bottomMargin) <= 1f) { HideFrom(0); return; }
 
         Vector3 playerFlat = player.position;
         playerFlat.y = 0f;
@@ -131,7 +132,7 @@ public class EliteThreatIndicator : MonoBehaviour
             if (dist > showRadius) continue;
 
             Vector2 edge;
-            if (!OffScreenEdgePoint(world, size, inner, out edge)) continue; // 화면에 보이면 화살표 없음
+            if (!OffScreenEdgePoint(world, size, out edge)) continue; // 화면에 보이면 화살표 없음
 
             Arrow a = GetArrow(used++);
             a.root.anchoredPosition = edge;
@@ -147,7 +148,7 @@ public class EliteThreatIndicator : MonoBehaviour
     }
 
     // 화면 밖이면 가장자리 위의 찍을 지점을 돌려준다. 화면 안이면 false
-    bool OffScreenEdgePoint(Vector3 world, Vector2 size, Vector2 inner, out Vector2 point)
+    bool OffScreenEdgePoint(Vector3 world, Vector2 size, out Vector2 point)
     {
         point = Vector2.zero;
 
@@ -164,9 +165,11 @@ public class EliteThreatIndicator : MonoBehaviour
         if (p.sqrMagnitude < 0.0001f) p = new Vector2(0f, -1f);
 
         // 방향을 유지한 채 가장자리 사각형에 정확히 얹는다 (밖이면 줄이고, 안이면 늘린다)
-        float limitY = p.y < 0f ? size.y * 0.5f - bottomMargin : inner.y; // 아래쪽만 더 안쪽으로
+        float limitX = size.x * 0.5f - (p.x < 0f ? leftMargin : rightMargin);
+        float limitY = size.y * 0.5f - (p.y < 0f ? bottomMargin : topMargin);
+        if (limitX < 1f) limitX = 1f;
         if (limitY < 1f) limitY = 1f;
-        float kx = Mathf.Abs(p.x) > 0.0001f ? inner.x / Mathf.Abs(p.x) : float.PositiveInfinity;
+        float kx = Mathf.Abs(p.x) > 0.0001f ? limitX / Mathf.Abs(p.x) : float.PositiveInfinity;
         float ky = Mathf.Abs(p.y) > 0.0001f ? limitY / Mathf.Abs(p.y) : float.PositiveInfinity;
         point = p * Mathf.Min(kx, ky);
         return true;
