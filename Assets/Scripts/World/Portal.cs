@@ -14,9 +14,17 @@ public class Portal : MonoBehaviour
     public Color closedColor = new Color(0.25f, 0.25f, 0.3f, 1f);
     public Color openColor = new Color(0.3f, 0.85f, 1f, 1f);
     public float openPulseSpeed = 2.5f;
+    public HudMessage openMessage;          // 닫혀 있다가 열리는 순간 한 번 띄운다
+    public string openText = "옥상으로 향하는 문이 열렸습니다";
 
     float readyTime = 0f;
     Material runtimeMat;
+    bool wasOpen;
+
+    void Start()
+    {
+        wasOpen = IsOpen; // 처음부터 열려 있는 포탈은 알리지 않는다
+    }
 
     public bool IsOpen
     {
@@ -30,6 +38,10 @@ public class Portal : MonoBehaviour
 
     void Update()
     {
+        bool open = IsOpen;
+        if (open && !wasOpen && openMessage != null) openMessage.Show(openText);
+        wasOpen = open;
+
         if (visual == null) return;
         if (runtimeMat == null) runtimeMat = visual.material; // 이 포탈만의 인스턴스 재질
 

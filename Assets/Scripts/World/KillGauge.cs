@@ -40,10 +40,7 @@ public class KillGauge : MonoBehaviour
     [Header("공세 경보")]
     public float[] warnAt = { 50f, 100f, 200f, 250f }; // 게이지가 각 값을 넘는 순간 경보
     public string warnMessage = "적들의 공세가 더욱 거세집니다";
-    public Text warnLabel;               // 화면 중상단, 빨간 글씨
-    public float warnTime = 2.5f;        // 떠 있는 전체 시간
-    public float warnFade = 0.5f;        // 그중 끝에서 서서히 사라지는 시간
-    float warnTimer;
+    public HudMessage warn;              // 화면 중상단, 빨간 글씨
 
     public float Value { get; private set; }
     public bool IsFull { get { return Value >= maxValue; } }
@@ -86,7 +83,7 @@ public class KillGauge : MonoBehaviour
         float before = Value;
         Value = Mathf.Clamp(Value + amount, 0f, maxValue);
         foreach (float at in warnAt)
-            if (before < at && Value >= at) ShowWarning(); // 한 번에 여러 개를 넘어도 같은 문구라 한 번 뜬 것과 같다
+            if (before < at && Value >= at && warn != null) warn.Show(warnMessage); // 여러 개를 한 번에 넘어도 같은 문구라 한 번 뜬 것과 같다
         if (before < eliteHuntAt && EliteHunt)
             foreach (EnemyAI e in FindObjectsByType<EnemyAI>(FindObjectsSortMode.None))
                 if (e.isElite) e.ForceAttack();
@@ -126,7 +123,7 @@ public class KillGauge : MonoBehaviour
     //   / : 게이지를 debugAddAmount(기본 100)만큼 올린다 (숫자패드 / 도 동일)
     //   ] : 스폰을 멈추고 살아있는 몹을 지운다 / 다시 누르면 재개 (맵을 둘러볼 때)
     //   숫자패드 1~6 : 정예 a~f를 플레이어 남쪽 10유닛에 소환 (패턴을 하나씩 확인할 때)
-    //   ' : 열쇠를 전부 모은 것으로 처리해 포탈을 바로 연다
+    //   ' : 게이지를 채우고 열쇠를 전부 모은 것으로 처리해 포탈을 바로 연다
     void HandleDebugKeys()
     {
         if (!debugKeys) return;
@@ -137,7 +134,11 @@ public class KillGauge : MonoBehaviour
         if (kb.digit0Key.wasPressedThisFrame) Add(maxValue);
         if (kb.slashKey.wasPressedThisFrame || kb.numpadDivideKey.wasPressedThisFrame) Add(debugAddAmount);
         if (kb.rightBracketKey.wasPressedThisFrame) ToggleSpawns();
-        if (kb.quoteKey.wasPressedThisFrame && KeyItemSpawner.Instance != null) KeyItemSpawner.Instance.DebugCollectAll();
+        if (kb.quoteKey.wasPressedThisFrame)
+        {
+            Add(maxValue); // 포탈은 게이지 가득 + 열쇠 전부가 조건이다
+            if (KeyItemSpawner.Instance != null) KeyItemSpawner.Instance.DebugCollectAll();
+        }
 
         if (kb.numpad1Key.wasPressedThisFrame) DebugSpawnElite(0);
         if (kb.numpad2Key.wasPressedThisFrame) DebugSpawnElite(1);
@@ -223,26 +224,9 @@ public class KillGauge : MonoBehaviour
             if (alive[i].GetComponent<BossDefeat>() == null) Destroy(alive[i].gameObject);
     }
 
-    void ShowWarning()
-    {
-        if (warnLabel == null) return;
-        warnLabel.text = warnMessage;
-        warnLabel.enabled = true;
-        warnTimer = warnTime;
-    }
-
     void Update()
     {
         HandleDebugKeys();
-
-        if (warnTimer > 0f && warnLabel != null)
-        {
-            warnTimer -= Time.deltaTime;
-            Color wc = warnLabel.color;
-            wc.a = warnFade > 0f ? Mathf.Clamp01(warnTimer / warnFade) : 1f;
-            warnLabel.color = wc;
-            if (warnTimer <= 0f) warnLabel.enabled = false;
-        }
 
         if (glow == null) return;
 
