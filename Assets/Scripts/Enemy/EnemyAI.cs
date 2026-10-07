@@ -49,6 +49,7 @@ public class EnemyAI : MonoBehaviour
     }
 
     public float recognitionRadius = 15f;
+    public float gunshotHearing = 0f; // 총소리를 듣는 반경. 0이면 쏘는 쪽 기본값(PlayerCombat.gunshotAlertRadius)
     public float visionAngle = 180f;
 
     public float attackDamage = 10f;
@@ -687,12 +688,12 @@ public static int CountNear(Vector3 position, float radius)
 // 총성: 반경 안의 적을 전부 추격 상태로 돌린다. 소리라서 장애물은 따지지 않는다
 public static void AlertGunshot(Vector3 origin, float radius)
     {
-        float sqrRadius = radius * radius;
         for (int i = active.Count - 1; i >= 0; i--)
         {
             EnemyAI e = active[i];
             if (e == null) { active.RemoveAt(i); continue; }
-            if ((e.transform.position - origin).sqrMagnitude > sqrRadius) continue;
+            float r = e.gunshotHearing > 0f ? e.gunshotHearing : radius;
+            if ((e.transform.position - origin).sqrMagnitude > r * r) continue;
             e.ForceAttack();
         }
     }

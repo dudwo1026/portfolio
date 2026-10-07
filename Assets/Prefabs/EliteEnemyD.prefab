@@ -317,6 +317,7 @@ MonoBehaviour:
   pathClearRadius: 0.45
   navSampleRadius: 4
   recognitionRadius: 30
+  gunshotHearing: 45
   visionAngle: 180
   attackDamage: 15
   attackCooldown: 2
