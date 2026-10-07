@@ -9,6 +9,7 @@ public class Portal : MonoBehaviour
 
     [Header("개방 조건")]
     public bool requireGaugeFull = false;   // 처치 게이지가 가득 차야 열린다
+    public bool requireKeys = false;        // 열쇠(KeyItemSpawner)를 다 모아야 열린다
     public Renderer visual;                 // 열림/닫힘을 색으로 보여줄 렌더러
     public Color closedColor = new Color(0.25f, 0.25f, 0.3f, 1f);
     public Color openColor = new Color(0.3f, 0.85f, 1f, 1f);
@@ -19,7 +20,12 @@ public class Portal : MonoBehaviour
 
     public bool IsOpen
     {
-        get { return !requireGaugeFull || (KillGauge.Instance != null && KillGauge.Instance.IsFull); }
+        get
+        {
+            if (requireGaugeFull && !(KillGauge.Instance != null && KillGauge.Instance.IsFull)) return false;
+            if (requireKeys && !(KeyItemSpawner.Instance != null && KeyItemSpawner.Instance.HasAllKeys)) return false;
+            return true;
+        }
     }
 
     void Update()
