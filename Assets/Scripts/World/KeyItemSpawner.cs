@@ -12,6 +12,7 @@ public class KeyItemSpawner : MonoBehaviour
     public float gaugeStep = 50f;
     public Color keyColor = new Color(1f, 0.8f, 0.1f, 1f);
     public float spinSpeed = 90f;
+    public UnityEngine.UI.Text countLabel; // 우상단 게이지 아래 "열쇠 n/7"
 
     public int Collected { get; private set; }
     public bool HasAllKeys { get { return Collected >= keysRequired; } }
@@ -39,6 +40,7 @@ public class KeyItemSpawner : MonoBehaviour
             p.gameObject.SetActive(false);
             unused.Add(p);
         }
+        RefreshLabel();
     }
 
     void Update()
@@ -58,6 +60,12 @@ public class KeyItemSpawner : MonoBehaviour
     {
         key.SetActive(false);
         Collected++;
+        RefreshLabel();
+    }
+
+    void RefreshLabel()
+    {
+        if (countLabel != null) countLabel.text = "열쇠 " + Collected + "/" + keysRequired;
     }
 }
 
