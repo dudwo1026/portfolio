@@ -87,6 +87,16 @@ public class KeyItemSpawner : MonoBehaviour
         RefreshLabel();
     }
 
+    // 테스트용 (KillGauge의 ' 키): 남은 열쇠를 전부 치우고 다 모은 것으로 처리한다
+    public void DebugCollectAll()
+    {
+        foreach (Transform p in spawnPoints) if (p != null) p.gameObject.SetActive(false);
+        unused.Clear();
+        spawned = keysRequired; // 이후 게이지가 올라도 더 나오지 않는다
+        Collected = keysRequired;
+        RefreshLabel();
+    }
+
     void RefreshLabel()
     {
         if (countLabel != null) countLabel.text = "열쇠 " + Collected + "/" + keysRequired;

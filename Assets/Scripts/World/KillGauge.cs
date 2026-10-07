@@ -108,6 +108,7 @@ public class KillGauge : MonoBehaviour
     //   / : 게이지를 debugAddAmount(기본 100)만큼 올린다 (숫자패드 / 도 동일)
     //   ] : 스폰을 멈추고 살아있는 몹을 지운다 / 다시 누르면 재개 (맵을 둘러볼 때)
     //   숫자패드 1~6 : 정예 a~f를 플레이어 남쪽 10유닛에 소환 (패턴을 하나씩 확인할 때)
+    //   ' : 열쇠를 전부 모은 것으로 처리해 포탈을 바로 연다
     void HandleDebugKeys()
     {
         if (!debugKeys) return;
@@ -118,6 +119,7 @@ public class KillGauge : MonoBehaviour
         if (kb.digit0Key.wasPressedThisFrame) Add(maxValue);
         if (kb.slashKey.wasPressedThisFrame || kb.numpadDivideKey.wasPressedThisFrame) Add(debugAddAmount);
         if (kb.rightBracketKey.wasPressedThisFrame) ToggleSpawns();
+        if (kb.quoteKey.wasPressedThisFrame && KeyItemSpawner.Instance != null) KeyItemSpawner.Instance.DebugCollectAll();
 
         if (kb.numpad1Key.wasPressedThisFrame) DebugSpawnElite(0);
         if (kb.numpad2Key.wasPressedThisFrame) DebugSpawnElite(1);
