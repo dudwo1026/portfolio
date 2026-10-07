@@ -37,6 +37,11 @@ public class BossLaserPattern : MonoBehaviour
     // 확정 순간에 재생한다. 레이저가 재생 약 0.6초 뒤에 나와서 확정(0.7초) 끝 = 발사 시작과 맞고,
     // 레이저가 나오는 시간(약 3초)도 발사 유지 시간과 맞는다
     public GameObject beamEffectPrefab;
+    // 마법진은 보스 주변을 레이저 방향으로 따라 돌고, 레이저는 그 중심에서 나간다.
+    // 보스(한 변 6) 모서리(중심에서 4.24)에 묻히지 않는 거리
+    public float effectOrbitRadius = 4.5f;
+    // 원본 마법진 지름 약 12.8 → 4.5. 보스 중심이 바닥 위 3이라 반지름이 그보다 작아야 바닥에 안 박힌다
+    public float effectCircleScale = 0.35f;
 
     EnemyAI ai;
     BossObstaclePattern obstacles;
@@ -105,6 +110,7 @@ public class BossLaserPattern : MonoBehaviour
         {
             fx = Instantiate(beamEffectPrefab);
             fx.name = "BossLaser"; // 보스가 죽으면 BossDefeat가 이름으로 치운다
+            SetupEffect(fx);
             PlaceEffect(fx, dir);
         }
         yield return new WaitForSeconds(lockDelay);
@@ -139,22 +145,42 @@ public class BossLaserPattern : MonoBehaviour
         running = false;
     }
 
-    // 이펙트는 위로 뻗는 레이저라 위쪽을 dir로 눕힌다.
-    // 레이저(늘림 배율이 음수인 파티클)는 벽까지 길이에 맞추고, 마법진(Local 정렬)은 바닥에 눕혀 둔다
+    // 레이저 = 늘림 배율이 음수인 파티클, 마법진 = Local 정렬 파티클
+    static bool IsBeam(ParticleSystemRenderer r)
+    {
+        return r.renderMode == ParticleSystemRenderMode.Stretch && r.lengthScale < 0f;
+    }
+
+    // 가장 굵은 레이저가 판정 굵기(beamWidth)가 되도록 레이저들을 같은 비율로 맞추고, 마법진을 줄인다
+    void SetupEffect(GameObject fx)
+    {
+        ParticleSystemRenderer[] rs = fx.GetComponentsInChildren<ParticleSystemRenderer>();
+        float widest = 0f;
+        foreach (ParticleSystemRenderer r in rs)
+            if (IsBeam(r)) widest = Mathf.Max(widest, r.GetComponent<ParticleSystem>().main.startSize.constantMax);
+
+        foreach (ParticleSystemRenderer r in rs)
+        {
+            if (IsBeam(r) && widest > 0f)
+            {
+                ParticleSystem.MainModule m = r.GetComponent<ParticleSystem>().main;
+                m.startSize = m.startSize.constantMax * beamWidth / widest;
+            }
+            else if (r.alignment == ParticleSystemRenderSpace.Local)
+                r.transform.localScale = Vector3.one * effectCircleScale;
+        }
+    }
+
+    // 이펙트는 위로 뻗는 레이저라 위쪽을 dir로 눕힌다. 마법진도 같이 세워져 레이저 방향을 바라보고,
+    // 보스 주변 effectOrbitRadius 위치를 따라 돈다. 레이저 길이는 마법진부터 벽까지
     float PlaceEffect(GameObject fx, Vector3 dir)
     {
         float length = ClearLength(dir, beamWidth, beamHeight);
-        fx.transform.SetPositionAndRotation(transform.position, Quaternion.FromToRotation(Vector3.up, dir));
+        fx.transform.SetPositionAndRotation(transform.position + dir * effectOrbitRadius, Quaternion.FromToRotation(Vector3.up, dir));
 
-        Vector3 ground = transform.position;
-        ground.y = FindGroundY() + groundOffset;
+        float visible = Mathf.Max(0.5f, length - effectOrbitRadius);
         foreach (ParticleSystemRenderer r in fx.GetComponentsInChildren<ParticleSystemRenderer>())
-        {
-            if (r.renderMode == ParticleSystemRenderMode.Stretch && r.lengthScale < 0f)
-                r.lengthScale = -length / r.GetComponent<ParticleSystem>().main.startSize.constantMax; // 길이 = 크기 x 배율
-            else if (r.alignment == ParticleSystemRenderSpace.Local)
-                r.transform.SetPositionAndRotation(ground, Quaternion.identity);
-        }
+            if (IsBeam(r)) r.lengthScale = -visible / r.GetComponent<ParticleSystem>().main.startSize.constantMax; // 길이 = 크기 x 배율
         return length;
     }
 
