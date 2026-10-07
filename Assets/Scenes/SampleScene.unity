@@ -6863,7 +6863,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 1.5, y: -1.5}
+  m_EffectDistance: {x: 2.5, y: -2.5}
   m_UseGraphicAlpha: 1
 --- !u!1 &408172378
 GameObject:
@@ -6958,7 +6958,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 1.5, y: -1.5}
+  m_EffectDistance: {x: 2.5, y: -2.5}
   m_UseGraphicAlpha: 1
 --- !u!1 &410087039
 GameObject:
@@ -11695,7 +11695,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 1.5, y: -1.5}
+  m_EffectDistance: {x: 2.5, y: -2.5}
   m_UseGraphicAlpha: 1
 --- !u!1 &726330298
 GameObject:
@@ -12885,7 +12885,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 1.5, y: -1.5}
+  m_EffectDistance: {x: 2.5, y: -2.5}
   m_UseGraphicAlpha: 1
 --- !u!1 &832575517
 GameObject:
@@ -17190,7 +17190,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 1.5, y: -1.5}
+  m_EffectDistance: {x: 2.5, y: -2.5}
   m_UseGraphicAlpha: 1
 --- !u!1 &1102489764
 GameObject:
@@ -18263,7 +18263,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 1.5, y: -1.5}
+  m_EffectDistance: {x: 2.5, y: -2.5}
   m_UseGraphicAlpha: 1
 --- !u!1 &1124296981
 GameObject:
@@ -23696,7 +23696,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 1.5, y: -1.5}
+  m_EffectDistance: {x: 2.5, y: -2.5}
   m_UseGraphicAlpha: 1
 --- !u!1001 &1427636174
 PrefabInstance:
