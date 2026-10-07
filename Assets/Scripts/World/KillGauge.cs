@@ -51,6 +51,10 @@ public class KillGauge : MonoBehaviour
 
     public System.Action onFull; // 추후 이벤트 연결 지점
 
+    // 이 값부터 정예는 발견 절차 없이 생성되자마자 추격한다 (넘는 순간 살아 있는 정예도 전부)
+    public float eliteHuntAt = 250f;
+    public bool EliteHunt { get { return Value >= eliteHuntAt; } }
+
     bool wasFull;
     bool spawnsPaused;   // ] 키 상태
     float clearTimer;
@@ -83,6 +87,9 @@ public class KillGauge : MonoBehaviour
         Value = Mathf.Clamp(Value + amount, 0f, maxValue);
         foreach (float at in warnAt)
             if (before < at && Value >= at) ShowWarning(); // 한 번에 여러 개를 넘어도 같은 문구라 한 번 뜬 것과 같다
+        if (before < eliteHuntAt && EliteHunt)
+            foreach (EnemyAI e in FindObjectsByType<EnemyAI>(FindObjectsSortMode.None))
+                if (e.isElite) e.ForceAttack();
         UpdateUnlocks();
         Refresh();
 
