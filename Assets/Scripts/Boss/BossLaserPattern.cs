@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 // 보스 특수패턴 6: 본체에서 굵은 레이저를 쏜다.
-// 워닝 1.5초(플레이어 추적) → 시작지점 확정 → 0.7초 후 발사 → 3초간 플레이어를 따라 휘두른다.
+// 워닝 1.5초(플레이어 추적) → 시작지점 확정 → 0.7초 후 발사 → 2.5초간 플레이어를 따라 휘두른다.
 [RequireComponent(typeof(EnemyAI))]
 public class BossLaserPattern : MonoBehaviour
 {
@@ -13,7 +13,7 @@ public class BossLaserPattern : MonoBehaviour
     public float cooldownFloor = 5f;
     public float warningTime = 1.5f;   // 워닝이 플레이어를 따라다니는 시간
     public float lockDelay = 0.7f;     // 확정 후 발사까지
-    public float fireDuration = 3f;    // 발사 유지 시간
+    public float fireDuration = 2.5f;  // 발사 유지 시간
     // 레이저 끝이 플레이어 거리에서 초당 이만큼 움직이도록 회전한다 (플레이어 이동속도와 맞춤).
     // 각속도로 고정하면 거리에 따라 체감이 달라지므로, 선속도 기준으로 매 프레임 환산한다
     public float trackLinearSpeed = 6f;
@@ -120,7 +120,7 @@ public class BossLaserPattern : MonoBehaviour
         }
         if (warning != null) Destroy(warning);
 
-        // 3) 발사: 3초간 추적
+        // 3) 발사: fireDuration 동안 추적
         GameObject beam = fx != null ? null : MakeBar("BossLaser", beamColor, beamHeight);
         float fired = 0f, tick = 0f;
         while (fired < fireDuration)
