@@ -51,6 +51,17 @@ public class EliteRangedAttack : MonoBehaviour, IElitePatternVisual
         rend = GetComponent<Renderer>();
     }
 
+    void OnEnable() { ai.onMeleeHit += OnMeleeHit; }
+    void OnDisable() { ai.onMeleeHit -= OnMeleeHit; }
+
+    // 사격 모션 중(발사 전)에 근접공격을 맞으면 끊긴다 (발사 간격은 이미 소모됨)
+    void OnMeleeHit()
+    {
+        if (fireAt < 0f) return;
+        fireAt = -1f;
+        lastShotTime = -999f; // 모션도 같이 끊는다
+    }
+
 void FixedUpdate()
     {
         if (ai.IsStunned || ai.patternDriving) { fireAt = -1f; return; } // 선딜 중 기절하면 취소

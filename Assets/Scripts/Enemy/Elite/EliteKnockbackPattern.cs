@@ -55,7 +55,19 @@ void Awake()
         if (rend != null) normalMaterial = rend.sharedMaterial;
     }
 
+    void OnEnable()
+    {
+        ai.onMeleeHit += OnMeleeHit;
+    }
+
     void OnDisable()
+    {
+        ai.onMeleeHit -= OnMeleeHit;
+        if (casting) EndCast();
+    }
+
+    // 시전 중에 근접공격을 맞으면 끊긴다 (쿨타임은 이미 소모됨)
+    void OnMeleeHit()
     {
         if (casting) EndCast();
     }

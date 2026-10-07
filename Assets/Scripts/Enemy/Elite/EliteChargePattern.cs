@@ -52,11 +52,22 @@ public class EliteChargePattern : MonoBehaviour, IElitePatternVisual
         rb = GetComponent<Rigidbody>();
     }
 
-    void OnEnable() { ai.onPlayerDetected += BeginCharge; }
+    void OnEnable()
+    {
+        ai.onPlayerDetected += BeginCharge;
+        ai.onMeleeHit += OnMeleeHit;
+    }
 
     void OnDisable()
     {
         ai.onPlayerDetected -= BeginCharge;
+        ai.onMeleeHit -= OnMeleeHit;
+        if (charging) EndCharge();
+    }
+
+    // 돌진 중에 근접공격을 맞으면 끊긴다 (쿨타임은 이미 소모됨)
+    void OnMeleeHit()
+    {
         if (charging) EndCharge();
     }
 
