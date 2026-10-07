@@ -14,6 +14,10 @@ public class KeyItemSpawner : MonoBehaviour
     public Color keyColor = new Color(1f, 0.8f, 0.1f, 1f);
     public float spinSpeed = 90f;
     public UnityEngine.UI.Text countLabel; // 우상단 게이지 아래 "열쇠 n/7"
+    public UnityEngine.UI.Text announceLabel; // 화면 중상단 "n번째 열쇠가 생성되었습니다"
+    public float announceTime = 2.5f;  // 떠 있는 전체 시간
+    public float announceFade = 0.5f;  // 그중 끝에서 서서히 사라지는 시간
+    float announceTimer;
 
     public int Collected { get; private set; }
     public bool HasAllKeys { get { return Collected >= keysRequired; } }
@@ -54,7 +58,26 @@ public class KeyItemSpawner : MonoBehaviour
             unused[i].gameObject.SetActive(true);
             unused.RemoveAt(i);
             spawned++;
+            Announce(spawned + "번째 열쇠가 생성되었습니다");
         }
+
+        if (announceTimer > 0f && announceLabel != null)
+        {
+            announceTimer -= Time.deltaTime;
+            Color c = announceLabel.color;
+            c.a = announceFade > 0f ? Mathf.Clamp01(announceTimer / announceFade) : 1f; // 외곽선도 글자 알파를 따른다
+            announceLabel.color = c;
+            if (announceTimer <= 0f) announceLabel.enabled = false;
+        }
+    }
+
+    // 한 번에 여러 개가 나오면 마지막 것만 보인다
+    void Announce(string message)
+    {
+        if (announceLabel == null) return;
+        announceLabel.text = message;
+        announceLabel.enabled = true;
+        announceTimer = announceTime;
     }
 
     public void Collect(GameObject key)
