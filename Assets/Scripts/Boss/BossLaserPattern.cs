@@ -34,9 +34,11 @@ public class BossLaserPattern : MonoBehaviour
     public Color beamColor = new Color(1f, 0.25f, 0.6f);
 
     [Header("이펙트 (비워 두면 큐브 막대)")]
-    // 확정 순간에 재생한다. 레이저가 재생 약 0.6초 뒤에 나와서 확정(0.7초) 끝 = 발사 시작과 맞고,
-    // 레이저가 나오는 시간(약 3초)도 발사 유지 시간과 맞는다
     public GameObject beamEffectPrefab;
+    // 발사 이만큼 전에 이펙트를 재생한다. 마법진이 1.32초에 걸쳐 다 펼쳐진 뒤 레이저가 나오도록,
+    // Laser AOE Single은 레이저 첫 발이 재생 1.6초 뒤(= 발사 0.1초 전)에 나오게 맞춰 두었다.
+    // 이 값을 바꾸면 그 프리팹의 최상위 버스트 시각(1.2)도 같이 옮겨야 한다
+    public float effectLeadTime = 1.7f;
     // 마법진은 보스 주변을 레이저 방향으로 따라 돌고, 레이저는 그 중심에서 나간다.
     // 보스(한 변 6) 모서리(중심에서 4.24)에 묻히지 않는 거리
     public float effectOrbitRadius = 4.5f;
@@ -50,6 +52,7 @@ public class BossLaserPattern : MonoBehaviour
     BossActionLock actionLock;
     float nextCastTime;
     bool running;
+    GameObject fx;
 
     void Awake()
     {
@@ -100,6 +103,7 @@ public class BossLaserPattern : MonoBehaviour
             t += Time.deltaTime;
             if (ai.PlayerTransform != null) dir = FlatDirTo(ai.PlayerTransform.position);
             PlaceBar(warning, dir, beamWidth, 0.1f, true);
+            TickEffect(warningTime - t + lockDelay, dir);
             yield return null;
         }
 
@@ -107,15 +111,13 @@ public class BossLaserPattern : MonoBehaviour
         Renderer wr = warning != null ? warning.GetComponent<Renderer>() : null;
         if (wr != null) wr.sharedMaterial.color = lockedColor;
         PlaceBar(warning, dir, beamWidth, 0.1f, true);
-        GameObject fx = null;
-        if (beamEffectPrefab != null)
+        float locked = 0f;
+        while (locked < lockDelay)
         {
-            fx = Instantiate(beamEffectPrefab);
-            fx.name = "BossLaser"; // 보스가 죽으면 BossDefeat가 이름으로 치운다
-            SetupEffect(fx);
-            PlaceEffect(fx, dir);
+            locked += Time.deltaTime;
+            TickEffect(lockDelay - locked, dir);
+            yield return null;
         }
-        yield return new WaitForSeconds(lockDelay);
         if (warning != null) Destroy(warning);
 
         // 3) 발사: 3초간 추적
@@ -144,7 +146,22 @@ public class BossLaserPattern : MonoBehaviour
 
         if (beam != null) Destroy(beam);
         if (fx != null) Destroy(fx);
+        fx = null;
         running = false;
+    }
+
+    // 발사까지 남은 시간이 effectLeadTime 이하가 되면 이펙트를 만들고, 그 뒤로는 매 프레임 자리를 맞춘다
+    void TickEffect(float untilFire, Vector3 dir)
+    {
+        if (beamEffectPrefab == null) return;
+        if (fx == null)
+        {
+            if (untilFire > effectLeadTime) return;
+            fx = Instantiate(beamEffectPrefab);
+            fx.name = "BossLaser"; // 보스가 죽으면 BossDefeat가 이름으로 치운다
+            SetupEffect(fx);
+        }
+        PlaceEffect(fx, dir);
     }
 
     // 레이저 = 늘림 배율이 음수인 파티클, 마법진 = Local 정렬 파티클
