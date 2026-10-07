@@ -16011,6 +16011,7 @@ GameObject:
   - component: {fileID: 970124522}
   - component: {fileID: 970124524}
   - component: {fileID: 970124523}
+  - component: {fileID: 970124525}
   m_Layer: 0
   m_Name: PortalConfirmPanel
   m_TagString: Untagged
@@ -16076,6 +16077,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 970124521}
   m_CullTransparentMesh: 1
+--- !u!114 &970124525
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 970124521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b97085926115334498d2de48aef8c46d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ConfirmSelector
+  buttons:
+  - {fileID: 685374820}
+  - {fileID: 431090519}
+  defaultIndex: 1
+  selectedScale: 1.15
 --- !u!1001 &973395133
 PrefabInstance:
   m_ObjectHideFlags: 0
