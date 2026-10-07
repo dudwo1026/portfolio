@@ -38,6 +38,7 @@ public class PlayerDash : MonoBehaviour
 
     void Update()
     {
+        if (Time.timeScale == 0f) return; // 일시정지(확인창·게임오버) 중에는 입력을 받지 않는다
         Keyboard kb = Keyboard.current;
         if (kb == null) return;
 

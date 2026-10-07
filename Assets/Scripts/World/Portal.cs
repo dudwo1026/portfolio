@@ -17,6 +17,11 @@ public class Portal : MonoBehaviour
     public HudMessage openMessage;          // 닫혀 있다가 열리는 순간 한 번 띄운다
     public string openText = "옥상으로 향하는 문이 열렸습니다";
 
+    [Header("진입 확인")]
+    public GameObject confirmPanel;                  // 넣어 두면 닿았을 때 바로 보내지 않고 예/아니오를 묻는다
+    public UnityEngine.Rendering.Volume blurVolume;  // 묻는 동안 weight 1 (약한 가우시안 피사계심도)
+    Transform pending;
+
     float readyTime = 0f;
     Material runtimeMat;
     bool wasOpen;
@@ -62,8 +67,44 @@ void OnTriggerEnter(Collider other)
         if (other.GetComponent<PlayerCombat>() == null) return; // players only - enemies can't use portals
         if (Time.time < readyTime) return;
 
+        if (confirmPanel != null)
+        {
+            // 바로 보내지 않고 묻는다. 멈춘 동안 화면은 흐리게
+            pending = other.transform;
+            confirmPanel.SetActive(true);
+            if (blurVolume != null) blurVolume.weight = 1f;
+            Time.timeScale = 0f;
+            return;
+        }
+        Teleport(other.transform);
+    }
+
+    // 확인창 버튼에서 부른다
+    public void ConfirmYes()
+    {
+        CloseConfirm();
+        if (pending != null) Teleport(pending);
+        pending = null;
+    }
+
+    // 아니오: 그 자리에 남는다. 다시 묻게 하려면 포탈에서 나갔다 들어와야 한다
+    public void ConfirmNo()
+    {
+        CloseConfirm();
+        pending = null;
+    }
+
+    void CloseConfirm()
+    {
+        confirmPanel.SetActive(false);
+        if (blurVolume != null) blurVolume.weight = 0f;
+        Time.timeScale = 1f;
+    }
+
+    void Teleport(Transform player)
+    {
         Vector3 dir = destinationPortal != null ? destinationPortal.exitDirection : destination.forward;
-        other.transform.position = destination.position + dir.normalized * 2f;
+        player.position = destination.position + dir.normalized * 2f;
 
         readyTime = Time.time + cooldown;
         if (destinationPortal != null)
