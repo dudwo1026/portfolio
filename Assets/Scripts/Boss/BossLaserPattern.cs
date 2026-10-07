@@ -33,6 +33,11 @@ public class BossLaserPattern : MonoBehaviour
     public Color lockedColor = new Color(1f, 0.1f, 0.05f);
     public Color beamColor = new Color(1f, 0.25f, 0.6f);
 
+    [Header("이펙트 (비워 두면 큐브 막대)")]
+    // 확정 순간에 재생한다. 레이저가 재생 약 0.6초 뒤에 나와서 확정(0.7초) 끝 = 발사 시작과 맞고,
+    // 레이저가 나오는 시간(약 3초)도 발사 유지 시간과 맞는다
+    public GameObject beamEffectPrefab;
+
     EnemyAI ai;
     BossObstaclePattern obstacles;
     BossActionLock actionLock;
@@ -95,11 +100,18 @@ public class BossLaserPattern : MonoBehaviour
         Renderer wr = warning != null ? warning.GetComponent<Renderer>() : null;
         if (wr != null) wr.sharedMaterial.color = lockedColor;
         PlaceBar(warning, dir, beamWidth, 0.1f, true);
+        GameObject fx = null;
+        if (beamEffectPrefab != null)
+        {
+            fx = Instantiate(beamEffectPrefab);
+            fx.name = "BossLaser"; // 보스가 죽으면 BossDefeat가 이름으로 치운다
+            PlaceEffect(fx, dir);
+        }
         yield return new WaitForSeconds(lockDelay);
         if (warning != null) Destroy(warning);
 
         // 3) 발사: 3초간 추적
-        GameObject beam = MakeBar("BossLaser", beamColor, beamHeight);
+        GameObject beam = fx != null ? null : MakeBar("BossLaser", beamColor, beamHeight);
         float fired = 0f, tick = 0f;
         while (fired < fireDuration)
         {
@@ -111,7 +123,7 @@ public class BossLaserPattern : MonoBehaviour
                 Vector3 want = FlatDirTo(ai.PlayerTransform.position);
                 dir = Vector3.RotateTowards(dir, want, TrackRadiansPerSecond() * dt, 0f); // 회전 속도 제한
             }
-            float length = PlaceBar(beam, dir, beamWidth, beamHeight, false);
+            float length = fx != null ? PlaceEffect(fx, dir) : PlaceBar(beam, dir, beamWidth, beamHeight, false);
 
             tick -= dt;
             if (tick <= 0f)
@@ -123,7 +135,27 @@ public class BossLaserPattern : MonoBehaviour
         }
 
         if (beam != null) Destroy(beam);
+        if (fx != null) Destroy(fx);
         running = false;
+    }
+
+    // 이펙트는 위로 뻗는 레이저라 위쪽을 dir로 눕힌다.
+    // 레이저(늘림 배율이 음수인 파티클)는 벽까지 길이에 맞추고, 마법진(Local 정렬)은 바닥에 눕혀 둔다
+    float PlaceEffect(GameObject fx, Vector3 dir)
+    {
+        float length = ClearLength(dir, beamWidth, beamHeight);
+        fx.transform.SetPositionAndRotation(transform.position, Quaternion.FromToRotation(Vector3.up, dir));
+
+        Vector3 ground = transform.position;
+        ground.y = FindGroundY() + groundOffset;
+        foreach (ParticleSystemRenderer r in fx.GetComponentsInChildren<ParticleSystemRenderer>())
+        {
+            if (r.renderMode == ParticleSystemRenderMode.Stretch && r.lengthScale < 0f)
+                r.lengthScale = -length / r.GetComponent<ParticleSystem>().main.startSize.constantMax; // 길이 = 크기 x 배율
+            else if (r.alignment == ParticleSystemRenderSpace.Local)
+                r.transform.SetPositionAndRotation(ground, Quaternion.identity);
+        }
+        return length;
     }
 
     // 플레이어 거리에서의 선속도를 각속도로 환산
