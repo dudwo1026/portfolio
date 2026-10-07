@@ -58,7 +58,7 @@ public class KeyItemSpawner : MonoBehaviour
             unused[i].gameObject.SetActive(true);
             unused.RemoveAt(i);
             spawned++;
-            Announce(spawned + "번째 열쇠가 생성되었습니다");
+            Announce((spawned >= keysRequired ? "마지막" : spawned + "번째") + " 열쇠가 생성되었습니다");
         }
 
         if (announceTimer > 0f && announceLabel != null)
