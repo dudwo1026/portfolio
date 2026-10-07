@@ -372,8 +372,8 @@ Transform:
   m_GameObject: {fileID: 14298232}
   serializedVersion: 2
   m_LocalRotation: {x: 0.34202012, y: -0.000000029802319, z: -0.0000000074505797, w: 0.9396926}
-  m_LocalPosition: {x: 0.52495575, y: 0.033605814, z: -0.0000011920929}
-  m_LocalScale: {x: 2.269368, y: 2.2106774, z: 1}
+  m_LocalPosition: {x: -0.13529277, y: 0.6523111, z: -0.000002026558}
+  m_LocalScale: {x: 2.3581781, y: 3.3786454, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1878695940}
@@ -19277,6 +19277,7 @@ GameObject:
   - component: {fileID: 1176907072}
   - component: {fileID: 1176907073}
   - component: {fileID: 1176907074}
+  - component: {fileID: 1176907075}
   m_Layer: 0
   m_Name: Canvas
   m_TagString: Untagged
@@ -19506,6 +19507,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EliteThreatIndicator
   viewCamera: {fileID: 330585545}
   player: {fileID: 1878695940}
+  trackKeys: 0
   showRadius: 33
   refreshInterval: 0.25
   aimHeight: 1
@@ -19554,6 +19556,34 @@ MonoBehaviour:
   target: {fileID: 146723448}
   fillImage: {fileID: 17088847}
   root: {fileID: 812666277}
+--- !u!114 &1176907075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1176907061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b8f1e59dbffc9a45bba698739ca09aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EliteThreatIndicator
+  viewCamera: {fileID: 330585545}
+  player: {fileID: 1878695940}
+  trackKeys: 1
+  showRadius: 9999
+  refreshInterval: 0.25
+  aimHeight: 1
+  edgeMargin: 120
+  bottomMargin: 330
+  arrowSize: 46
+  arrowColor: {r: 0.25, g: 0.6, b: 1, a: 0.92}
+  outlineColor: {r: 0, g: 0, b: 0, a: 0.7}
+  outlineScale: 1.32
+  scaleByDistance: 0
+  nearDistance: 12
+  nearScale: 1.3
+  farScale: 0.78
 --- !u!1 &1180381425
 GameObject:
   m_ObjectHideFlags: 0

@@ -18,7 +18,9 @@ public class EliteThreatIndicator : MonoBehaviour
     public Transform player;
 
     [Header("표시 조건")]
-    public float showRadius = 22f;        // 이 안의 정예만 표시. 인지범위(15)보다 넉넉히 잡아 미리 경고한다
+    // 켜면 정예 대신 맵에 나와 있는 열쇠(KeyItemSpawner)를 가리킨다. 같은 컴포넌트를 하나 더 붙여 파란색으로 쓴다
+    public bool trackKeys = false;
+    public float showRadius = 22f;       // 이 안의 정예만 표시. 인지범위(15)보다 넉넉히 잡아 미리 경고한다
     public float refreshInterval = 0.25f; // 정예 목록 재탐색 주기 (위치는 매 프레임 갱신된다)
     public float aimHeight = 1f;          // 몹의 발밑이 아니라 몸통을 기준으로 방향을 잡는다
 
@@ -49,7 +51,7 @@ public class EliteThreatIndicator : MonoBehaviour
     RectTransform container;
     Sprite arrowSprite;
     readonly List<Arrow> pool = new List<Arrow>();
-    readonly List<EnemyAI> elites = new List<EnemyAI>();
+    readonly List<Transform> targets = new List<Transform>();
     float refreshTimer;
 
     void Awake()
@@ -78,7 +80,7 @@ public class EliteThreatIndicator : MonoBehaviour
 
     void BuildContainer()
     {
-        GameObject go = new GameObject("EliteThreatArrows", typeof(RectTransform));
+        GameObject go = new GameObject(trackKeys ? "KeyArrows" : "EliteThreatArrows", typeof(RectTransform));
         container = (RectTransform)go.transform;
         container.SetParent(transform, false);
         container.anchorMin = Vector2.zero;
@@ -110,15 +112,20 @@ public class EliteThreatIndicator : MonoBehaviour
         playerFlat.y = 0f;
 
         int used = 0;
-        for (int i = 0; i < elites.Count; i++)
+        for (int i = 0; i < targets.Count; i++)
         {
-            EnemyAI e = elites[i];
-            if (e == null || !e.isActiveAndEnabled) continue;
-            if (e.State != EnemyState.Attack) continue; // 플레이어를 쫓기 시작한 정예만 알린다
+            Transform t = targets[i];
+            if (t == null || !t.gameObject.activeInHierarchy) continue; // 주운 열쇠는 꺼진다
+            if (!trackKeys)
+            {
+                EnemyAI e = t.GetComponent<EnemyAI>();
+                if (e == null || !e.isActiveAndEnabled) continue;
+                if (e.State != EnemyState.Attack) continue; // 플레이어를 쫓기 시작한 정예만 알린다
+            }
 
-            Vector3 world = e.transform.position + Vector3.up * aimHeight;
+            Vector3 world = t.position + Vector3.up * aimHeight;
 
-            Vector3 flat = e.transform.position;
+            Vector3 flat = t.position;
             flat.y = 0f;
             float dist = Vector3.Distance(flat, playerFlat);
             if (dist > showRadius) continue;
@@ -167,10 +174,17 @@ public class EliteThreatIndicator : MonoBehaviour
 
     void RefreshEliteList()
     {
-        elites.Clear();
+        targets.Clear();
+        if (trackKeys)
+        {
+            // 아직 안 나온 열쇠도 넣어 둔다. 꺼져 있는 동안은 LateUpdate에서 걸러진다
+            if (KeyItemSpawner.Instance != null)
+                foreach (Transform k in KeyItemSpawner.Instance.spawnPoints) targets.Add(k);
+            return;
+        }
         EnemyAI[] all = FindObjectsByType<EnemyAI>(FindObjectsSortMode.None);
         for (int i = 0; i < all.Length; i++)
-            if (all[i].isElite) elites.Add(all[i]);
+            if (all[i].isElite) targets.Add(all[i].transform);
     }
 
     Arrow GetArrow(int index)
