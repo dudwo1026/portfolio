@@ -9,8 +9,8 @@ public class KillGauge : MonoBehaviour
 
     [Header("게이지")]
     public float maxValue = 300f;
-    public float normalKillValue = 3f;
-    public float eliteKillValue = 10f;
+    public float normalKillValue = 1f;
+    public float eliteKillValue = 5f;
 
     [Header("정예 스포너 개방")]
     public float unlockStep = 50f;      // 이만큼 찰 때마다
