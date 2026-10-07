@@ -151,13 +151,6 @@ public class EnemyAI : MonoBehaviour
         if (selfHealth != null) selfHealth.Damaged += OnDamaged;
     }
 
-    void Start()
-    {
-        // 정예몹은 감지 절차 없이 생성되자마자 플레이어를 쫓는다.
-        // (Awake가 아니라 Start인 이유: 패턴 컴포넌트들이 onPlayerDetected를 붙일 시간을 준다)
-        if (isElite && player != null) EnterAttack();
-    }
-
 void OnDamaged()
     {
         if (selfHealth != null && selfHealth.CurrentHealth <= 0f)

@@ -114,6 +114,7 @@ public class EliteThreatIndicator : MonoBehaviour
         {
             EnemyAI e = elites[i];
             if (e == null || !e.isActiveAndEnabled) continue;
+            if (e.State != EnemyState.Attack) continue; // 플레이어를 쫓기 시작한 정예만 알린다
 
             Vector3 world = e.transform.position + Vector3.up * aimHeight;
 

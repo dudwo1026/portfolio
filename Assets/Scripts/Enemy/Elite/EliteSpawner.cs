@@ -101,6 +101,9 @@ public class EliteSpawner : MonoBehaviour
         current[slot] = Instantiate(elitePrefabs[type], FindSpawnPoint(), Quaternion.Euler(0f, Random.Range(0f, 360f), 0f));
         current[slot].name = elitePrefabs[type].name; // "(Clone)" 없이 원래 이름 유지
         current[slot].SetActive(true);
+        // 발견 전에는 배회한다. 생성 구역 밖(담장 너머)으로 흘러가지 않게 같은 구역에 묶는다
+        EnemyAI ai = current[slot].GetComponent<EnemyAI>();
+        if (ai != null) ai.SetWanderArea(new Bounds(areaCenter, new Vector3(areaSize.x, 100f, areaSize.y)));
         currentType[slot] = type;
         timers[slot] = 0f;
     }
