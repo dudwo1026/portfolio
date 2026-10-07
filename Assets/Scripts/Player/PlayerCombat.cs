@@ -58,18 +58,20 @@ public class PlayerCombat : MonoBehaviour
     // bool 한 개라서 열 번을 눌러도 기억은 한 개 — 쿨다운이 풀릴 때 한 발만 나간다
     bool secondaryFireBuffered;
     int primaryAmmo;
-    int primaryReserveMags;
+    int primaryReserve;   // 예비 탄 (발 단위). 장전은 빈 만큼만 여기서 빼 온다
     int secondaryAmmo;
-    int secondaryReserveMags;
+    int secondaryReserve;
 
     // 원거리 무기를 마지막으로 발사한 시각. 공격 모션 재생용 (근접은 포함하지 않는다)
     public float LastRangedFireTime { get; private set; } = -999f;
     public float LastMeleeTime { get; private set; } = -999f;
 
     public int PrimaryAmmo => primaryAmmo;
-    public int PrimaryReserveMags => primaryReserveMags;
+    public int PrimaryReserve => primaryReserve;
     public int SecondaryAmmo => secondaryAmmo;
-    public int SecondaryReserveMags => secondaryReserveMags;
+    public int SecondaryReserve => secondaryReserve;
+    int PrimaryMaxReserve => primaryMaxReserveMags * primaryMagSize;
+    int SecondaryMaxReserve => secondaryMaxReserveMags * secondaryMagSize;
 
     TopDownMove mover;
     PlayerBound bound;
@@ -81,9 +83,9 @@ void Awake()
         bound = GetComponent<PlayerBound>();
         dash = GetComponent<PlayerDash>();
         primaryAmmo = primaryMagSize;
-        primaryReserveMags = primaryMaxReserveMags;
+        primaryReserve = PrimaryMaxReserve;
         secondaryAmmo = secondaryMagSize;
-        secondaryReserveMags = secondaryMaxReserveMags;
+        secondaryReserve = SecondaryMaxReserve;
 
         // 탄약처럼 유탄도 시작할 때 채운다. 씬에 남은 값이 0이면 첫 발이 안 나가버린다
         grenadeLoaded = 1;
@@ -315,15 +317,16 @@ void Reload()
                 grenadeLoaded = 1;
             }
 
-            if (primaryReserveMags <= 0 || primaryAmmo == primaryMagSize) return;
-            primaryReserveMags--;
-            primaryAmmo = primaryMagSize;
+            // 남은 탄은 버리지 않는다. 빈 만큼만 예비에서 채운다
+            int take = Mathf.Min(primaryMagSize - primaryAmmo, primaryReserve);
+            primaryReserve -= take;
+            primaryAmmo += take;
         }
         else if (currentSlot == WeaponSlot.Secondary)
         {
-            if (secondaryReserveMags <= 0 || secondaryAmmo == secondaryMagSize) return;
-            secondaryReserveMags--;
-            secondaryAmmo = secondaryMagSize;
+            int take = Mathf.Min(secondaryMagSize - secondaryAmmo, secondaryReserve);
+            secondaryReserve -= take;
+            secondaryAmmo += take;
         }
     }
 
@@ -331,18 +334,18 @@ void Reload()
 public void RefillAmmo()
     {
         primaryAmmo = primaryMagSize;
-        primaryReserveMags = primaryMaxReserveMags;
+        primaryReserve = PrimaryMaxReserve;
         secondaryAmmo = secondaryMagSize;
-        secondaryReserveMags = secondaryMaxReserveMags;
+        secondaryReserve = SecondaryMaxReserve;
 
-        grenadeLoaded = 1;                      // 유탄도 가득 채운다 (장전 1 + 예비)
+        grenadeLoaded = 1;                     // 유탄도 가득 채운다 (장전 1 + 예비)
         grenadeReserve = grenadeMaxReserve;
     }
 
-    // 보급키트: 주무기/보조무기 예비탄창을 하나씩 채운다 (유탄 제외)
+    // 보급키트: 주무기/보조무기 예비탄을 탄창 하나 분량씩 채운다 (유탄 제외)
     public void AddMagazine()
     {
-        primaryReserveMags = Mathf.Min(primaryReserveMags + 1, primaryMaxReserveMags);
-        secondaryReserveMags = Mathf.Min(secondaryReserveMags + 1, secondaryMaxReserveMags);
+        primaryReserve = Mathf.Min(primaryReserve + primaryMagSize, PrimaryMaxReserve);
+        secondaryReserve = Mathf.Min(secondaryReserve + secondaryMagSize, SecondaryMaxReserve);
     }
 }

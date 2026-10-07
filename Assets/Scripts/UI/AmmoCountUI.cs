@@ -16,12 +16,12 @@ public class AmmoCountUI : MonoBehaviour
         if (primaryBig != null) primaryBig.text = combat.PrimaryAmmo.ToString();
         if (primarySmall != null)
         {
-            int totalBullets = combat.PrimaryAmmo + combat.PrimaryReserveMags * combat.primaryMagSize;
+            int totalBullets = combat.PrimaryAmmo + combat.PrimaryReserve;
             // 유탄은 소총탄과 같은 칸에: 장전된 발 / 예비
             primarySmall.text = totalBullets + "   G " + combat.GrenadeLoaded + "/" + combat.GrenadeReserve;
         }
 
         if (secondaryBig != null) secondaryBig.text = combat.SecondaryAmmo.ToString();
-        if (secondarySmall != null) secondarySmall.text = (combat.SecondaryAmmo + combat.SecondaryReserveMags * combat.secondaryMagSize).ToString();
+        if (secondarySmall != null) secondarySmall.text = (combat.SecondaryAmmo + combat.SecondaryReserve).ToString();
     }
 }
