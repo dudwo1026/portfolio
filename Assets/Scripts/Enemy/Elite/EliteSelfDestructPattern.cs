@@ -5,8 +5,9 @@ using UnityEngine;
 // radius it lights up, slows to a crawl over 3s while still closing in, then blows up:
 // a much larger blast than the fuse radius, so walking away only works if you start early.
 //
-// 자폭하기 전에 죽이면 (점화 전이든 후든) 대신 '처치 폭발'이 난다. 플레이어에게는 피해가 없고
+// 도화선이 붙기 전에 죽이면 대신 '처치 폭발'이 난다. 플레이어에게는 피해가 없고
 // 주변 적만 쓸어버리므로, 원거리에서 먼저 잡아내는 것이 손해가 아니라 보상이 된다.
+// 도화선이 붙은 뒤에 죽이면 그 자리에서 바로 자폭한다 (붙어서 잡는다고 피할 수 없다).
 [RequireComponent(typeof(EnemyAI))]
 public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
 {
@@ -27,7 +28,7 @@ public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
     public float confusionDuration = 8f;  // 혼란: 폭발 대미지를 입었을 때만 추가로 부여
 
     [Header("처치 폭발")]
-    // 자폭 전에 죽었을 때 터진다 (점화 여부 무관).
+    // 도화선이 붙기 전(lit == false)에 죽었을 때만 터진다.
     // 플레이어에게는 피해를 주지 않는다 — 이 폭발의 목적은 무리 정리이지 자해가 아니다
     public float deathBlastRadius = 5f;
     public float deathBlastDamage = 100f;
@@ -73,13 +74,14 @@ public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
         if (selfHealth != null) selfHealth.Damaged -= OnDamaged;
     }
 
-    // 점화 뒤에 죽어도 같은 처치 폭발이 난다. 근접 사거리(2.76)는 점화 반경(5)보다 짧아서,
-    // 예전처럼 점화 전에만 터지게 하면 근접으로 잡을 때는 항상 아무 일도 없었다
+    // 점화 전에 죽으면 처치 폭발(적만), 점화 뒤에 죽으면 그 자리에서 바로 자폭한다.
+    // 예전엔 점화 뒤 처치가 아무 일 없이 끝나서, 근접(사거리 2.76 < 점화 반경 5)으로 잡으면 자폭을 공짜로 피했다
     void OnDamaged()
     {
         if (exploded) return;
         if (selfHealth == null || selfHealth.CurrentHealth > 0f) return;
-        DeathBlast();
+        if (lit) Explode();
+        else DeathBlast();
     }
 
     // 조기 처치 폭발. 플레이어만 빼고 반경 안의 모든 체력에 고정 피해를 준다
