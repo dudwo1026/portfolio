@@ -310,6 +310,7 @@ public class BossTotem : MonoBehaviour
         }
 
         if (owner != null) owner.NotifyTotemDestroyed(this);
+        SupplyKit.Spawn(transform.position); // 부순 보상: 보급상자 확정 드랍
         Destroy(gameObject);
     }
 }
