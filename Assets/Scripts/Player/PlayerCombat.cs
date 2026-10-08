@@ -74,12 +74,12 @@ public class PlayerCombat : MonoBehaviour
     [Header("산탄총 (주무기 대안, 1클릭 1발)")]
     public int shotgunPellets = 12;
     public float shotgunSpread = 25f;       // 전방 이 각도(전체 폭) 안에서 탄마다 무작위 방향
-    public float shotgunPelletDamage = 5f;  // 다 맞으면 한 발에 60
+    public float shotgunPelletDamage = 8f;  // 다 맞으면 한 발에 96
     // 0.25가 아니라 0.23인 이유는 권총과 같다: 프레임 단위 판정 손해를 미리 깎아 실효 0.25초
     public float shotgunCooldown = 0.23f;
     public int shotgunMagSize = 8;
     public int shotgunMaxReserve = 120;     // 장전 8 + 예비 = 전체 128
-    public int shotgunSupplyKitRounds = 8;  // 키트 하나 = 탄창 하나. 30발이면 발당 60이라 소총 키트의 약 3배가 된다
+    public int shotgunSupplyKitRounds = 8;  // 키트 하나 = 탄창 하나. 30발이면 발당 96이라 소총 키트의 약 5배가 된다
     public int primaryMaxReserveMags = 11;  // 예비 330발 → 장전 30 + 예비 = 전체 360
     public int secondaryMagSize = 8;   // 권총: 예비탄 무제한, 탄창만 있다
     public float reloadTime = 1f; // 실제로 장전되면 이 시간 동안 원거리 사격 불가 (근접은 가능)
