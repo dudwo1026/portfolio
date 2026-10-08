@@ -10,15 +10,23 @@ public class ConfirmSelector : MonoBehaviour
     public Button[] buttons;          // 왼쪽(위)부터
     public bool vertical = false;
     public int defaultIndex = 1;      // 창이 뜰 때 고른 상태로 둘 버튼
+    // 켜면 처음엔 아무것도 고르지 않은 상태로 뜨고, 방향키를 처음 누를 때 defaultIndex가 골라진다
+    public bool startUnselected = false;
     public float selectedScale = 1.15f;
 
-    int index;
+    int index; // -1 = 아직 아무것도 안 고름
 
     void OnEnable()
     {
+        if (startUnselected) index = -1;
+        else SelectDefault();
+        Apply();
+    }
+
+    void SelectDefault()
+    {
         index = Mathf.Clamp(defaultIndex, 0, buttons.Length - 1);
         if (!buttons[index].interactable) Step(1);
-        Apply();
     }
 
     void Update()
@@ -30,6 +38,11 @@ public class ConfirmSelector : MonoBehaviour
                              : (kb.leftArrowKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame);
         bool next = vertical ? (kb.downArrowKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame)
                              : (kb.rightArrowKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame);
+        if (index < 0)
+        {
+            if (prev || next) { SelectDefault(); Apply(); } // 첫 입력은 고르기만 한다
+            return;
+        }
         if (prev) { Step(-1); Apply(); }
         if (next) { Step(1); Apply(); }
         if ((kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame) && buttons[index].interactable)
