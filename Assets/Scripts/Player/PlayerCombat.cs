@@ -62,6 +62,7 @@ public class PlayerCombat : MonoBehaviour
 
 
     public int primaryMagSize = 30;
+    public int laserMagSize = 60;      // 레이저 탄창 (초당 8발 소모 → 7.5초)
     public int primaryMaxReserveMags = 8;
     public int secondaryMagSize = 10;
     public int secondaryMaxReserveMags = 6;
@@ -88,6 +89,8 @@ public class PlayerCombat : MonoBehaviour
     public int PrimaryReserve => primaryReserve;
     public int SecondaryAmmo => secondaryAmmo;
     public int SecondaryReserve => secondaryReserve;
+    public int PrimaryMagSize => primaryWeapon == PrimaryWeapon.Laser ? laserMagSize : primaryMagSize;
+    // 예비탄은 아직 무기 구분 없이 소총 기준(탄창 수 x 30)으로 같이 쓴다
     int PrimaryMaxReserve => primaryMaxReserveMags * primaryMagSize;
     int SecondaryMaxReserve => secondaryMaxReserveMags * secondaryMagSize;
 
@@ -101,7 +104,7 @@ void Awake()
         bound = GetComponent<PlayerBound>();
         dash = GetComponent<PlayerDash>();
         if (GameSettings.primaryChosen) primaryWeapon = GameSettings.primary;
-        primaryAmmo = primaryMagSize;
+        primaryAmmo = PrimaryMagSize;
         primaryReserve = PrimaryMaxReserve;
         secondaryAmmo = secondaryMagSize;
         secondaryReserve = SecondaryMaxReserve;
@@ -431,7 +434,7 @@ void Reload()
             }
 
             // 남은 탄은 버리지 않는다. 빈 만큼만 예비에서 채운다
-            int take = Mathf.Min(primaryMagSize - primaryAmmo, primaryReserve);
+            int take = Mathf.Min(PrimaryMagSize - primaryAmmo, primaryReserve);
             primaryReserve -= take;
             primaryAmmo += take;
             if (loaded || take > 0) reloadEndTime = Time.time + reloadTime;
@@ -448,7 +451,7 @@ void Reload()
 
 public void RefillAmmo()
     {
-        primaryAmmo = primaryMagSize;
+        primaryAmmo = PrimaryMagSize;
         primaryReserve = PrimaryMaxReserve;
         secondaryAmmo = secondaryMagSize;
         secondaryReserve = SecondaryMaxReserve;
