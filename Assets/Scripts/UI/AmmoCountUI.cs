@@ -24,6 +24,6 @@ public class AmmoCountUI : MonoBehaviour
         }
 
         if (secondaryBig != null) secondaryBig.text = combat.SecondaryAmmo.ToString();
-        if (secondarySmall != null) secondarySmall.text = (combat.SecondaryAmmo + combat.SecondaryReserve).ToString();
+        if (secondarySmall != null) secondarySmall.text = "∞"; // 권총은 예비탄 무제한
     }
 }

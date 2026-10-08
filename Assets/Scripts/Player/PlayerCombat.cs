@@ -22,7 +22,8 @@ public class PlayerCombat : MonoBehaviour
     // 총알 사거리 = bulletSpeed * bulletLifeTime. 탄속을 30으로 올렸으므로
     // 사거리를 예전과 같은 60으로 유지하려면 수명은 2초여야 한다 (30 * 2 = 60)
     public float bulletLifeTime = 2f;
-    public float bulletDamage = 20f;
+    public float bulletDamage = 20f;  // 소총
+    public float pistolDamage = 40f;  // 권총
     public float meleeDamage = 50f;
     public float meleeKnockbackForce = 4f;
     public float meleeKnockbackDuration = 0.5f;
@@ -70,8 +71,7 @@ public class PlayerCombat : MonoBehaviour
     public int laserMaxReserve = 300;  // 레이저 예비탄 → 장전 60 + 예비 = 전체 360
     public int supplyKitPrimaryRounds = 30; // 보급키트 하나가 채우는 주무기 예비탄 (소총·레이저 공통)
     public int primaryMaxReserveMags = 11;  // 예비 330발 → 장전 30 + 예비 = 전체 360
-    public int secondaryMagSize = 10;
-    public int secondaryMaxReserveMags = 6;
+    public int secondaryMagSize = 8;   // 권총: 예비탄 무제한, 탄창만 있다
     public float reloadTime = 1f; // 실제로 장전되면 이 시간 동안 원거리 사격 불가 (근접은 가능)
     float reloadEndTime;
 
@@ -85,7 +85,6 @@ public class PlayerCombat : MonoBehaviour
     int primaryAmmo;
     int primaryReserve;   // 예비 탄 (발 단위). 장전은 빈 만큼만 여기서 빼 온다
     int secondaryAmmo;
-    int secondaryReserve;
 
     // 원거리 무기를 마지막으로 발사한 시각. 공격 모션 재생용 (근접은 포함하지 않는다)
     public float LastRangedFireTime { get; private set; } = -999f;
@@ -94,10 +93,8 @@ public class PlayerCombat : MonoBehaviour
     public int PrimaryAmmo => primaryAmmo;
     public int PrimaryReserve => primaryReserve;
     public int SecondaryAmmo => secondaryAmmo;
-    public int SecondaryReserve => secondaryReserve;
     public int PrimaryMagSize => primaryWeapon == PrimaryWeapon.Laser ? laserMagSize : primaryMagSize;
     int PrimaryMaxReserve => primaryWeapon == PrimaryWeapon.Laser ? laserMaxReserve : primaryMaxReserveMags * primaryMagSize;
-    int SecondaryMaxReserve => secondaryMaxReserveMags * secondaryMagSize;
 
     TopDownMove mover;
     PlayerBound bound;
@@ -112,7 +109,6 @@ void Awake()
         primaryAmmo = PrimaryMagSize;
         primaryReserve = PrimaryMaxReserve;
         secondaryAmmo = secondaryMagSize;
-        secondaryReserve = SecondaryMaxReserve;
 
         // 탄약처럼 유탄도 시작할 때 채운다. 씬에 남은 값이 0이면 첫 발이 안 나가버린다
         grenadeLoaded = 1;
@@ -319,7 +315,7 @@ void Fire()
             secondaryAmmo--;
         }
 
-        SpawnBullet();
+        SpawnBullet(currentSlot == WeaponSlot.Primary ? bulletDamage : pistolDamage);
         LastRangedFireTime = Time.time; // 공격 모션이 이 시각을 보고 자세를 바꾼다
         EnemyAI.AlertGunshot(transform.position, gunshotAlertRadius); // 총성에 어그로가 끌린다 (근접은 제외)
         float rate = currentSlot == WeaponSlot.Primary ? (1f / primaryFireRate) : secondaryFireCooldown;
@@ -353,7 +349,7 @@ void Fire()
         EnemyAI.AlertGunshot(transform.position, gunshotAlertRadius); // 유탄도 시끄럽다
     }
 
-    void SpawnBullet()
+    void SpawnBullet(float damage)
     {
         GameObject bullet = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         bullet.name = "Bullet";
@@ -370,7 +366,7 @@ void Fire()
 
         Bullet b = bullet.AddComponent<Bullet>();
         b.lifeTime = bulletLifeTime;
-        b.damage = bulletDamage;
+        b.damage = damage;
         b.impactVfx = bulletImpactVfx;
         b.vfxScale = bulletImpactVfxScale;
 
@@ -453,8 +449,7 @@ void Reload()
         }
         else if (currentSlot == WeaponSlot.Secondary)
         {
-            int take = Mathf.Min(secondaryMagSize - secondaryAmmo, secondaryReserve);
-            secondaryReserve -= take;
+            int take = secondaryMagSize - secondaryAmmo; // 예비탄 무제한
             secondaryAmmo += take;
             if (take > 0) reloadEndTime = Time.time + reloadTime; // 꽉 찬 상태에서 R은 아무 일도 없다
         }
@@ -474,17 +469,15 @@ public void RefillAmmo()
         primaryAmmo = PrimaryMagSize;
         primaryReserve = PrimaryMaxReserve;
         secondaryAmmo = secondaryMagSize;
-        secondaryReserve = SecondaryMaxReserve;
 
         grenadeLoaded = 1;                     // 유탄도 가득 채운다 (장전 1 + 예비)
         grenadeReserve = grenadeMaxReserve;
     }
 
-    // 보급키트: 주무기 예비탄 supplyKitPrimaryRounds발, 보조무기 탄창 하나 분량 (유탄 제외).
+    // 보급키트: 주무기 예비탄 supplyKitPrimaryRounds발 (유탄 제외, 권총은 예비탄 무제한이라 해당 없음).
     // 주무기는 무기와 상관없이 같은 발수다. 레이저 탄창(60)만큼 주면 소총의 약 2배 가치가 된다
     public void AddMagazine()
     {
         primaryReserve = Mathf.Min(primaryReserve + supplyKitPrimaryRounds, PrimaryMaxReserve);
-        secondaryReserve = Mathf.Min(secondaryReserve + secondaryMagSize, SecondaryMaxReserve);
     }
 }
