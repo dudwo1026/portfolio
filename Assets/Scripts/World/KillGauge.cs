@@ -53,7 +53,7 @@ public class KillGauge : MonoBehaviour
     public bool EliteHunt { get { return Value >= eliteHuntAt; } }
 
     bool wasFull;
-    bool spawnsPaused;   // ] 키 상태
+    bool spawnsPaused;   // [ 키 상태
     float clearTimer;
     readonly System.Collections.Generic.List<EnemySpawner> pausedByMe = new System.Collections.Generic.List<EnemySpawner>();
 
@@ -121,7 +121,8 @@ public class KillGauge : MonoBehaviour
     // 테스트용 키. 게임 로직이 아니므로 Update 본문과 섞지 않고 여기에 모아 둔다
     //   0 : 게이지를 가득 채운다
     //   / : 게이지를 debugAddAmount(기본 100)만큼 올린다 (숫자패드 / 도 동일)
-    //   ] : 스폰을 멈추고 살아있는 몹을 지운다 / 다시 누르면 재개 (맵을 둘러볼 때)
+    //   [ : 스폰을 멈추고 살아있는 몹을 지운다 / 다시 누르면 재개 (맵을 둘러볼 때)
+    //   ] : 주무기 돌격소총 ↔ 레이저 전환 (임시)
     //   숫자패드 1~6 : 정예 a~f를 플레이어 남쪽 10유닛에 소환 (패턴을 하나씩 확인할 때)
     //   ' : 게이지를 채우고 열쇠를 전부 모은 것으로 처리해 포탈을 바로 연다
     void HandleDebugKeys()
@@ -133,7 +134,16 @@ public class KillGauge : MonoBehaviour
 
         if (kb.digit0Key.wasPressedThisFrame) Add(maxValue);
         if (kb.slashKey.wasPressedThisFrame || kb.numpadDivideKey.wasPressedThisFrame) Add(debugAddAmount);
-        if (kb.rightBracketKey.wasPressedThisFrame) ToggleSpawns();
+        if (kb.leftBracketKey.wasPressedThisFrame) ToggleSpawns();
+        if (kb.rightBracketKey.wasPressedThisFrame)
+        {
+            PlayerCombat pc = FindFirstObjectByType<PlayerCombat>();
+            if (pc != null)
+            {
+                pc.primaryWeapon = pc.primaryWeapon == PrimaryWeapon.Rifle ? PrimaryWeapon.Laser : PrimaryWeapon.Rifle;
+                Debug.Log("[Debug] 주무기: " + pc.primaryWeapon);
+            }
+        }
         if (kb.quoteKey.wasPressedThisFrame)
         {
             Add(maxValue); // 포탈은 게이지 가득 + 열쇠 전부가 조건이다
