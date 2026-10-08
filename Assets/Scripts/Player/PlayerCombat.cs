@@ -73,7 +73,7 @@ public class PlayerCombat : MonoBehaviour
 
     [Header("산탄총 (주무기 대안, 1클릭 1발)")]
     public int shotgunPellets = 12;
-    public float shotgunSpread = 30f;       // 전방 이 각도(전체 폭) 안에서 탄마다 무작위 방향
+    public float shotgunSpread = 25f;       // 전방 이 각도(전체 폭) 안에서 탄마다 무작위 방향
     public float shotgunPelletDamage = 5f;  // 다 맞으면 한 발에 60
     // 0.25가 아니라 0.23인 이유는 권총과 같다: 프레임 단위 판정 손해를 미리 깎아 실효 0.25초
     public float shotgunCooldown = 0.23f;
