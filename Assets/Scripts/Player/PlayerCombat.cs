@@ -7,6 +7,8 @@ public class PlayerCombat : MonoBehaviour
 {
     public WeaponSlot currentSlot = WeaponSlot.Primary;
 
+    public PrimaryWeapon primaryWeapon = PrimaryWeapon.Rifle; // 타이틀에서 고르면 그 값으로 덮인다
+
     public float primaryFireRate = 8f;
     // 0.25가 아니라 0.23인 이유: 발사 판정이 프레임 단위라 쿨다운이 프레임 중간에 풀려도
     // 다음 프레임에야 쏜다. 그 손해(60fps에서 최대 16ms)를 미리 깎아 실효 4발/초를 맞춘 값
@@ -39,6 +41,16 @@ public class PlayerCombat : MonoBehaviour
     public float grenadeCooldown = 1f;
     public GameObject grenadeExplosionVfx;   // CFXR2 WW Explosion 프리팹
     public float grenadeExplosionVfxScale = 3.33f; // 반경 3에서 2였던 걸 반경 5에 맞춰 같은 비율로
+
+    [Header("레이저 (주무기 대안, 좌클릭 홀드)")]
+    // 소총 순간 DPS(20 x 8발 = 160)의 1.2배. 탄은 소총과 같은 탄창을 같은 속도(초당 primaryFireRate발)로 쓴다
+    public float laserDps = 192f;
+    public float laserRange = 60f;      // 소총 사거리(탄속 45 x 수명 1.33)와 같게
+    public float laserRadius = 0.3f;    // 판정 굵기 (반지름)
+    public float laserWidth = 0.45f;    // 보이는 굵기 (밝은 바닥에서도 보이게)
+    public Color laserColor = new Color(0.1f, 0.55f, 1f, 1f);
+    LineRenderer laserLine;
+    float laserTick; // 다음 탄 소모·피해까지 남은 시간. 떼었다 눌러도 줄지 않아 연타로 DPS를 올릴 수 없다
 
     public int GrenadeLoaded => grenadeLoaded;
     public int GrenadeReserve => grenadeReserve;
@@ -84,6 +96,7 @@ void Awake()
         mover = GetComponent<TopDownMove>();
         bound = GetComponent<PlayerBound>();
         dash = GetComponent<PlayerDash>();
+        if (GameSettings.primaryChosen) primaryWeapon = GameSettings.primary;
         primaryAmmo = primaryMagSize;
         primaryReserve = PrimaryMaxReserve;
         secondaryAmmo = secondaryMagSize;
@@ -121,8 +134,16 @@ void Awake()
         else if (mover != null && mover.MoveDirection.sqrMagnitude > 0.0001f)
             transform.rotation = Quaternion.LookRotation(mover.MoveDirection);
 
+        laserTick = Mathf.Max(0f, laserTick - Time.deltaTime);
+        bool laserMode = currentSlot == WeaponSlot.Primary && primaryWeapon == PrimaryWeapon.Laser;
+        UpdateLaser(laserMode && mouse.leftButton.isPressed);
+
         bool firePressed;
-        if (currentSlot == WeaponSlot.Primary)
+        if (laserMode)
+        {
+            firePressed = false; // 레이저는 UpdateLaser가 맡는다
+        }
+        else if (currentSlot == WeaponSlot.Primary)
         {
             firePressed = mouse.leftButton.isPressed; // 주무기는 꾹 누르면 연사
         }
@@ -149,6 +170,74 @@ void Awake()
         // 유탄발사기는 주무기에 달려 있다: 주무기를 들고 휠 클릭
         if (mouse.middleButton.wasPressedThisFrame && Time.time >= nextGrenadeTime)
             FireGrenade();
+    }
+
+    // 레이저: 누르고 있는 동안 정면으로 한 줄기. 적은 관통하고 건물·장애물에서 끊긴다.
+    // 탄은 소총과 같은 탄창을 1/primaryFireRate초마다 1발씩 쓰고, 그때마다 그 사이 분량의 피해를 준다
+    void UpdateLaser(bool held)
+    {
+        bool canFire = held && primaryAmmo > 0 && Time.time >= reloadEndTime
+                       && !(dash != null && dash.IsDashing) && !(bound != null && bound.IsActive);
+        if (!canFire) { if (laserLine != null) laserLine.enabled = false; return; }
+
+        Vector3 origin = transform.position + transform.forward * 0.8f; // 총알과 같은 총구
+        Vector3 dir = transform.forward;
+        float length = LaserLength(origin, dir);
+
+        if (laserLine == null) laserLine = BuildLaserLine();
+        laserLine.enabled = true;
+        laserLine.SetPosition(0, origin);
+        laserLine.SetPosition(1, origin + dir * length);
+        LastRangedFireTime = Time.time; // 공격 모션 유지
+
+        if (laserTick > 0f) return;
+        laserTick += 1f / primaryFireRate;
+        primaryAmmo--;
+        DamageAlongLaser(origin, dir, length, laserDps / primaryFireRate);
+        EnemyAI.AlertGunshot(transform.position, gunshotAlertRadius);
+    }
+
+    // 정면으로 가장 먼저 막는 건물·장애물까지의 거리. 적과 플레이어 자신은 막지 않는다
+    float LaserLength(Vector3 origin, Vector3 dir)
+    {
+        float best = laserRange;
+        RaycastHit[] hits = Physics.RaycastAll(origin, dir, laserRange, ~0, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            if (hits[i].collider.transform.IsChildOf(transform)) continue;
+            if (hits[i].collider.GetComponentInParent<EnemyAI>() != null) continue;
+            if (hits[i].distance < best) best = hits[i].distance;
+        }
+        return best;
+    }
+
+    void DamageAlongLaser(Vector3 origin, Vector3 dir, float length, float damage)
+    {
+        RaycastHit[] hits = Physics.SphereCastAll(origin, laserRadius, dir, length, ~0, QueryTriggerInteraction.Ignore);
+        var struck = new System.Collections.Generic.HashSet<Health>(); // 콜라이더가 여럿인 적이 두 번 맞지 않게
+        for (int i = 0; i < hits.Length; i++)
+        {
+            if (hits[i].collider.GetComponentInParent<EnemyAI>() == null) continue;
+            Health h = hits[i].collider.GetComponentInParent<Health>();
+            if (h != null && struck.Add(h)) h.TakeDamage(damage);
+        }
+    }
+
+    LineRenderer BuildLaserLine()
+    {
+        GameObject go = new GameObject("LaserBeam");
+        go.transform.SetParent(transform, false);
+        LineRenderer lr = go.AddComponent<LineRenderer>();
+        lr.positionCount = 2;
+        lr.useWorldSpace = true;
+        lr.startWidth = laserWidth;
+        lr.endWidth = laserWidth * 0.7f;
+        lr.material = new Material(Shader.Find("Sprites/Default")); // 조명 없이 색 그대로
+        lr.startColor = laserColor;
+        lr.endColor = new Color(laserColor.r, laserColor.g, laserColor.b, laserColor.a * 0.6f);
+        lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        lr.receiveShadows = false;
+        return lr;
     }
 
     void AimAtMouse(Mouse mouse)

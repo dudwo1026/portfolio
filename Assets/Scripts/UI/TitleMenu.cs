@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 // 타이틀 화면 메뉴. 지금은 새 게임과 종료만 동작한다.
-// 새 게임 → 무기 선택 → 게임 시작. 무기는 아직 돌격소총 하나라 고른 값을 넘기지 않는다
+// 새 게임 → 무기 선택 → 게임 시작. 고른 무기는 GameSettings에 담아 게임 씬으로 넘긴다
 public class TitleMenu : MonoBehaviour
 {
     public string gameSceneName = "SampleScene";
@@ -14,6 +14,16 @@ public class TitleMenu : MonoBehaviour
         if (weaponSelectPanel == null) { StartGame(); return; }
         if (menu != null) menu.SetActive(false);
         weaponSelectPanel.SetActive(true);
+    }
+
+    public void StartRifle() { StartWith(PrimaryWeapon.Rifle); }
+    public void StartLaser() { StartWith(PrimaryWeapon.Laser); }
+
+    void StartWith(PrimaryWeapon weapon)
+    {
+        GameSettings.primary = weapon;
+        GameSettings.primaryChosen = true;
+        StartGame();
     }
 
     public void StartGame()

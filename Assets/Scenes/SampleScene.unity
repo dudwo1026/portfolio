@@ -32253,6 +32253,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
   currentSlot: 0
+  primaryWeapon: 0
   primaryFireRate: 8
   secondaryFireCooldown: 0.23
   meleeCooldown: 0.5
@@ -32277,6 +32278,11 @@ MonoBehaviour:
   grenadeCooldown: 1
   grenadeExplosionVfx: {fileID: 4593184484909914552, guid: 2e1e9506f5904a64b81744324fb7cd50, type: 3}
   grenadeExplosionVfxScale: 3.33
+  laserDps: 192
+  laserRange: 60
+  laserRadius: 0.3
+  laserWidth: 0.45
+  laserColor: {r: 0.1, g: 0.55, b: 1, a: 1}
   primaryMagSize: 30
   primaryMaxReserveMags: 11
   secondaryMagSize: 10
