@@ -49,8 +49,8 @@ public class PlayerCombat : MonoBehaviour
     public float laserRadius = 0.3f;    // 판정 굵기 (반지름)
     public float laserWidth = 0.45f;    // 보이는 굵기 (밝은 바닥에서도 보이게)
     public Color laserColor = new Color(0.1f, 0.55f, 1f, 1f);
-    public float laserPierceFalloff = 0.1f; // 적을 하나 뚫을 때마다 다음 적이 받는 피해가 이만큼(비율) 준다
-    public float laserMinDamageRatio = 0.3f; // 그래도 이 아래로는 안 내려간다
+    public float laserPierceFalloff = 0.15f; // 적을 하나 뚫을 때마다 다음 적이 받는 피해가 이만큼(비율) 준다
+    public float laserMinDamageRatio = 0.1f; // 그래도 이 아래로는 안 내려간다
     LineRenderer laserLine;
     float laserTick; // 다음 탄 소모·피해까지 남은 시간. 떼었다 눌러도 줄지 않아 연타로 DPS를 올릴 수 없다
     // 계속 쏜 시간(초)에 따른 피해 배율: 0~1초 50%, 1~2초 80%, 2초부터 100%.
@@ -246,7 +246,7 @@ void Awake()
             if (hits[i].collider.GetComponentInParent<EnemyAI>() == null) continue;
             Health h = hits[i].collider.GetComponentInParent<Health>();
             if (h == null || !struck.Add(h)) continue;
-            // 첫 적 100%, 둘째 90%, ... 여덟째부터 30%
+            // 첫 적 100%, 둘째 85%, 셋째 70%, ... 일곱째부터 10%
             float ratio = Mathf.Max(laserMinDamageRatio, 1f - laserPierceFalloff * (struck.Count - 1));
             h.TakeDamage(damage * ratio);
         }
