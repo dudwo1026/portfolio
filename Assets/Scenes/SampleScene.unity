@@ -32297,6 +32297,7 @@ MonoBehaviour:
   primaryMaxReserveMags: 11
   secondaryMagSize: 8
   reloadTime: 1
+  secondaryReloadTime: 0.7
 --- !u!114 &1878695942
 MonoBehaviour:
   m_ObjectHideFlags: 0
