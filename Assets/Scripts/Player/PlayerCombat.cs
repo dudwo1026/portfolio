@@ -49,8 +49,12 @@ public class PlayerCombat : MonoBehaviour
     public float laserRadius = 0.3f;    // 판정 굵기 (반지름)
     public float laserWidth = 0.45f;    // 보이는 굵기 (밝은 바닥에서도 보이게)
     public Color laserColor = new Color(0.1f, 0.55f, 1f, 1f);
+    public float laserPierceFalloff = 0.1f; // 적을 하나 뚫을 때마다 다음 적이 받는 피해가 이만큼(비율) 준다
+    public float laserMinDamageRatio = 0.3f; // 그래도 이 아래로는 안 내려간다
     LineRenderer laserLine;
     float laserTick; // 다음 탄 소모·피해까지 남은 시간. 떼었다 눌러도 줄지 않아 연타로 DPS를 올릴 수 없다
+    bool laserFiring;
+    Vector3 laserDir; // 쏘기 시작한 순간의 방향. 떼기 전까지 이 방향으로만 나간다
 
     public int GrenadeLoaded => grenadeLoaded;
     public int GrenadeReserve => grenadeReserve;
@@ -129,7 +133,8 @@ void Awake()
         Mouse mouse = Mouse.current;
         if (mouse == null) return;
 
-        if (mouse.rightButton.isPressed)
+        if (laserFiring) { } // 레이저를 쏘는 동안은 처음 방향을 유지한다 (이동은 된다)
+        else if (mouse.rightButton.isPressed)
             AimAtMouse(mouse);
         else if (mover != null && mover.MoveDirection.sqrMagnitude > 0.0001f)
             transform.rotation = Quaternion.LookRotation(mover.MoveDirection);
@@ -178,10 +183,16 @@ void Awake()
     {
         bool canFire = held && primaryAmmo > 0 && Time.time >= reloadEndTime
                        && !(dash != null && dash.IsDashing) && !(bound != null && bound.IsActive);
-        if (!canFire) { if (laserLine != null) laserLine.enabled = false; return; }
+        if (!canFire)
+        {
+            laserFiring = false;
+            if (laserLine != null) laserLine.enabled = false;
+            return;
+        }
+        if (!laserFiring) { laserFiring = true; laserDir = transform.forward; } // 쏘기 시작 = 방향 고정
 
-        Vector3 origin = transform.position + transform.forward * 0.8f; // 총알과 같은 총구
-        Vector3 dir = transform.forward;
+        Vector3 dir = laserDir;
+        Vector3 origin = transform.position + dir * 0.8f; // 총알과 같은 총구
         float length = LaserLength(origin, dir);
 
         if (laserLine == null) laserLine = BuildLaserLine();
@@ -214,12 +225,16 @@ void Awake()
     void DamageAlongLaser(Vector3 origin, Vector3 dir, float length, float damage)
     {
         RaycastHit[] hits = Physics.SphereCastAll(origin, laserRadius, dir, length, ~0, QueryTriggerInteraction.Ignore);
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance)); // 가까운 적부터 뚫는다
         var struck = new System.Collections.Generic.HashSet<Health>(); // 콜라이더가 여럿인 적이 두 번 맞지 않게
         for (int i = 0; i < hits.Length; i++)
         {
             if (hits[i].collider.GetComponentInParent<EnemyAI>() == null) continue;
             Health h = hits[i].collider.GetComponentInParent<Health>();
-            if (h != null && struck.Add(h)) h.TakeDamage(damage);
+            if (h == null || !struck.Add(h)) continue;
+            // 첫 적 100%, 둘째 90%, ... 여덟째부터 30%
+            float ratio = Mathf.Max(laserMinDamageRatio, 1f - laserPierceFalloff * (struck.Count - 1));
+            h.TakeDamage(damage * ratio);
         }
     }
 
