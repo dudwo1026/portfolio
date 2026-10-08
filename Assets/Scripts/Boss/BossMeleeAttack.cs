@@ -105,7 +105,7 @@ public class BossMeleeAttack : MonoBehaviour
 
     float GroundY()
     {
-        return rend != null ? rend.bounds.min.y : transform.position.y;
+        return BossGround.Y(transform.position, rend != null ? rend.bounds.min.y : transform.position.y);
     }
 
     void SpawnWarning()

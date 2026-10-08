@@ -282,10 +282,7 @@ public class BossLaserPattern : MonoBehaviour
 
     float FindGroundY()
     {
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, 60f, ~0, QueryTriggerInteraction.Ignore))
-            return hit.point.y;
-        return transform.position.y;
+        return BossGround.Y(transform.position, transform.position.y);
     }
 
     void DamageInBeam(Vector3 dir, float length)

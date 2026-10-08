@@ -145,10 +145,7 @@ public class BossMeteorPattern : MonoBehaviour
 
     float FindGroundY(Vector3 point)
     {
-        RaycastHit hit;
-        if (Physics.Raycast(point + Vector3.up * 3f, Vector3.down, out hit, 60f, ~0, QueryTriggerInteraction.Ignore))
-            return hit.point.y;
-        return point.y;
+        return BossGround.Y(point, point.y); // 플레이어·토템·장애물 위가 아니라 그 밑 바닥
     }
 
     GameObject MakeDisc(string name, Vector3 pos, float diameter, float thickness, Color color)

@@ -126,8 +126,9 @@ public class BossGuardPattern : MonoBehaviour
             Vector3 dir = Quaternion.Euler(0f, a, 0f) * BaseDirection;
 
             Vector3 pos = transform.position + dir.normalized * totemDistance;
-            pos.y = groundY + totemSize.y * 0.5f;
-            totems.Add(BossTotem.Spawn(this, pos, totemSize, totemColor, totemMeleeHits, groundY));
+            float y = BossGround.Y(pos, groundY); // 토템 자리의 바닥 (다른 소환물·몹 위에 올라서지 않게)
+            pos.y = y + totemSize.y * 0.5f;
+            totems.Add(BossTotem.Spawn(this, pos, totemSize, totemColor, totemMeleeHits, y));
         }
 
         nextCastTime = float.PositiveInfinity; // 서 있는 동안에는 재발동 타이머를 돌리지 않는다

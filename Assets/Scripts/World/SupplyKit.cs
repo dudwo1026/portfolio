@@ -45,17 +45,8 @@ public class SupplyKit : MonoBehaviour
     void Place(Vector3 deathPosition)
     {
         // 몹이 죽은 자리 바로 아래 지면을 찾아 그 위에 띄운다.
-        // Destroy는 프레임 끝에 처리되므로 죽는 중인 몹의 콜라이더가 아직 살아 있다 — 몹은 건너뛴다
-        float groundY = deathPosition.y;
-        RaycastHit[] hits = Physics.RaycastAll(deathPosition + Vector3.up * 2f, Vector3.down, 30f, ~0, QueryTriggerInteraction.Ignore);
-        float best = float.NegativeInfinity;
-        for (int i = 0; i < hits.Length; i++)
-        {
-            if (hits[i].collider.GetComponentInParent<EnemyAI>() != null) continue;
-            if (hits[i].point.y > deathPosition.y + 0.5f) continue; // 머리 위에 걸린 것은 지면이 아니다
-            if (hits[i].point.y > best) best = hits[i].point.y;
-        }
-        if (best > float.NegativeInfinity) groundY = best;
+        // 죽는 중인 몹(Destroy는 프레임 끝), 플레이어, 보스 토템·장애물 위에는 올라서지 않는다
+        float groundY = BossGround.Y(deathPosition, deathPosition.y);
 
         baseY = groundY + hoverHeight;
         bobPhase = Random.Range(0f, Mathf.PI * 2f); // 여러 개가 같이 떠도 따로 놀게
