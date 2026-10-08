@@ -460,6 +460,13 @@ void Reload()
     }
 
 
+// 주무기를 바꾸고 그 무기 탄창으로 새로 채운다 (테스트 키 ]). 예비탄은 그대로
+    public void SetPrimaryWeapon(PrimaryWeapon weapon)
+    {
+        primaryWeapon = weapon;
+        primaryAmmo = PrimaryMagSize;
+    }
+
 public void RefillAmmo()
     {
         primaryAmmo = PrimaryMagSize;

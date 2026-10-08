@@ -140,7 +140,7 @@ public class KillGauge : MonoBehaviour
             PlayerCombat pc = FindFirstObjectByType<PlayerCombat>();
             if (pc != null)
             {
-                pc.primaryWeapon = pc.primaryWeapon == PrimaryWeapon.Rifle ? PrimaryWeapon.Laser : PrimaryWeapon.Rifle;
+                pc.SetPrimaryWeapon(pc.primaryWeapon == PrimaryWeapon.Rifle ? PrimaryWeapon.Laser : PrimaryWeapon.Rifle);
                 Debug.Log("[Debug] 주무기: " + pc.primaryWeapon);
             }
         }
