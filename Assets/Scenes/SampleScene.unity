@@ -32294,6 +32294,13 @@ MonoBehaviour:
   laserMagSize: 60
   laserMaxReserve: 300
   supplyKitPrimaryRounds: 30
+  shotgunPellets: 12
+  shotgunSpread: 30
+  shotgunPelletDamage: 5
+  shotgunCooldown: 0.23
+  shotgunMagSize: 8
+  shotgunMaxReserve: 120
+  shotgunSupplyKitRounds: 8
   primaryMaxReserveMags: 11
   secondaryMagSize: 8
   reloadTime: 1

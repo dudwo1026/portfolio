@@ -78,7 +78,7 @@ public class PlayerCombat : MonoBehaviour
     // 0.25가 아니라 0.23인 이유는 권총과 같다: 프레임 단위 판정 손해를 미리 깎아 실효 0.25초
     public float shotgunCooldown = 0.23f;
     public int shotgunMagSize = 8;
-    public int shotgunMaxReserve = 88;      // 장전 8 + 예비 = 전체 96
+    public int shotgunMaxReserve = 120;     // 장전 8 + 예비 = 전체 128
     public int shotgunSupplyKitRounds = 8;  // 키트 하나 = 탄창 하나. 30발이면 발당 60이라 소총 키트의 약 3배가 된다
     public int primaryMaxReserveMags = 11;  // 예비 330발 → 장전 30 + 예비 = 전체 360
     public int secondaryMagSize = 8;   // 권총: 예비탄 무제한, 탄창만 있다
