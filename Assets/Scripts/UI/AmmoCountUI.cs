@@ -17,8 +17,10 @@ public class AmmoCountUI : MonoBehaviour
         if (primarySmall != null)
         {
             int totalBullets = combat.PrimaryAmmo + combat.PrimaryReserve;
-            // 유탄은 소총탄과 같은 칸에: 장전된 발 / 예비
-            primarySmall.text = totalBullets + "   G " + combat.GrenadeLoaded + "/" + combat.GrenadeReserve;
+            // 유탄은 소총탄과 같은 칸에: 장전된 발 / 예비. 레이저는 유탄이 없으니 숨긴다
+            primarySmall.text = combat.primaryWeapon == PrimaryWeapon.Laser
+                ? totalBullets.ToString()
+                : totalBullets + "   G " + combat.GrenadeLoaded + "/" + combat.GrenadeReserve;
         }
 
         if (secondaryBig != null) secondaryBig.text = combat.SecondaryAmmo.ToString();

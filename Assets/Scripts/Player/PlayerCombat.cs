@@ -314,6 +314,7 @@ void Fire()
     void FireGrenade()
     {
         if (currentSlot != WeaponSlot.Primary) return;      // 주무기 장착 중에만
+        if (primaryWeapon == PrimaryWeapon.Laser) return;    // 유탄발사기는 돌격소총에만 달려 있다
         if (dash != null && dash.IsDashing) return;          // 대시 중에는 공격 불가
         if (bound != null && bound.IsActive) return;         // 구속 중에는 원거리 불가
         if (grenadeLoaded <= 0) return; // 비었으면 R로 재장전해야 한다
