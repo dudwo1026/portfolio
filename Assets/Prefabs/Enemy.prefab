@@ -29,8 +29,8 @@ Transform:
   m_GameObject: {fileID: 1903466886737597495}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.103785045, y: 0.1233871, z: 0.10378503}
-  m_LocalScale: {x: 2.0548387, y: 2.2693548, z: 1}
+  m_LocalPosition: {x: -0.13492055, y: 0.4604032, z: 0.13492054}
+  m_LocalScale: {x: 2.6712902, y: 2.9501612, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2592540432156057973}
@@ -193,10 +193,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
+  m_Radius: 0.65
+  m_Height: 2.6
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0.29999995, z: 0}
 --- !u!23 &5542468624351243936
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -321,11 +321,14 @@ MonoBehaviour:
   pathClearRadius: 0.45
   navSampleRadius: 4
   recognitionRadius: 15
+  gunshotHearing: 0
   visionAngle: 180
   attackDamage: 10
   attackCooldown: 2
   attackWindup: 0.5
   attackRange: 1.8
+  keepMinDistance: 0
+  keepMaxDistance: 0
   loseTargetGraceTime: 5
   persistentAggro: 0
   isElite: 0
