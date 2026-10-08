@@ -67,6 +67,7 @@ public class PlayerCombat : MonoBehaviour
 
     public int primaryMagSize = 30;
     public int laserMagSize = 60;      // 레이저 탄창 (초당 8발 소모 → 7.5초)
+    public int laserMaxReserve = 300;  // 레이저 예비탄 → 장전 60 + 예비 = 전체 360
     public int primaryMaxReserveMags = 11;  // 예비 330발 → 장전 30 + 예비 = 전체 360
     public int secondaryMagSize = 10;
     public int secondaryMaxReserveMags = 6;
@@ -94,8 +95,7 @@ public class PlayerCombat : MonoBehaviour
     public int SecondaryAmmo => secondaryAmmo;
     public int SecondaryReserve => secondaryReserve;
     public int PrimaryMagSize => primaryWeapon == PrimaryWeapon.Laser ? laserMagSize : primaryMagSize;
-    // 예비탄은 아직 무기 구분 없이 소총 기준(탄창 수 x 30)으로 같이 쓴다
-    int PrimaryMaxReserve => primaryMaxReserveMags * primaryMagSize;
+    int PrimaryMaxReserve => primaryWeapon == PrimaryWeapon.Laser ? laserMaxReserve : primaryMaxReserveMags * primaryMagSize;
     int SecondaryMaxReserve => secondaryMaxReserveMags * secondaryMagSize;
 
     TopDownMove mover;
@@ -460,11 +460,12 @@ void Reload()
     }
 
 
-// 주무기를 바꾸고 그 무기 탄창으로 새로 채운다 (테스트 키 ]). 예비탄은 그대로
+// 주무기를 바꾸고 그 무기의 장전·예비탄으로 새로 채운다 (테스트 키 ])
     public void SetPrimaryWeapon(PrimaryWeapon weapon)
     {
         primaryWeapon = weapon;
         primaryAmmo = PrimaryMagSize;
+        primaryReserve = PrimaryMaxReserve;
     }
 
 public void RefillAmmo()
@@ -481,7 +482,7 @@ public void RefillAmmo()
     // 보급키트: 주무기/보조무기 예비탄을 탄창 하나 분량씩 채운다 (유탄 제외)
     public void AddMagazine()
     {
-        primaryReserve = Mathf.Min(primaryReserve + primaryMagSize, PrimaryMaxReserve);
+        primaryReserve = Mathf.Min(primaryReserve + PrimaryMagSize, PrimaryMaxReserve);
         secondaryReserve = Mathf.Min(secondaryReserve + secondaryMagSize, SecondaryMaxReserve);
     }
 }
