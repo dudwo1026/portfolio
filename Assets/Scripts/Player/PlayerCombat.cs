@@ -53,7 +53,11 @@ public class PlayerCombat : MonoBehaviour
     public float laserMinDamageRatio = 0.3f; // 그래도 이 아래로는 안 내려간다
     LineRenderer laserLine;
     float laserTick; // 다음 탄 소모·피해까지 남은 시간. 떼었다 눌러도 줄지 않아 연타로 DPS를 올릴 수 없다
+    // 계속 쏜 시간(초)에 따른 피해 배율: 0~1초 50%, 1~2초 80%, 2초부터 100%.
+    // 떼거나 장전·대시 등으로 끊기면 처음(50%)부터 다시
+    public float[] laserRampBySecond = { 0.5f, 0.8f, 1f };
     bool laserFiring;
+    float laserStartTime;
     Vector3 laserDir; // 쏘기 시작한 순간의 방향. 떼기 전까지 이 방향으로만 나간다
 
     public int GrenadeLoaded => grenadeLoaded;
@@ -192,7 +196,7 @@ void Awake()
             if (laserLine != null) laserLine.enabled = false;
             return;
         }
-        if (!laserFiring) { laserFiring = true; laserDir = transform.forward; } // 쏘기 시작 = 방향 고정
+        if (!laserFiring) { laserFiring = true; laserDir = transform.forward; laserStartTime = Time.time; } // 쏘기 시작 = 방향 고정
 
         Vector3 dir = laserDir;
         Vector3 origin = transform.position + dir * 0.8f; // 총알과 같은 총구
@@ -207,8 +211,15 @@ void Awake()
         if (laserTick > 0f) return;
         laserTick += 1f / primaryFireRate;
         primaryAmmo--;
-        DamageAlongLaser(origin, dir, length, laserDps / primaryFireRate);
+        DamageAlongLaser(origin, dir, length, laserDps / primaryFireRate * LaserRamp());
         EnemyAI.AlertGunshot(transform.position, gunshotAlertRadius);
+    }
+
+    float LaserRamp()
+    {
+        if (laserRampBySecond == null || laserRampBySecond.Length == 0) return 1f;
+        int i = Mathf.Clamp(Mathf.FloorToInt(Time.time - laserStartTime), 0, laserRampBySecond.Length - 1);
+        return laserRampBySecond[i];
     }
 
     // 정면으로 가장 먼저 막는 건물·장애물까지의 거리. 적과 플레이어 자신은 막지 않는다
