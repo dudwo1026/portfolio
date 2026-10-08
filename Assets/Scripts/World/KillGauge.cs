@@ -122,7 +122,7 @@ public class KillGauge : MonoBehaviour
     //   0 : 게이지를 가득 채운다
     //   / : 게이지를 debugAddAmount(기본 100)만큼 올린다 (숫자패드 / 도 동일)
     //   [ : 스폰을 멈추고 살아있는 몹을 지운다 / 다시 누르면 재개 (맵을 둘러볼 때)
-    //   ] : 주무기 돌격소총 ↔ 레이저 전환 (임시)
+    //   ] : 주무기 돌격소총 → 레이저 → 산탄총 순환 (임시)
     //   숫자패드 1~6 : 정예 a~f를 플레이어 남쪽 10유닛에 소환 (패턴을 하나씩 확인할 때)
     //   ' : 게이지를 채우고 열쇠를 전부 모은 것으로 처리해 포탈을 바로 연다
     void HandleDebugKeys()
@@ -140,7 +140,8 @@ public class KillGauge : MonoBehaviour
             PlayerCombat pc = FindFirstObjectByType<PlayerCombat>();
             if (pc != null)
             {
-                pc.SetPrimaryWeapon(pc.primaryWeapon == PrimaryWeapon.Rifle ? PrimaryWeapon.Laser : PrimaryWeapon.Rifle);
+                // 소총 → 레이저 → 산탄총 → 소총
+                pc.SetPrimaryWeapon((PrimaryWeapon)(((int)pc.primaryWeapon + 1) % 3));
                 Debug.Log("[Debug] 주무기: " + pc.primaryWeapon);
             }
         }

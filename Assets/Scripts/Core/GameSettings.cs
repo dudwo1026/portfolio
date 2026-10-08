@@ -1,5 +1,5 @@
 // 씬을 넘어 들고 가는 선택값. 타이틀의 무기 선택이 채우고, 게임 씬의 PlayerCombat이 읽는다
-public enum PrimaryWeapon { Rifle, Laser }
+public enum PrimaryWeapon { Rifle, Laser, Shotgun }
 
 public static class GameSettings
 {

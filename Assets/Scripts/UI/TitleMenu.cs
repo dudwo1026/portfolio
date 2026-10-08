@@ -18,6 +18,7 @@ public class TitleMenu : MonoBehaviour
 
     public void StartRifle() { StartWith(PrimaryWeapon.Rifle); }
     public void StartLaser() { StartWith(PrimaryWeapon.Laser); }
+    public void StartShotgun() { StartWith(PrimaryWeapon.Shotgun); }
 
     void StartWith(PrimaryWeapon weapon)
     {

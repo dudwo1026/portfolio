@@ -70,6 +70,16 @@ public class PlayerCombat : MonoBehaviour
     public int laserMagSize = 60;      // 레이저 탄창 (초당 8발 소모 → 7.5초)
     public int laserMaxReserve = 300;  // 레이저 예비탄 → 장전 60 + 예비 = 전체 360
     public int supplyKitPrimaryRounds = 30; // 보급키트 하나가 채우는 주무기 예비탄 (소총·레이저 공통)
+
+    [Header("산탄총 (주무기 대안, 1클릭 1발)")]
+    public int shotgunPellets = 12;
+    public float shotgunSpread = 30f;       // 전방 이 각도(전체 폭) 안에서 탄마다 무작위 방향
+    public float shotgunPelletDamage = 5f;  // 다 맞으면 한 발에 60
+    // 0.25가 아니라 0.23인 이유는 권총과 같다: 프레임 단위 판정 손해를 미리 깎아 실효 0.25초
+    public float shotgunCooldown = 0.23f;
+    public int shotgunMagSize = 8;
+    public int shotgunMaxReserve = 88;      // 장전 8 + 예비 = 전체 96
+    public int shotgunSupplyKitRounds = 8;  // 키트 하나 = 탄창 하나. 30발이면 발당 60이라 소총 키트의 약 3배가 된다
     public int primaryMaxReserveMags = 11;  // 예비 330발 → 장전 30 + 예비 = 전체 360
     public int secondaryMagSize = 8;   // 권총: 예비탄 무제한, 탄창만 있다
     public float reloadTime = 1f; // 실제로 장전되면 이 시간 동안 원거리 사격 불가 (근접은 가능)
@@ -94,8 +104,12 @@ public class PlayerCombat : MonoBehaviour
     public int PrimaryAmmo => primaryAmmo;
     public int PrimaryReserve => primaryReserve;
     public int SecondaryAmmo => secondaryAmmo;
-    public int PrimaryMagSize => primaryWeapon == PrimaryWeapon.Laser ? laserMagSize : primaryMagSize;
-    int PrimaryMaxReserve => primaryWeapon == PrimaryWeapon.Laser ? laserMaxReserve : primaryMaxReserveMags * primaryMagSize;
+    public int PrimaryMagSize =>
+        primaryWeapon == PrimaryWeapon.Laser ? laserMagSize :
+        primaryWeapon == PrimaryWeapon.Shotgun ? shotgunMagSize : primaryMagSize;
+    int PrimaryMaxReserve =>
+        primaryWeapon == PrimaryWeapon.Laser ? laserMaxReserve :
+        primaryWeapon == PrimaryWeapon.Shotgun ? shotgunMaxReserve : primaryMaxReserveMags * primaryMagSize;
 
     TopDownMove mover;
     PlayerBound bound;
@@ -153,11 +167,11 @@ void Awake()
         {
             firePressed = false; // 레이저는 UpdateLaser가 맡는다
         }
-        else if (currentSlot == WeaponSlot.Primary)
+        else if (currentSlot == WeaponSlot.Primary && primaryWeapon != PrimaryWeapon.Shotgun)
         {
-            firePressed = mouse.leftButton.isPressed; // 주무기는 꾹 누르면 연사
+            firePressed = mouse.leftButton.isPressed; // 소총은 꾹 누르면 연사
         }
-        else if (currentSlot == WeaponSlot.Secondary)
+        else if (currentSlot != WeaponSlot.Melee) // 권총, 산탄총: 1클릭 1발
         {
             // 권총은 반자동. 예전엔 쿨다운 중에 누른 클릭이 그냥 버려져서,
             // 실제 연사력이 쿨다운이 아니라 "내 클릭 주기의 배수"로 결정됐다
@@ -316,17 +330,36 @@ void Fire()
             secondaryAmmo--;
         }
 
-        SpawnBullet(currentSlot == WeaponSlot.Primary ? bulletDamage : pistolDamage);
+        float rate;
+        if (currentSlot == WeaponSlot.Primary && primaryWeapon == PrimaryWeapon.Shotgun)
+        {
+            // 전방 shotgunSpread도 안에서 탄마다 무작위 방향
+            for (int i = 0; i < shotgunPellets; i++)
+            {
+                float yaw = Random.Range(-shotgunSpread * 0.5f, shotgunSpread * 0.5f);
+                SpawnBullet(shotgunPelletDamage, Quaternion.Euler(0f, yaw, 0f) * transform.forward);
+            }
+            rate = shotgunCooldown;
+        }
+        else if (currentSlot == WeaponSlot.Primary)
+        {
+            SpawnBullet(bulletDamage, transform.forward);
+            rate = 1f / primaryFireRate;
+        }
+        else
+        {
+            SpawnBullet(pistolDamage, transform.forward);
+            rate = secondaryFireCooldown;
+        }
         LastRangedFireTime = Time.time; // 공격 모션이 이 시각을 보고 자세를 바꾼다
         EnemyAI.AlertGunshot(transform.position, gunshotAlertRadius); // 총성에 어그로가 끌린다 (근접은 제외)
-        float rate = currentSlot == WeaponSlot.Primary ? (1f / primaryFireRate) : secondaryFireCooldown;
         nextFireTime = Time.time + rate;
     }
 
     void FireGrenade()
     {
         if (currentSlot != WeaponSlot.Primary) return;      // 주무기 장착 중에만
-        if (primaryWeapon == PrimaryWeapon.Laser) return;    // 유탄발사기는 돌격소총에만 달려 있다
+        if (primaryWeapon != PrimaryWeapon.Rifle) return;    // 유탄발사기는 돌격소총에만 달려 있다
         if (dash != null && dash.IsDashing) return;          // 대시 중에는 공격 불가
         if (bound != null && bound.IsActive) return;         // 구속 중에는 원거리 불가
         if (grenadeLoaded <= 0) return; // 비었으면 R로 재장전해야 한다
@@ -350,7 +383,7 @@ void Fire()
         EnemyAI.AlertGunshot(transform.position, gunshotAlertRadius); // 유탄도 시끄럽다
     }
 
-    void SpawnBullet(float damage)
+    void SpawnBullet(float damage, Vector3 dir)
     {
         GameObject bullet = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         bullet.name = "Bullet";
@@ -363,7 +396,7 @@ void Fire()
 
         Rigidbody brb = bullet.AddComponent<Rigidbody>();
         brb.useGravity = false;
-        brb.linearVelocity = transform.forward * bulletSpeed;
+        brb.linearVelocity = dir * bulletSpeed;
 
         Bullet b = bullet.AddComponent<Bullet>();
         b.lifeTime = bulletLifeTime;
@@ -479,6 +512,7 @@ public void RefillAmmo()
     // 주무기는 무기와 상관없이 같은 발수다. 레이저 탄창(60)만큼 주면 소총의 약 2배 가치가 된다
     public void AddMagazine()
     {
-        primaryReserve = Mathf.Min(primaryReserve + supplyKitPrimaryRounds, PrimaryMaxReserve);
+        int kit = primaryWeapon == PrimaryWeapon.Shotgun ? shotgunSupplyKitRounds : supplyKitPrimaryRounds;
+        primaryReserve = Mathf.Min(primaryReserve + kit, PrimaryMaxReserve);
     }
 }
