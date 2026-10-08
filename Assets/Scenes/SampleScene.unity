@@ -32273,10 +32273,10 @@ MonoBehaviour:
   grenadeMaxReserve: 2
   grenadeDamage: 200
   grenadeRange: 15
-  grenadeRadius: 3
+  grenadeRadius: 5
   grenadeCooldown: 1
   grenadeExplosionVfx: {fileID: 4593184484909914552, guid: 2e1e9506f5904a64b81744324fb7cd50, type: 3}
-  grenadeExplosionVfxScale: 2
+  grenadeExplosionVfxScale: 3.33
   primaryMagSize: 30
   primaryMaxReserveMags: 11
   secondaryMagSize: 10

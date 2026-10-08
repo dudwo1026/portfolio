@@ -35,10 +35,10 @@ public class PlayerCombat : MonoBehaviour
     public int grenadeMaxReserve = 2;  // 보급 시 채워지는 예비 유탄 (장전 1발 + 이만큼)
     public float grenadeDamage = 200f;
     public float grenadeRange = 15f;
-    public float grenadeRadius = 3f;
+    public float grenadeRadius = 5f;
     public float grenadeCooldown = 1f;
     public GameObject grenadeExplosionVfx;   // CFXR2 WW Explosion 프리팹
-    public float grenadeExplosionVfxScale = 2f;
+    public float grenadeExplosionVfxScale = 3.33f; // 반경 3에서 2였던 걸 반경 5에 맞춰 같은 비율로
 
     public int GrenadeLoaded => grenadeLoaded;
     public int GrenadeReserve => grenadeReserve;
