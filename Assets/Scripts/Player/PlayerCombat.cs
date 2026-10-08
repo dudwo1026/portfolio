@@ -67,7 +67,7 @@ public class PlayerCombat : MonoBehaviour
 
     public int primaryMagSize = 30;
     public int laserMagSize = 60;      // 레이저 탄창 (초당 8발 소모 → 7.5초)
-    public int primaryMaxReserveMags = 12;  // 예비 360발
+    public int primaryMaxReserveMags = 11;  // 예비 330발 → 장전 30 + 예비 = 전체 360
     public int secondaryMagSize = 10;
     public int secondaryMaxReserveMags = 6;
     public float reloadTime = 1f; // 실제로 장전되면 이 시간 동안 원거리 사격 불가 (근접은 가능)

@@ -32291,7 +32291,7 @@ MonoBehaviour:
   - 1
   primaryMagSize: 30
   laserMagSize: 60
-  primaryMaxReserveMags: 12
+  primaryMaxReserveMags: 11
   secondaryMagSize: 10
   secondaryMaxReserveMags: 6
   reloadTime: 1
