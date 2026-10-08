@@ -2,11 +2,21 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 // 타이틀 화면 메뉴. 지금은 새 게임과 종료만 동작한다.
+// 새 게임 → 무기 선택 → 게임 시작. 무기는 아직 돌격소총 하나라 고른 값을 넘기지 않는다
 public class TitleMenu : MonoBehaviour
 {
     public string gameSceneName = "SampleScene";
+    public GameObject menu;               // 오른쪽 메뉴 (무기 선택 중에는 숨긴다)
+    public GameObject weaponSelectPanel;  // 비워 두면 예전처럼 바로 시작
 
     public void NewGame()
+    {
+        if (weaponSelectPanel == null) { StartGame(); return; }
+        if (menu != null) menu.SetActive(false);
+        weaponSelectPanel.SetActive(true);
+    }
+
+    public void StartGame()
     {
         Time.timeScale = 1f; // 이전 판이 멈춘 상태로 끝났을 수 있다
         SceneManager.LoadScene(gameSceneName);
