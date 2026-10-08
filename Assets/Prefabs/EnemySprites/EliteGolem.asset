@@ -74,7 +74,7 @@ MonoBehaviour:
     charBottomPx: 0
     footCenterPx: 0
     sizeScale: 1
-  characterHeight: 3.5749998
+  characterHeight: 4.647
   moveFramesPerSecond: 2
   scaleFpsBySpeed: 0
   referenceSpeed: 2.5
