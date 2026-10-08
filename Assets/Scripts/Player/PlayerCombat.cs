@@ -68,6 +68,7 @@ public class PlayerCombat : MonoBehaviour
     public int primaryMagSize = 30;
     public int laserMagSize = 60;      // 레이저 탄창 (초당 8발 소모 → 7.5초)
     public int laserMaxReserve = 300;  // 레이저 예비탄 → 장전 60 + 예비 = 전체 360
+    public int supplyKitPrimaryRounds = 30; // 보급키트 하나가 채우는 주무기 예비탄 (소총·레이저 공통)
     public int primaryMaxReserveMags = 11;  // 예비 330발 → 장전 30 + 예비 = 전체 360
     public int secondaryMagSize = 10;
     public int secondaryMaxReserveMags = 6;
@@ -479,10 +480,11 @@ public void RefillAmmo()
         grenadeReserve = grenadeMaxReserve;
     }
 
-    // 보급키트: 주무기/보조무기 예비탄을 탄창 하나 분량씩 채운다 (유탄 제외)
+    // 보급키트: 주무기 예비탄 supplyKitPrimaryRounds발, 보조무기 탄창 하나 분량 (유탄 제외).
+    // 주무기는 무기와 상관없이 같은 발수다. 레이저 탄창(60)만큼 주면 소총의 약 2배 가치가 된다
     public void AddMagazine()
     {
-        primaryReserve = Mathf.Min(primaryReserve + PrimaryMagSize, PrimaryMaxReserve);
+        primaryReserve = Mathf.Min(primaryReserve + supplyKitPrimaryRounds, PrimaryMaxReserve);
         secondaryReserve = Mathf.Min(secondaryReserve + secondaryMagSize, SecondaryMaxReserve);
     }
 }
