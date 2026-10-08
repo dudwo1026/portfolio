@@ -119,7 +119,7 @@ public class KillGauge : MonoBehaviour
     }
 
     // 테스트용 키. 게임 로직이 아니므로 Update 본문과 섞지 않고 여기에 모아 둔다
-    //   0 : 게이지를 가득 채운다
+    //   0 : 플레이어 무적 + 무한탄창 켜기/끄기
     //   / : 게이지를 debugAddAmount(기본 100)만큼 올린다 (숫자패드 / 도 동일)
     //   [ : 스폰을 멈추고 살아있는 몹을 지운다 / 다시 누르면 재개 (맵을 둘러볼 때)
     //   ] : 주무기 돌격소총 → 레이저 → 산탄총 순환 (임시)
@@ -132,7 +132,18 @@ public class KillGauge : MonoBehaviour
         var kb = UnityEngine.InputSystem.Keyboard.current;
         if (kb == null) return;
 
-        if (kb.digit0Key.wasPressedThisFrame) Add(maxValue);
+        if (kb.digit0Key.wasPressedThisFrame)
+        {
+            PlayerCombat pc = FindFirstObjectByType<PlayerCombat>();
+            if (pc != null)
+            {
+                bool on = !pc.infiniteAmmo;
+                pc.infiniteAmmo = on;
+                Health h = pc.GetComponent<Health>();
+                if (h != null) h.invulnerable = on;
+                Debug.Log("[Debug] 무적 + 무한탄창: " + (on ? "ON" : "OFF"));
+            }
+        }
         if (kb.slashKey.wasPressedThisFrame || kb.numpadDivideKey.wasPressedThisFrame) Add(debugAddAmount);
         if (kb.leftBracketKey.wasPressedThisFrame) ToggleSpawns();
         if (kb.rightBracketKey.wasPressedThisFrame)

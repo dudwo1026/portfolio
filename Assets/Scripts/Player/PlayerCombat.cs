@@ -82,6 +82,7 @@ public class PlayerCombat : MonoBehaviour
     public int shotgunSupplyKitRounds = 8;  // 키트 하나 = 탄창 하나. 30발이면 발당 96이라 소총 키트의 약 5배가 된다
     public int primaryMaxReserveMags = 11;  // 예비 330발 → 장전 30 + 예비 = 전체 360
     public int secondaryMagSize = 8;   // 권총: 예비탄 무제한, 탄창만 있다
+    [System.NonSerialized] public bool infiniteAmmo; // 테스트용: 쏴도 탄창·유탄이 줄지 않는다 (KillGauge의 0 키)
     public float reloadTime = 1f; // 실제로 장전되면 이 시간 동안 원거리 사격 불가 (근접은 가능)
     public float secondaryReloadTime = 0.7f; // 권총은 더 빨리 장전한다
     float reloadEndTime;
@@ -222,7 +223,7 @@ void Awake()
 
         if (laserTick > 0f) return;
         laserTick += 1f / primaryFireRate;
-        primaryAmmo--;
+        if (!infiniteAmmo) primaryAmmo--;
         DamageAlongLaser(origin, dir, length, laserDps / primaryFireRate * LaserRamp());
         EnemyAI.AlertGunshot(transform.position, gunshotAlertRadius);
     }
@@ -322,12 +323,12 @@ void Fire()
         if (currentSlot == WeaponSlot.Primary)
         {
             if (primaryAmmo <= 0) return;
-            primaryAmmo--;
+            if (!infiniteAmmo) primaryAmmo--;
         }
         else
         {
             if (secondaryAmmo <= 0) return;
-            secondaryAmmo--;
+            if (!infiniteAmmo) secondaryAmmo--;
         }
 
         float rate;
@@ -365,7 +366,7 @@ void Fire()
         if (grenadeLoaded <= 0) return; // 비었으면 R로 재장전해야 한다
         if (Time.time < reloadEndTime) return; // 장전 중
 
-        grenadeLoaded--;
+        if (!infiniteAmmo) grenadeLoaded--;
         nextGrenadeTime = Time.time + grenadeCooldown;
 
         GameObject g = GameObject.CreatePrimitive(PrimitiveType.Sphere);
