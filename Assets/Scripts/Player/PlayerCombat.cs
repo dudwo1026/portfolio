@@ -73,6 +73,7 @@ public class PlayerCombat : MonoBehaviour
     public int primaryMaxReserveMags = 11;  // 예비 330발 → 장전 30 + 예비 = 전체 360
     public int secondaryMagSize = 8;   // 권총: 예비탄 무제한, 탄창만 있다
     public float reloadTime = 1f; // 실제로 장전되면 이 시간 동안 원거리 사격 불가 (근접은 가능)
+    public float secondaryReloadTime = 0.7f; // 권총은 더 빨리 장전한다
     float reloadEndTime;
 
 
@@ -451,7 +452,7 @@ void Reload()
         {
             int take = secondaryMagSize - secondaryAmmo; // 예비탄 무제한
             secondaryAmmo += take;
-            if (take > 0) reloadEndTime = Time.time + reloadTime; // 꽉 찬 상태에서 R은 아무 일도 없다
+            if (take > 0) reloadEndTime = Time.time + secondaryReloadTime; // 꽉 찬 상태에서 R은 아무 일도 없다
         }
     }
 
