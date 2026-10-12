@@ -15,6 +15,10 @@ public class KeyItemSpawner : MonoBehaviour
     public float spinSpeed = 90f;
     public UnityEngine.UI.Text countLabel; // 우상단 게이지 아래 "열쇠 n/7"
     public HudMessage announce; // 화면 중상단 "n번째 열쇠가 생성되었습니다"
+    // 포탈 옆 열쇠 표시등. 왼쪽부터 순서대로 넣는다 — 모은 개수만큼 앞에서부터 켜진다
+    public Renderer[] slotLights;
+    public Material slotOff;
+    public Material slotOn;
 
     public int Collected { get; private set; }
     public bool HasAllKeys { get { return Collected >= keysRequired; } }
@@ -80,6 +84,9 @@ public class KeyItemSpawner : MonoBehaviour
     void RefreshLabel()
     {
         if (countLabel != null) countLabel.text = "열쇠 " + Collected + "/" + keysRequired;
+        if (slotLights == null) return;
+        for (int i = 0; i < slotLights.Length; i++)
+            if (slotLights[i] != null) slotLights[i].sharedMaterial = i < Collected ? slotOn : slotOff;
     }
 }
 
