@@ -39,7 +39,7 @@ public class ControlGuide : MonoBehaviour
     const float Gap = 10f;
 
     static readonly Vector2 ControlBoxSize = new Vector2(940f, 560f);
-    static readonly Vector2 StoryBoxSize = new Vector2(1700f, 800f); // 사진 세 장을 가로로 크게 놓는다
+    static readonly Vector2 StoryBoxSize = new Vector2(1700f, 680f); // 사진 세 장을 가로로 크게 놓는다
 
     GameObject panel;
     RectTransform box, body;
@@ -103,12 +103,12 @@ public class ControlGuide : MonoBehaviour
 
     // 진행 가이드 한 장. 마지막 줄을 뺀 단계들은 윗줄에 가로로 늘어놓고 → 로 잇는다.
     // 칸마다 위에 그림(액자 FrameW x FrameH 안에 비율 유지), 아래에 설명.
-    // 마지막 줄(보스)은 맨 아래 가운데 한 줄. 마지막 칸 밑에서 꺾인 화살표가 그리로 이어진다
+    // 마지막 줄(보스)은 그 바로 아래 가운데 한 줄
     void ShowStory()
     {
         box.sizeDelta = StoryBoxSize;
         title.text = "게임 진행";
-        const float spacing = 530f, frameW = 460f, frameH = 220f, picY = 150f, textY = -25f, finalY = -230f;
+        const float spacing = 530f, frameW = 460f, frameH = 220f, picY = 110f, textY = -65f, finalY = -160f;
         int steps = storyPages.Length - 1;
         float firstX = -(steps - 1) * spacing * 0.5f;
 
@@ -143,12 +143,6 @@ public class ControlGuide : MonoBehaviour
 
         Text fin = NewText("Final", body, 32, new Vector2(1500f, 60f), new Vector2(0f, finalY), TextAnchor.MiddleCenter);
         fin.text = storyPages[steps];
-
-        // 마지막 칸 설명 밑에서 아래로 내려와, 왼쪽으로 꺾여 보스 안내 끝에 닿는다
-        float lastX = firstX + (steps - 1) * spacing;
-        float tipX = fin.preferredWidth * 0.5f + 18f;
-        Segment(new Vector2(lastX, textY - 50f), new Vector2(lastX, finalY));
-        Arrow(new Vector2(lastX, finalY), new Vector2(tipX, finalY));
     }
 
     static readonly Color ArrowColor = new Color(0.75f, 0.85f, 1f, 1f);
