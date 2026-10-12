@@ -5944,6 +5944,7 @@ MonoBehaviour:
   pitch: 40
   distance: 16
   lookOffset: {x: 0, y: 0, z: 0}
+  shakeFrequency: 22
 --- !u!114 &330585549
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32858,6 +32859,11 @@ MonoBehaviour:
   laserWidthChangeTime: 0.15
   laserColor: {r: 0.1, g: 0.55, b: 1, a: 1}
   laserEffectPrefab: {fileID: 7478731271839673279, guid: 1a93e8504c343504480e5958e5e4ff01, type: 3}
+  laserChargedColor: {r: 1, g: 0.5, b: 0.31, a: 1}
+  laserChargedBrightness: 0.5
+  laserTopStageTint: 0.7
+  laserShimmer: 0.08
+  laserShimmerSpeed: 18
   laserPierceFalloff: 0.15
   laserMinDamageRatio: 0.1
   laserRampBySecond:
