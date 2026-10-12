@@ -20,6 +20,9 @@ public class EliteThreatIndicator : MonoBehaviour
     [Header("표시 조건")]
     // 켜면 정예 대신 맵에 나와 있는 열쇠(KeyItemSpawner)를 가리킨다. 같은 컴포넌트를 하나 더 붙여 파란색으로 쓴다
     public bool trackKeys = false;
+    // 넣어 두면 정예·열쇠 대신 이 포탈들 중 열린 것을 가리킨다
+    public Portal[] portals;
+    bool TrackPortals { get { return portals != null && portals.Length > 0; } }
     public float showRadius = 22f;       // 이 안의 정예만 표시. 인지범위(15)보다 넉넉히 잡아 미리 경고한다
     public float refreshInterval = 0.25f; // 정예 목록 재탐색 주기 (위치는 매 프레임 갱신된다)
     public float aimHeight = 1f;          // 몹의 발밑이 아니라 몸통을 기준으로 방향을 잡는다
@@ -81,7 +84,7 @@ public class EliteThreatIndicator : MonoBehaviour
 
     void BuildContainer()
     {
-        GameObject go = new GameObject(trackKeys ? "KeyArrows" : "EliteThreatArrows", typeof(RectTransform));
+        GameObject go = new GameObject(TrackPortals ? "PortalArrows" : trackKeys ? "KeyArrows" : "EliteThreatArrows", typeof(RectTransform));
         container = (RectTransform)go.transform;
         container.SetParent(transform, false);
         container.anchorMin = Vector2.zero;
@@ -117,7 +120,7 @@ public class EliteThreatIndicator : MonoBehaviour
         {
             Transform t = targets[i];
             if (t == null || !t.gameObject.activeInHierarchy) continue; // 주운 열쇠는 꺼진다
-            if (!trackKeys)
+            if (!trackKeys && !TrackPortals)
             {
                 EnemyAI e = t.GetComponent<EnemyAI>();
                 if (e == null || !e.isActiveAndEnabled) continue;
@@ -178,6 +181,11 @@ public class EliteThreatIndicator : MonoBehaviour
     void RefreshEliteList()
     {
         targets.Clear();
+        if (TrackPortals)
+        {
+            foreach (Portal p in portals) if (p != null && p.IsOpen) targets.Add(p.transform);
+            return;
+        }
         if (trackKeys)
         {
             // 아직 안 나온 열쇠도 넣어 둔다. 꺼져 있는 동안은 LateUpdate에서 걸러진다
