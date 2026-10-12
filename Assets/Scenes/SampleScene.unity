@@ -20978,10 +20978,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ControlGuide
   pages:
-  - "\uC774\uB3D9|W  A  S  D\n\uB300\uC2DC|Space"
-  - "\uC870\uC900|\uC6B0\uD074\uB9AD (\uB204\uB974\uACE0 \uC788\uAE30)\n\uACF5\uACA9|\uC88C\uD074\uB9AD\n\uC720\uD0C4
-    \uBC1C\uC0AC|F\n\uC7AC\uC7A5\uC804|R\n\uBB34\uAE30 \uAD50\uCCB4|1  2  3"
-  - "\uC0C1\uD638\uC791\uC6A9|E (\uB204\uB974\uACE0 \uC788\uAE30)\n\uC18C\uBAA8\uD488|Ctrl"
+  - "\uC774\uB3D9|[W][A][S][D]\n\uB300\uC2DC|[Space]"
+  - "\uC870\uC900|[RMB] \uB204\uB974\uACE0 \uC788\uAE30\n\uACF5\uACA9|[LMB]\n\uC720\uD0C4
+    \uBC1C\uC0AC|[F]\n\uC7AC\uC7A5\uC804|[R]\n\uBB34\uAE30 \uAD50\uCCB4|[1][2][3]"
+  - "\uC0C1\uD638\uC791\uC6A9|[E] \uB204\uB974\uACE0 \uC788\uAE30\n\uC18C\uBAA8\uD488|[Ctrl]"
   onlyFromTitle: 1
 --- !u!1 &1180381425
 GameObject:
