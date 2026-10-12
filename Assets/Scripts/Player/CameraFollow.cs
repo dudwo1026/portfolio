@@ -23,6 +23,31 @@ public class CameraFollow : MonoBehaviour
     [Tooltip("플레이어를 화면 정중앙이 아닌 곳에 두고 싶을 때. 예: y를 올리면 플레이어가 화면 아래로 내려가 앞이 더 보인다")]
     public Vector3 lookOffset = Vector3.zero;
 
+    [Header("화면 흔들림")]
+    [Tooltip("초당 흔들리는 횟수 정도. 높을수록 잘게 떤다")]
+    public float shakeFrequency = 22f;
+
+    float shakeAmplitude;  // 이번 흔들림의 처음 세기 (월드 단위)
+    float shakeDuration;
+    float shakeTimeLeft;
+    float shakeSeed;
+
+    // 폭발 등에서 부른다. 세기는 화면 평면 위로 카메라가 밀리는 거리.
+    // 이미 흔들리는 중이면 더 센 쪽을 남긴다 (유탄이 연달아 터져도 누적돼 폭주하지 않게)
+    public static void Shake(float amplitude, float duration)
+    {
+        Camera cam = Camera.main;
+        CameraFollow f = cam != null ? cam.GetComponent<CameraFollow>() : null;
+        if (f == null || duration <= 0f) return;
+
+        float remaining = f.shakeTimeLeft > 0f ? f.shakeAmplitude * (f.shakeTimeLeft / f.shakeDuration) : 0f;
+        if (amplitude < remaining) return;
+        f.shakeAmplitude = amplitude;
+        f.shakeDuration = duration;
+        f.shakeTimeLeft = duration;
+        f.shakeSeed = Random.Range(0f, 100f);
+    }
+
     void LateUpdate()
     {
         Apply();
@@ -57,7 +82,22 @@ public class CameraFollow : MonoBehaviour
 
         Vector3 focus = target.position + lookOffset;
         Quaternion rot = Quaternion.Euler(pitch, yaw, 0f);
-        transform.position = focus - rot * Vector3.forward * distance;
+        transform.position = focus - rot * Vector3.forward * distance + ShakeOffset(rot);
         transform.rotation = rot;
+    }
+
+    // 화면 가로·세로로만 민다 (앞뒤로 밀면 확대·축소처럼 보인다). 끝으로 갈수록 약해진다
+    Vector3 ShakeOffset(Quaternion rot)
+    {
+        if (!Application.isPlaying || shakeTimeLeft <= 0f) return Vector3.zero;
+
+        shakeTimeLeft -= Time.deltaTime;
+        if (shakeTimeLeft <= 0f) return Vector3.zero;
+
+        float k = shakeAmplitude * (shakeTimeLeft / shakeDuration);
+        float t = Time.time * shakeFrequency;
+        float x = (Mathf.PerlinNoise(shakeSeed, t) - 0.5f) * 2f;
+        float y = (Mathf.PerlinNoise(shakeSeed + 37f, t) - 0.5f) * 2f;
+        return (rot * Vector3.right * x + rot * Vector3.up * y) * k;
     }
 }

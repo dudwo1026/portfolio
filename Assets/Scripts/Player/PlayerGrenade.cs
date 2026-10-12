@@ -18,6 +18,10 @@ public class PlayerGrenade : MonoBehaviour
     public GameObject explosionVfx;
     public float vfxScale = 2f; // 프리팹 기본 크기가 폭발 반경보다 작아서 키운다
 
+    // 터질 때 화면 흔들림. 세기는 카메라가 밀리는 거리(카메라 거리 약 14.4 기준)
+    public float shakeAmplitude = 0.35f;
+    public float shakeDuration = 0.3f;
+
     Vector3 velocity;
     GameObject owner;
     float horizontalTraveled;
@@ -126,6 +130,7 @@ public class PlayerGrenade : MonoBehaviour
 
         SpawnVfx();
         SpawnMarker();
+        CameraFollow.Shake(shakeAmplitude, shakeDuration);
         Destroy(gameObject);
     }
 

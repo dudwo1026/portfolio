@@ -139,6 +139,7 @@ public class EnemyAI : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         MeasureBody();
         selfHealth = GetComponent<Health>();
+        if (selfHealth != null && GetComponent<HitFlash>() == null) gameObject.AddComponent<HitFlash>(); // 맞으면 하얗게
         GameObject playerGO = GameObject.Find("Player");
         if (playerGO != null)
         {
