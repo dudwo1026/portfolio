@@ -372,8 +372,8 @@ Transform:
   m_GameObject: {fileID: 14298232}
   serializedVersion: 2
   m_LocalRotation: {x: 0.34202012, y: -0.000000029802319, z: -0.0000000074505797, w: 0.9396926}
-  m_LocalPosition: {x: 0.33405402, y: 0.024077892, z: -0.0000026524067}
-  m_LocalScale: {x: 2.2789338, y: 2.0943112, z: 1}
+  m_LocalPosition: {x: 0.52495575, y: 0.033605814, z: -0.0000011920929}
+  m_LocalScale: {x: 2.269368, y: 2.2106774, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1878695940}
@@ -16224,6 +16224,7 @@ MonoBehaviour:
   - {fileID: 431090519}
   vertical: 0
   defaultIndex: 1
+  startUnselected: 0
   selectedScale: 1.15
 --- !u!1001 &973395133
 PrefabInstance:
@@ -20055,7 +20056,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 176, y: -72}
+  m_AnchoredPosition: {x: 176, y: -86}
   m_SizeDelta: {x: 330, y: 30}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1157996979
@@ -27035,7 +27036,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
+    m_FontSize: 19
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
@@ -27071,7 +27072,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 1, y: 0.45}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -3, y: 4}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &1530985303
@@ -32690,6 +32691,7 @@ MonoBehaviour:
   - {fileID: 1245996600}
   vertical: 1
   defaultIndex: 0
+  startUnselected: 0
   selectedScale: 1.15
 --- !u!114 &1890639000
 MonoBehaviour:
@@ -34214,8 +34216,8 @@ Transform:
   m_GameObject: {fileID: 2002803338}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -9.56, y: 1.5, z: 0}
-  m_LocalScale: {x: 0.3, y: 3, z: 4}
+  m_LocalPosition: {x: -9.56, y: 2.71, z: 0}
+  m_LocalScale: {x: 0.3, y: 4.23, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 584608240}
