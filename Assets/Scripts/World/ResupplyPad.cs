@@ -22,7 +22,7 @@ public class ResupplyPad : MonoBehaviour, IChargePad
 
     // 캐스팅바 색. 장판은 충전 중에 색이 밝아지므로, 기준이 되는 평소 색을 돌려준다
     public Color BarColor { get { return idleColor; } }
-    public string Prompt { get { return player != null && OnPad() ? (usable ? "[E] 길게 눌러 회복약 보급" : "회복약이 가득 찼습니다") : null; } }
+    public string Prompt { get { return player != null && OnPad() ? (usable ? ChargeCastBarUI.HoldPrompt("회복약 보급") : "<size=40>회복약이 가득 찼습니다</size>") : null; } }
     bool usable;
 
     Transform player;

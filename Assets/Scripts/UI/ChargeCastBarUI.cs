@@ -27,7 +27,13 @@ public class ChargeCastBarUI : MonoBehaviour
     public Color fallbackFillColor = new Color(0.45f, 1f, 0.55f, 1f); // 장판이 색을 안 주면 쓰는 값
     public float fillAlpha = 0.95f;
 
-    public int promptFontSize = 30;
+    public int promptFontSize = 30;      // 아랫줄 "[E] 홀드". 윗줄은 아래 <size=40>
+
+    // 장판들이 Prompt로 돌려줄 두 줄 문구. 윗줄 이름(40), 아랫줄 조작(promptFontSize)
+    public static string HoldPrompt(string title)
+    {
+        return "<size=40>" + title + "</size>\n[E] 홀드";
+    }
 
     RectTransform container;
     RectTransform root;
@@ -103,7 +109,7 @@ public class ChargeCastBarUI : MonoBehaviour
         RectTransform tr = (RectTransform)t.transform;
         tr.SetParent(container, false);
         tr.anchorMin = tr.anchorMax = tr.pivot = new Vector2(0.5f, 0.5f);
-        tr.sizeDelta = new Vector2(700f, 50f);
+        tr.sizeDelta = new Vector2(700f, 110f);
         prompt = t.GetComponent<Text>();
         prompt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         prompt.fontSize = promptFontSize;
@@ -172,7 +178,7 @@ public class ChargeCastBarUI : MonoBehaviour
 
         prompt.text = text;
         Vector2 local;
-        if (HeadLocal(out local)) ((RectTransform)prompt.transform).anchoredPosition = local + new Vector2(0f, size * 0.5f + 24f);
+        if (HeadLocal(out local)) ((RectTransform)prompt.transform).anchoredPosition = local + new Vector2(0f, size * 0.5f + 55f);
     }
 
     // 진행 중인 장판 하나. 두 장판이 겹칠 일이 없으므로 가장 많이 찬 것을 고른다
