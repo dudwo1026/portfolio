@@ -18,6 +18,10 @@ public class ControlGuide : MonoBehaviour
         "상호작용|[E] 누르고 있기\n소모품|[Ctrl]",
     };
     public bool onlyFromTitle = true; // 게임 씬을 바로 플레이할 때(테스트)는 띄우지 않는다
+    // 뜬 직후 이 시간(실시간) 동안은 입력을 무시한다. 무기 선택 화면에서 연타한 Enter·클릭이
+    // 씬이 넘어오자마자 처리돼 가이드를 넘겨 버리는 것을 막는다
+    public float inputDelay = 0.5f;
+    float openedAt;
 
     const float RowHeight = 74f;
     const float KeyHeight = 60f;
@@ -37,6 +41,7 @@ public class ControlGuide : MonoBehaviour
         Build();
         Show(0);
         Time.timeScale = 0f;
+        openedAt = Time.unscaledTime;
     }
 
     void OnDestroy()
@@ -47,6 +52,7 @@ public class ControlGuide : MonoBehaviour
     void LateUpdate()
     {
         if (panel == null || !panel.activeSelf) return;
+        if (Time.unscaledTime < openedAt + inputDelay) return;
 
         Keyboard kb = Keyboard.current;
         Mouse mouse = Mouse.current;
