@@ -49,8 +49,17 @@ public class PlayerCombat : MonoBehaviour
     public float laserDps = 192f;
     public float laserRange = 60f;      // 소총 사거리(탄속 45 x 수명 1.33)와 같게
     public float laserRadius = 0.3f;    // 판정 굵기 (반지름)
-    public float laserWidth = 0.45f;    // 보이는 굵기 (밝은 바닥에서도 보이게)
-    public Color laserColor = new Color(0.1f, 0.55f, 1f, 1f);
+    // 최대 차지 때 보이는 굵기. 차지 단계마다 피해 배율(laserRampBySecond)만큼 가늘게 시작한다 (50% → 80% → 100%)
+    public float laserWidth = 0.45f;
+    public float laserWidthChangeTime = 0.15f; // 단계가 오를 때 이 시간에 걸쳐 굵어진다
+    public Color laserColor = new Color(0.1f, 0.55f, 1f, 1f); // 이펙트가 없을 때의 단색 선
+    public GameObject laserEffectPrefab; // Laser AOE Player. 비워 두면 단색 선(LineRenderer)으로 그린다
+    GameObject laserFx;
+    ParticleSystem[] laserFxBeams;   // 빔 = 늘림 배율이 음수인 파티클. 굵기·길이를 매 프레임 맞춘다
+    float[] laserFxBeamSizes;        // 프리팹 원래 크기. 가장 굵은 빔이 laserWidth가 되도록 같은 비율로 줄인다
+    float laserFxWidest;
+    float laserShownWidth;           // 지금 보이는 굵기 (단계 사이를 부드럽게 잇는다)
+    ParticleSystem.Particle[] laserFxBuf;
     public float laserPierceFalloff = 0.15f; // 적을 하나 뚫을 때마다 다음 적이 받는 피해가 이만큼(비율) 준다
     public float laserMinDamageRatio = 0.1f; // 그래도 이 아래로는 안 내려간다
     LineRenderer laserLine;
@@ -212,20 +221,30 @@ void Awake()
                        && !(dash != null && dash.IsDashing) && !(bound != null && bound.IsActive);
         if (!canFire)
         {
-            laserFiring = false;
-            if (laserLine != null) laserLine.enabled = false;
+            StopLaserVisual();
             return;
         }
-        if (!laserFiring) { laserFiring = true; laserDir = transform.forward; laserStartTime = Time.time; } // 쏘기 시작 = 방향 고정
+        if (!laserFiring) { laserFiring = true; laserDir = transform.forward; laserStartTime = Time.time; laserShownWidth = 0f; } // 쏘기 시작 = 방향 고정
 
         Vector3 dir = laserDir;
         Vector3 origin = Muzzle(dir); // 총알과 같은 총구
         float length = LaserLength(origin, dir);
 
-        if (laserLine == null) laserLine = BuildLaserLine();
-        laserLine.enabled = true;
-        laserLine.SetPosition(0, origin);
-        laserLine.SetPosition(1, origin + dir * length);
+        // 차지 단계에 맞춰 굵어진다. 처음 프레임은 1단 굵기에서 바로 시작
+        float targetWidth = laserWidth * LaserRamp();
+        laserShownWidth = laserShownWidth <= 0f ? targetWidth
+            : Mathf.MoveTowards(laserShownWidth, targetWidth, laserWidth / Mathf.Max(0.01f, laserWidthChangeTime) * Time.deltaTime);
+
+        if (laserEffectPrefab != null) PlaceLaserFx(origin, dir, length, laserShownWidth);
+        else
+        {
+            if (laserLine == null) laserLine = BuildLaserLine();
+            laserLine.enabled = true;
+            laserLine.startWidth = laserShownWidth;
+            laserLine.endWidth = laserShownWidth * 0.7f;
+            laserLine.SetPosition(0, origin);
+            laserLine.SetPosition(1, origin + dir * length);
+        }
         LastRangedFireTime = Time.time; // 공격 모션 유지
 
         if (laserTick > 0f) return;
@@ -269,6 +288,59 @@ void Awake()
             // 첫 적 100%, 둘째 85%, 셋째 70%, ... 일곱째부터 10%
             float ratio = Mathf.Max(laserMinDamageRatio, 1f - laserPierceFalloff * (struck.Count - 1));
             h.TakeDamage(damage * ratio);
+        }
+    }
+
+    void StopLaserVisual()
+    {
+        laserFiring = false;
+        if (laserLine != null) laserLine.enabled = false;
+        if (laserFx != null) Destroy(laserFx);
+        laserFx = null;
+    }
+
+    // 기절 등으로 이 컴포넌트가 꺼지면 Update가 안 돌아 빔이 그 자리에 남는다
+    void OnDisable()
+    {
+        StopLaserVisual();
+    }
+
+    // 이펙트는 위로 뻗는 레이저라 위쪽을 dir로 눕힌다 (보스 레이저와 같은 방식).
+    // 빔 길이 = 크기 x 늘림 배율이라, 굵기를 바꾸면 배율도 같이 다시 잰다
+    void PlaceLaserFx(Vector3 origin, Vector3 dir, float length, float width)
+    {
+        if (laserFx == null)
+        {
+            laserFx = Instantiate(laserEffectPrefab);
+            laserFx.name = "PlayerLaser";
+            var beams = new System.Collections.Generic.List<ParticleSystem>();
+            foreach (ParticleSystemRenderer r in laserFx.GetComponentsInChildren<ParticleSystemRenderer>())
+                if (r.renderMode == ParticleSystemRenderMode.Stretch && r.lengthScale < 0f) beams.Add(r.GetComponent<ParticleSystem>());
+            laserFxBeams = beams.ToArray();
+            laserFxBeamSizes = new float[laserFxBeams.Length];
+            laserFxWidest = 0f;
+            for (int i = 0; i < laserFxBeams.Length; i++)
+            {
+                laserFxBeamSizes[i] = laserFxBeams[i].main.startSize.constantMax;
+                laserFxWidest = Mathf.Max(laserFxWidest, laserFxBeamSizes[i]);
+            }
+            if (laserFxBuf == null) laserFxBuf = new ParticleSystem.Particle[64];
+        }
+
+        laserFx.transform.SetPositionAndRotation(origin, Quaternion.FromToRotation(Vector3.up, dir));
+        if (laserFxWidest <= 0f) return;
+
+        for (int i = 0; i < laserFxBeams.Length; i++)
+        {
+            ParticleSystem ps = laserFxBeams[i];
+            float size = laserFxBeamSizes[i] * width / laserFxWidest;
+            ParticleSystem.MainModule m = ps.main;
+            m.startSize = size;
+            // 이미 나와 있는 빔 조각도 같이 굵힌다. 안 그러면 단계가 오를 때 0.4초 동안 굵기·길이가 어긋난다
+            int n = ps.GetParticles(laserFxBuf);
+            for (int j = 0; j < n; j++) laserFxBuf[j].startSize = size;
+            ps.SetParticles(laserFxBuf, n);
+            ps.GetComponent<ParticleSystemRenderer>().lengthScale = -length / size;
         }
     }
 
