@@ -27,7 +27,7 @@ public class ChargeCastBarUI : MonoBehaviour
     public Color fallbackFillColor = new Color(0.45f, 1f, 0.55f, 1f); // 장판이 색을 안 주면 쓰는 값
     public float fillAlpha = 0.95f;
 
-    public int promptFontSize = 24;
+    public int promptFontSize = 30;
 
     RectTransform container;
     RectTransform root;
@@ -103,12 +103,13 @@ public class ChargeCastBarUI : MonoBehaviour
         RectTransform tr = (RectTransform)t.transform;
         tr.SetParent(container, false);
         tr.anchorMin = tr.anchorMax = tr.pivot = new Vector2(0.5f, 0.5f);
-        tr.sizeDelta = new Vector2(400f, 40f);
+        tr.sizeDelta = new Vector2(700f, 50f);
         prompt = t.GetComponent<Text>();
         prompt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         prompt.fontSize = promptFontSize;
         prompt.fontStyle = FontStyle.Bold;
         prompt.alignment = TextAnchor.MiddleCenter;
+        prompt.horizontalOverflow = HorizontalWrapMode.Overflow; // 문구가 길어도 줄바꿈 없이
         prompt.color = Color.white;
         prompt.raycastTarget = false;
         Outline o = t.GetComponent<Outline>();

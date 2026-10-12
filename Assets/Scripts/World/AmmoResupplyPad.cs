@@ -10,7 +10,7 @@ public class AmmoResupplyPad : MonoBehaviour, IChargePad
 
     // 캐스팅바 색은 장판 재질에서 가져온다. 나중에 장판 색을 바꾸면 바도 같이 따라간다
     public Color BarColor { get { return barColor; } }
-    public string Prompt { get { return playerInside ? "[E] 탄약 보급" : null; } }
+    public string Prompt { get { return playerInside ? "[E] 길게 눌러 탄약 보급" : null; } }
 
     bool playerInside;
     PlayerCombat playerCombat;

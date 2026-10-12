@@ -12,7 +12,7 @@ public class Portal : MonoBehaviour, IChargePad
 
     public float Progress { get { return holdTime > 0f ? Mathf.Clamp01(holdProgress / holdTime) : 0f; } }
     public Color BarColor { get { return openColor; } }
-    public string Prompt { get { return player != null && IsOpen && destination != null && InReach() ? "[E] 포탈 진입" : null; } }
+    public string Prompt { get { return player != null && IsOpen && destination != null && InReach() ? "[E] 길게 눌러 포탈 진입" : null; } }
 
     public Transform destination;
     public Portal destinationPortal;
