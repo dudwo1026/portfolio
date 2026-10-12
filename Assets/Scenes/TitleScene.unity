@@ -701,7 +701,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000061035156, y: 0.000030517578}
+  m_AnchoredPosition: {x: 0.000061035156, y: 0.000061035156}
   m_SizeDelta: {x: 0.000061035156, y: 0.000030517578}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &302154849
@@ -722,6 +722,7 @@ MonoBehaviour:
   - {fileID: 1444140515}
   vertical: 0
   defaultIndex: 0
+  startUnselected: 1
   selectedScale: 1.15
 --- !u!1 &557358913
 GameObject:
@@ -2158,6 +2159,7 @@ GameObject:
   - component: {fileID: 1937793385}
   - component: {fileID: 1937793387}
   - component: {fileID: 1937793386}
+  - component: {fileID: 1937793388}
   m_Layer: 0
   m_Name: Menu
   m_TagString: Untagged
@@ -2230,6 +2232,28 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1937793388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1937793384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b97085926115334498d2de48aef8c46d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ConfirmSelector
+  buttons:
+  - {fileID: 218746973}
+  - {fileID: 1381047686}
+  - {fileID: 1308866669}
+  - {fileID: 885559730}
+  - {fileID: 157641503}
+  vertical: 1
+  defaultIndex: 0
+  startUnselected: 1
+  selectedScale: 1.15
 --- !u!1 &2051425125
 GameObject:
   m_ObjectHideFlags: 0
