@@ -19,7 +19,7 @@ public class PlayerCombat : MonoBehaviour
     public float meleeRadius = 0.8f;
 
     public float bulletSpeed = 30f; // 20 -> 30 (1.5배). 주무기와 권총이 같이 쓴다
-    public float muzzleLift = 0.3f; // 총구를 몸 중심보다 이만큼 올린다. 아래 Muzzle() 참고
+    public float muzzleLift = 0.25f; // 총구를 몸 중심보다 이만큼 올린다. 아래 Muzzle() 참고
     // 총알 사거리 = bulletSpeed * bulletLifeTime. 탄속을 30으로 올렸으므로
     // 사거리를 예전과 같은 60으로 유지하려면 수명은 2초여야 한다 (30 * 2 = 60)
     public float bulletLifeTime = 2f;
