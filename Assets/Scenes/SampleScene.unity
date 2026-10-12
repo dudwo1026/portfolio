@@ -20286,7 +20286,7 @@ MonoBehaviour:
   - {fileID: 1248517111}
   keysRequired: 7
   firstKeyAt: 20
-  gaugeStep: 40
+  gaugeStep: 25
   keyColor: {r: 1, g: 0.8, b: 0.1, a: 1}
   spinSpeed: 90
   countLabel: {fileID: 80719181}
@@ -20805,13 +20805,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edcfb4f012c32734d8436bd3d9d476b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KillGauge
-  maxValue: 300
+  maxValue: 200
   normalKillValue: 1
   eliteKillValue: 5
   unlockAt:
-  - 50
-  - 100
-  - 200
+  - 35
+  - 70
+  - 135
   spawnersPerStep: 2
   maxSpawners: 6
   eliteSpawner: {fileID: 2142319068}
@@ -20828,13 +20828,13 @@ MonoBehaviour:
   glowMaxAlpha: 0.85
   glowPulseSpeed: 3
   warnAt:
-  - 50
-  - 100
-  - 200
-  - 250
+  - 35
+  - 70
+  - 135
+  - 170
   warnMessage: "\uC801\uB4E4\uC758 \uACF5\uC138\uAC00 \uB354\uC6B1 \uAC70\uC138\uC9D1\uB2C8\uB2E4"
   warn: {fileID: 709672956}
-  eliteHuntAt: 250
+  eliteHuntAt: 170
 --- !u!114 &1176907072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -34193,7 +34193,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 0/300
+  m_Text: 0/200
 --- !u!222 &1966276105
 CanvasRenderer:
   m_ObjectHideFlags: 0

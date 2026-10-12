@@ -1,20 +1,20 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// 처치 게이지. 일반몹 1, 정예몹 10씩 오르고, 일정 구간마다 정예 스포너가 열린다.
+// 처치 게이지. 일반몹 1, 정예몹 5씩 오르고, 일정 구간마다 정예 스포너가 열린다.
 // 가득 차면 게이지바가 빛난다 (가득 찼을 때의 이벤트는 추후 구현).
 public class KillGauge : MonoBehaviour
 {
     public static KillGauge Instance;
 
     [Header("게이지")]
-    public float maxValue = 300f;
+    public float maxValue = 200f;
     public float normalKillValue = 1f;
     public float eliteKillValue = 5f;
 
     [Header("정예 스포너 개방")]
-    public float[] unlockAt = { 50f, 100f, 200f }; // 게이지가 각 값에 닿을 때마다
-    public int spawnersPerStep = 2;     // 이만큼씩 열린다 (50 → 2, 100 → 4, 200 → 6)
+    public float[] unlockAt = { 35f, 70f, 135f }; // 게이지가 각 값에 닿을 때마다
+    public int spawnersPerStep = 2;     // 이만큼씩 열린다 (35 → 2, 70 → 4, 135 → 6)
     public int maxSpawners = 6;
     public EliteSpawner eliteSpawner;
 
@@ -38,7 +38,7 @@ public class KillGauge : MonoBehaviour
     public float glowPulseSpeed = 3f;
 
     [Header("공세 경보")]
-    public float[] warnAt = { 50f, 100f, 200f, 250f }; // 게이지가 각 값을 넘는 순간 경보
+    public float[] warnAt = { 35f, 70f, 135f, 170f }; // 게이지가 각 값을 넘는 순간 경보
     public string warnMessage = "적들의 공세가 더욱 거세집니다";
     public HudMessage warn;              // 화면 중상단, 빨간 글씨
 
@@ -49,7 +49,7 @@ public class KillGauge : MonoBehaviour
     public System.Action onFull; // 추후 이벤트 연결 지점
 
     // 이 값부터 정예는 발견 절차 없이 생성되자마자 추격한다 (넘는 순간 살아 있는 정예도 전부)
-    public float eliteHuntAt = 250f;
+    public float eliteHuntAt = 170f;
     public bool EliteHunt { get { return Value >= eliteHuntAt; } }
 
     bool wasFull;
