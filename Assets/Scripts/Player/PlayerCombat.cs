@@ -60,6 +60,7 @@ public class PlayerCombat : MonoBehaviour
     // 최대 차지 때 밝기 배율. 빔 재질이 매우 밝아(HDR x4.75) 원래 밝기로는 붉은 기가 넘쳐 노랗게 보인다.
     // 밝기를 낮춰야 코랄이 진하게 남는다
     public float laserChargedBrightness = 0.5f;
+    public float laserTopStageTint = 0.5f; // 2단 → 3단 색 변화를 이 비율만큼만 (1이면 3단 = laserChargedColor 그대로)
     GameObject laserFx;
     ParticleSystem[] laserFxAll;
     Vector4[] laserFxBaseHsv;        // 부위별 원래 색 (h, s, v, a)
@@ -365,11 +366,18 @@ void Awake()
         }
     }
 
-    // 1단 굵기 = 원래 색, 최대 굵기 = laserChargedColor. 사이는 굵기 비율대로 (2단은 60% 지점)
+    // 1단 굵기 = 원래 색, 최대 굵기 = laserChargedColor 쪽. 사이는 굵기 비율대로 (2단은 60% 지점).
+    // 2단 → 3단 구간은 laserTopStageTint만큼만 옮겨 3단이 2단과 너무 동떨어지지 않게 한다 (0.5면 3단 = 80% 지점)
     void TintLaserFx(float width)
     {
-        float minWidth = laserWidth * (laserRampBySecond != null && laserRampBySecond.Length > 0 ? laserRampBySecond[0] : 1f);
+        bool hasRamp = laserRampBySecond != null && laserRampBySecond.Length > 0;
+        float minWidth = laserWidth * (hasRamp ? laserRampBySecond[0] : 1f);
         float t = Mathf.InverseLerp(minWidth, laserWidth, width);
+        if (hasRamp && laserRampBySecond.Length > 2)
+        {
+            float t2 = Mathf.InverseLerp(minWidth, laserWidth, laserWidth * laserRampBySecond[1]);
+            if (t > t2) t = t2 + (t - t2) * laserTopStageTint;
+        }
         if (Mathf.Abs(t - laserFxTint) < 0.01f) return;
         laserFxTint = t;
 
