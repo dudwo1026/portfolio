@@ -58,6 +58,7 @@ public class PlayerCombat : MonoBehaviour
     // 떼거나 장전·대시 등으로 끊기면 처음(50%)부터 다시
     public float[] laserRampBySecond = { 0.5f, 0.8f, 1f };
     bool laserFiring;
+    bool waitFireRelease; // 일시정지가 풀린 뒤 좌클릭을 한 번 뗄 때까지 공격 막음
     float laserStartTime;
     Vector3 laserDir; // 쏘기 시작한 순간의 방향. 떼기 전까지 이 방향으로만 나간다
 
@@ -136,7 +137,9 @@ void Awake()
 
     void Update()
     {
-        if (Time.timeScale == 0f) return; // 일시정지(확인창·게임오버) 중에는 입력을 받지 않는다 (버튼 클릭이 사격으로 새지 않게)
+        // 일시정지(가이드·메뉴·확인창·게임오버) 중에는 입력을 받지 않는다. 풀린 뒤에도 그 클릭을 쥔 채라면
+        // 소총·레이저가 바로 쏴 버리므로, 좌클릭을 한 번 뗄 때까지 공격을 막는다
+        if (Time.timeScale == 0f) { waitFireRelease = true; secondaryFireBuffered = false; return; }
         Keyboard kb = Keyboard.current;
         if (kb != null)
         {
@@ -152,6 +155,9 @@ void Awake()
 
         Mouse mouse = Mouse.current;
         if (mouse == null) return;
+        if (waitFireRelease && !mouse.leftButton.isPressed) waitFireRelease = false;
+        bool attackHeld = !waitFireRelease && mouse.leftButton.isPressed;
+        bool attackClicked = !waitFireRelease && mouse.leftButton.wasPressedThisFrame;
 
         if (laserFiring) { } // 레이저를 쏘는 동안은 처음 방향을 유지한다 (이동은 된다)
         else if (mouse.rightButton.isPressed)
@@ -161,7 +167,7 @@ void Awake()
 
         laserTick = Mathf.Max(0f, laserTick - Time.deltaTime);
         bool laserMode = currentSlot == WeaponSlot.Primary && primaryWeapon == PrimaryWeapon.Laser;
-        UpdateLaser(laserMode && mouse.leftButton.isPressed);
+        UpdateLaser(laserMode && attackHeld);
 
         bool firePressed;
         if (laserMode)
@@ -170,7 +176,7 @@ void Awake()
         }
         else if (currentSlot == WeaponSlot.Primary && primaryWeapon != PrimaryWeapon.Shotgun)
         {
-            firePressed = mouse.leftButton.isPressed; // 소총은 꾹 누르면 연사
+            firePressed = attackHeld; // 소총은 꾹 누르면 연사
         }
         else if (currentSlot != WeaponSlot.Melee) // 권총, 산탄총: 1클릭 1발
         {
@@ -178,12 +184,12 @@ void Awake()
             // 실제 연사력이 쿨다운이 아니라 "내 클릭 주기의 배수"로 결정됐다
             // (초당 5번 누르면 오히려 초당 2발로 떨어졌음).
             // 이제 그 클릭을 하나만 기억해 뒀다가 쿨다운이 풀리는 즉시 쏜다.
-            if (mouse.leftButton.wasPressedThisFrame) secondaryFireBuffered = true;
+            if (attackClicked) secondaryFireBuffered = true;
             firePressed = secondaryFireBuffered;
         }
         else
         {
-            firePressed = mouse.leftButton.wasPressedThisFrame; // 근접은 예전 그대로
+            firePressed = attackClicked; // 근접은 예전 그대로
         }
 
         if (firePressed && Time.time >= nextFireTime)
