@@ -61,6 +61,8 @@ public class PlayerCombat : MonoBehaviour
     // 밝기를 낮춰야 코랄이 진하게 남는다
     public float laserChargedBrightness = 0.5f;
     public float laserTopStageTint = 0.5f; // 2단 → 3단 색 변화를 이 비율만큼만 (1이면 3단 = laserChargedColor 그대로)
+    public float laserShimmer = 0.08f;     // 보이는 굵기가 이 비율(±)만큼 일렁인다
+    public float laserShimmerSpeed = 18f;  // 일렁임 빠르기
     GameObject laserFx;
     ParticleSystem[] laserFxAll;
     Vector4[] laserFxBaseHsv;        // 부위별 원래 색 (h, s, v, a)
@@ -349,8 +351,11 @@ void Awake()
         }
 
         laserFx.transform.SetPositionAndRotation(origin, Quaternion.FromToRotation(Vector3.up, dir));
-        TintLaserFx(width);
+        TintLaserFx(width); // 색은 일렁임 전 굵기로 정한다. 일렁인 값으로 정하면 색까지 깜빡인다
         if (laserFxWidest <= 0f) return;
+
+        // 보이는 굵기만 미세하게 일렁인다 (판정 굵기 laserRadius는 그대로)
+        width *= 1f + laserShimmer * (Mathf.PerlinNoise(Time.time * laserShimmerSpeed, 0.37f) * 2f - 1f);
 
         for (int i = 0; i < laserFxBeams.Length; i++)
         {
@@ -386,6 +391,7 @@ void Awake()
         for (int i = 0; i < laserFxAll.Length; i++)
         {
             Vector4 b = laserFxBaseHsv[i];
+            if (b.y < 0.05f) continue; // 무채색 부위(빔 가운데 하얀 심)는 단계가 올라도 하얗게 둔다
             // 채도는 내리지 않는다. 코랄(채도 0.69)이 황금(0.95)보다 옅어서 그대로 섞으면
             // 발광 재질 위에서 하얗게 바래 오히려 연해 보였다
             Color c = Color.HSVToRGB(Mathf.Lerp(b.x, ch, t), Mathf.Lerp(b.y, Mathf.Max(b.y, cs), t), b.z * Mathf.Lerp(1f, laserChargedBrightness, t));
