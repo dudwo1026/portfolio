@@ -1,7 +1,18 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class Portal : MonoBehaviour
+// 열린 포탈 가까이(interactRadius)에서 E를 holdTime 동안 누르고 있으면 들어간다 (보급 장판과 같은 방식).
+// 진행도는 IChargePad로 내보내 장판 캐스팅바를 같이 쓴다. 떼거나 멀어지면 0부터
+public class Portal : MonoBehaviour, IChargePad
 {
+    public float interactRadius = 2.5f;  // 포탈 면에서 이 거리 안
+    public float holdTime = 0.5f;
+    float holdProgress;
+    Transform player;
+
+    public float Progress { get { return holdTime > 0f ? Mathf.Clamp01(holdProgress / holdTime) : 0f; } }
+    public Color BarColor { get { return openColor; } }
+
     public Transform destination;
     public Portal destinationPortal;
     public Vector3 exitDirection = Vector3.forward;
@@ -46,6 +57,7 @@ public class Portal : MonoBehaviour
         bool open = IsOpen;
         if (open && !wasOpen && openMessage != null) openMessage.Show(openText);
         wasOpen = open;
+        UpdateHold(open);
 
         if (visual == null) return;
         if (runtimeMat == null) runtimeMat = visual.material; // 이 포탈만의 인스턴스 재질
@@ -60,23 +72,50 @@ public class Portal : MonoBehaviour
         runtimeMat.color = Color.Lerp(openColor * 0.6f, openColor, t); // 열리면 맥동
     }
 
-void OnTriggerEnter(Collider other)
+    void UpdateHold(bool open)
     {
-        if (destination == null) return;
-        if (!IsOpen) return;
-        if (other.GetComponent<PlayerCombat>() == null) return; // players only - enemies can't use portals
-        if (Time.time < readyTime) return;
+        if (player == null)
+        {
+            GameObject p = GameObject.Find("Player");
+            if (p == null) return;
+            player = p.transform;
+        }
 
+        bool held = Keyboard.current != null && Keyboard.current.eKey.isPressed;
+        if (!open || destination == null || !held || Time.time < readyTime || !InReach())
+        {
+            holdProgress = 0f;
+            return;
+        }
+
+        holdProgress += Time.deltaTime;
+        if (holdProgress < holdTime) return;
+        holdProgress = 0f;
+        Enter(player);
+    }
+
+    // 포탈은 얇고 넓은 판이라 중심이 아니라 판 표면에서 잰다
+    bool InReach()
+    {
+        Collider c = GetComponent<Collider>();
+        Vector3 nearest = c != null ? c.bounds.ClosestPoint(player.position) : transform.position;
+        Vector3 d = player.position - nearest;
+        d.y = 0f;
+        return d.sqrMagnitude <= interactRadius * interactRadius;
+    }
+
+    void Enter(Transform who)
+    {
         if (confirmPanel != null)
         {
             // 바로 보내지 않고 묻는다. 멈춘 동안 화면은 흐리게
-            pending = other.transform;
+            pending = who;
             confirmPanel.SetActive(true);
             if (blurVolume != null) blurVolume.weight = 1f;
             Time.timeScale = 0f;
             return;
         }
-        Teleport(other.transform);
+        Teleport(who);
     }
 
     // 확인창 버튼에서 부른다
@@ -87,7 +126,7 @@ void OnTriggerEnter(Collider other)
         pending = null;
     }
 
-    // 아니오: 그 자리에 남는다. 다시 묻게 하려면 포탈에서 나갔다 들어와야 한다
+    // 아니오: 그 자리에 남는다. 다시 들어가려면 E를 다시 누르고 있으면 된다
     public void ConfirmNo()
     {
         CloseConfirm();
