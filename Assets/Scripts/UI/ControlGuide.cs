@@ -17,14 +17,14 @@ public class ControlGuide : MonoBehaviour
         "조준|[RMB] 누르고 있기\n공격|[LMB]\n유탄 발사|[F]\n재장전|[R]\n무기 교체|[1][2][3]",
         "상호작용|[E] 누르고 있기\n소모품|[Ctrl]",
     };
-    // 조작 가이드 뒤에 이어지는 진행 가이드. 그림(있으면) + 아래 설명 한 줄
+    // 조작 가이드 뒤에 이어지는 진행 가이드 한 장. 줄마다 그림(있으면) + 오른쪽 설명
     [TextArea(2, 4)]
     public string[] storyPages =
     {
-        "몬스터를 쓰러뜨리면 우상단의 <color=#FFC83C>혼돈 게이지</color>가 누적됩니다.",
-        "게이지가 누적될 때마다 맵 어딘가에 <color=#FFC83C>열쇠</color>가 등장합니다.",
-        "<color=#FFC83C>혼돈 게이지 최대치</color> + <color=#FFC83C>모든 열쇠 수집</color> 시 옥상으로 향하는 문이 열립니다.",
-        "옥상에서 당신을 기다리고 있는 <color=#FF5A4A>보스</color>를 마주하고 쓰러뜨리세요.",
+        "몬스터를 쓰러뜨리면 우상단의\n<color=#FFC83C>혼돈 게이지</color>가 누적됩니다.",
+        "게이지가 누적될 때마다\n맵 어딘가에 <color=#FFC83C>열쇠</color>가 등장합니다.",
+        "<color=#FFC83C>혼돈 게이지 최대치</color> + <color=#FFC83C>모든 열쇠 수집</color>\n시 옥상으로 향하는 문이 열립니다.",
+        "옥상에서 당신을 기다리고 있는\n<color=#FF5A4A>보스</color>를 마주하고 쓰러뜨리세요.",
     };
     public Sprite[] storyImages; // storyPages와 같은 순서. 비어 있으면 글만
 
@@ -38,8 +38,11 @@ public class ControlGuide : MonoBehaviour
     const float KeyHeight = 60f;
     const float Gap = 10f;
 
+    static readonly Vector2 ControlBoxSize = new Vector2(940f, 560f);
+    static readonly Vector2 StoryBoxSize = new Vector2(940f, 660f); // 2x2 칸이 들어가게 조금 더 높다
+
     GameObject panel;
-    RectTransform body;
+    RectTransform box, body;
     Text title;
     Font font;
     Sprite keycap, mouseLeft, mouseRight;
@@ -71,17 +74,18 @@ public class ControlGuide : MonoBehaviour
         bool next = (kb != null && (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame))
                     || (mouse != null && mouse.leftButton.wasPressedThisFrame);
         if (!next) return;
-        if (page + 1 < pages.Length + storyPages.Length) Show(page + 1);
+        if (page < pages.Length) Show(page + 1); // 마지막 조작 장 다음은 진행 가이드
         else Close();
     }
 
-    // 0..pages-1 = 조작 가이드, 그 뒤 = 진행 가이드
+    // 0..pages-1 = 조작 가이드, 마지막 한 장 = 진행 가이드
     void Show(int i)
     {
         page = i;
         for (int c = body.childCount - 1; c >= 0; c--) Destroy(body.GetChild(c).gameObject);
 
-        if (i >= pages.Length) { ShowStory(i - pages.Length); return; }
+        if (i >= pages.Length) { ShowStory(); return; }
+        box.sizeDelta = ControlBoxSize;
         title.text = "조작 가이드  (" + (i + 1) + " / " + pages.Length + ")";
 
         string[] lines = pages[i].Split('\n');
@@ -97,25 +101,33 @@ public class ControlGuide : MonoBehaviour
         }
     }
 
-    // 그림은 760x280 안에 비율을 지켜 맞추고, 설명은 그 아래. 그림이 없으면 설명만 가운데
-    void ShowStory(int s)
+    // 진행 가이드 한 장. 2x2 칸을 왼→오, 위→아래 순서로 채운다.
+    // 칸마다 위에 그림(400x140 안에 비율 유지), 아래에 설명. 그림이 없는 칸은 설명만 가운데
+    void ShowStory()
     {
-        title.text = "게임 진행  (" + (s + 1) + " / " + storyPages.Length + ")";
-        Sprite img = storyImages != null && s < storyImages.Length ? storyImages[s] : null;
-        if (img != null)
+        box.sizeDelta = StoryBoxSize;
+        title.text = "게임 진행";
+        const float cellW = 430f, cellH = 220f, picW = 400f, picH = 140f;
+        for (int s = 0; s < storyPages.Length; s++)
         {
-            float scale = Mathf.Min(760f / img.rect.width, 280f / img.rect.height);
-            Image pic = NewImage("Picture", img);
-            RectTransform r = pic.rectTransform;
-            r.sizeDelta = new Vector2(img.rect.width * scale, img.rect.height * scale);
-            r.anchoredPosition = new Vector2(0f, 45f);
-            Outline o = pic.gameObject.AddComponent<Outline>();
-            o.effectColor = new Color(0.6f, 0.6f, 0.65f, 1f);
-            o.effectDistance = new Vector2(2f, -2f);
+            Vector2 cell = new Vector2((s % 2 - 0.5f) * cellW, (0.5f - s / 2) * cellH);
+            Sprite img = storyImages != null && s < storyImages.Length ? storyImages[s] : null;
+            if (img != null)
+            {
+                float scale = Mathf.Min(picW / img.rect.width, picH / img.rect.height);
+                Image pic = NewImage("Picture", img);
+                RectTransform r = pic.rectTransform;
+                r.sizeDelta = new Vector2(img.rect.width * scale, img.rect.height * scale);
+                r.anchoredPosition = cell + new Vector2(0f, 32f);
+                Outline o = pic.gameObject.AddComponent<Outline>();
+                o.effectColor = new Color(0.6f, 0.6f, 0.65f, 1f);
+                o.effectDistance = new Vector2(2f, -2f);
+            }
+            Text t = NewText("Story", body, 24, new Vector2(picW, 70f), cell + new Vector2(0f, img != null ? -75f : 0f), TextAnchor.MiddleCenter);
+            t.horizontalOverflow = HorizontalWrapMode.Wrap;
+            t.verticalOverflow = VerticalWrapMode.Overflow; // 줄이 넘쳐도 잘리지 않게
+            t.text = storyPages[s];
         }
-        Text t = NewText("Story", body, 30, new Vector2(840f, 90f), new Vector2(0f, img != null ? -140f : 0f), TextAnchor.MiddleCenter);
-        t.horizontalOverflow = HorizontalWrapMode.Wrap;
-        t.text = storyPages[s];
     }
 
     // "[W][A] 누르고 있기" → 키캡, 키캡, 글자. 이름 칸 오른쪽(-20)부터 왼쪽 정렬로 늘어놓는다
@@ -200,15 +212,18 @@ public class ControlGuide : MonoBehaviour
         panel.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.6f);
         pr.SetAsLastSibling();
 
-        RectTransform box = NewRect("Box", pr, new Vector2(940f, 560f), Vector2.zero);
+        box = NewRect("Box", pr, ControlBoxSize, Vector2.zero);
         box.gameObject.AddComponent<Image>().color = new Color(0.08f, 0.08f, 0.1f, 0.95f);
         Outline ol = box.gameObject.AddComponent<Outline>();
         ol.effectColor = new Color(0.6f, 0.6f, 0.65f, 1f);
         ol.effectDistance = new Vector2(3f, -3f);
 
-        title = NewText("Title", box, 38, new Vector2(860f, 60f), new Vector2(0f, 230f), TextAnchor.MiddleCenter);
+        // 제목은 위, 안내는 아래 가장자리에 붙인다 — 진행 가이드에서 창 높이가 달라져도 따라간다
+        title = NewText("Title", box, 38, new Vector2(860f, 60f), new Vector2(0f, -50f), TextAnchor.MiddleCenter);
+        title.rectTransform.anchorMin = title.rectTransform.anchorMax = new Vector2(0.5f, 1f);
         body = NewRect("Body", box, new Vector2(860f, 340f), new Vector2(0f, 5f));
-        Text hint = NewText("Hint", box, 24, new Vector2(860f, 40f), new Vector2(0f, -240f), TextAnchor.MiddleCenter);
+        Text hint = NewText("Hint", box, 24, new Vector2(860f, 40f), new Vector2(0f, 40f), TextAnchor.MiddleCenter);
+        hint.rectTransform.anchorMin = hint.rectTransform.anchorMax = new Vector2(0.5f, 0f);
         hint.text = "Enter / 좌클릭: 다음      ESC: 건너뛰기";
         hint.color = new Color(0.7f, 0.7f, 0.75f, 1f);
     }

@@ -372,7 +372,7 @@ Transform:
   m_GameObject: {fileID: 14298232}
   serializedVersion: 2
   m_LocalRotation: {x: 0.34202012, y: -0.000000029802319, z: -0.0000000074505797, w: 0.9396926}
-  m_LocalPosition: {x: -0.13529277, y: 0.6523111, z: -0.000002026558}
+  m_LocalPosition: {x: 0.095667854, y: 0.6523111, z: 0.09566783}
   m_LocalScale: {x: 2.3581781, y: 3.3786454, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -20983,15 +20983,15 @@ MonoBehaviour:
     \uBC1C\uC0AC|[F]\n\uC7AC\uC7A5\uC804|[R]\n\uBB34\uAE30 \uAD50\uCCB4|[1][2][3]"
   - "\uC0C1\uD638\uC791\uC6A9|[E] \uB204\uB974\uACE0 \uC788\uAE30\n\uC18C\uBAA8\uD488|[Ctrl]"
   storyPages:
-  - "\uBAAC\uC2A4\uD130\uB97C \uC4F0\uB7EC\uB728\uB9AC\uBA74 \uC6B0\uC0C1\uB2E8\uC758
-    <color=#FFC83C>\uD63C\uB3C8 \uAC8C\uC774\uC9C0</color>\uAC00 \uB204\uC801\uB429\uB2C8\uB2E4."
-  - "\uAC8C\uC774\uC9C0\uAC00 \uB204\uC801\uB420 \uB54C\uB9C8\uB2E4 \uB9F5 \uC5B4\uB518\uAC00\uC5D0
+  - "\uBAAC\uC2A4\uD130\uB97C \uC4F0\uB7EC\uB728\uB9AC\uBA74 \uC6B0\uC0C1\uB2E8\uC758\n<color=#FFC83C>\uD63C\uB3C8
+    \uAC8C\uC774\uC9C0</color>\uAC00 \uB204\uC801\uB429\uB2C8\uB2E4."
+  - "\uAC8C\uC774\uC9C0\uAC00 \uB204\uC801\uB420 \uB54C\uB9C8\uB2E4\n\uB9F5 \uC5B4\uB518\uAC00\uC5D0
     <color=#FFC83C>\uC5F4\uC1E0</color>\uAC00 \uB4F1\uC7A5\uD569\uB2C8\uB2E4."
   - "<color=#FFC83C>\uD63C\uB3C8 \uAC8C\uC774\uC9C0 \uCD5C\uB300\uCE58</color> +
-    <color=#FFC83C>\uBAA8\uB4E0 \uC5F4\uC1E0 \uC218\uC9D1</color> \uC2DC \uC625\uC0C1\uC73C\uB85C
+    <color=#FFC83C>\uBAA8\uB4E0 \uC5F4\uC1E0 \uC218\uC9D1</color>\n\uC2DC \uC625\uC0C1\uC73C\uB85C
     \uD5A5\uD558\uB294 \uBB38\uC774 \uC5F4\uB9BD\uB2C8\uB2E4."
-  - "\uC625\uC0C1\uC5D0\uC11C \uB2F9\uC2E0\uC744 \uAE30\uB2E4\uB9AC\uACE0 \uC788\uB294
-    <color=#FF5A4A>\uBCF4\uC2A4</color>\uB97C \uB9C8\uC8FC\uD558\uACE0 \uC4F0\uB7EC\uB728\uB9AC\uC138\uC694."
+  - "\uC625\uC0C1\uC5D0\uC11C \uB2F9\uC2E0\uC744 \uAE30\uB2E4\uB9AC\uACE0 \uC788\uB294\n<color=#FF5A4A>\uBCF4\uC2A4</color>\uB97C
+    \uB9C8\uC8FC\uD558\uACE0 \uC4F0\uB7EC\uB728\uB9AC\uC138\uC694."
   storyImages:
   - {fileID: 21300000, guid: cb704432554264c43ba4fe01f7e1facb, type: 3}
   - {fileID: 21300000, guid: 1df557ddf0450a041b5e11753b6405fb, type: 3}
