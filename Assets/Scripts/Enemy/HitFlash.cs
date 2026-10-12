@@ -9,7 +9,7 @@ using UnityEngine;
 //    보스는 방어 모드에서 _BaseColor를 바꿔 칠하므로 그쪽은 건드리지 않는다
 public class HitFlash : MonoBehaviour
 {
-    public float peak = 0.45f;      // 맞은 순간 하얀색을 섞는 비율 (0~1)
+    public float peak = 0.3f;       // 맞은 순간 하얀색을 섞는 비율 (0~1)
     public float duration = 0.1f;   // 이 시간에 걸쳐 0으로 돌아온다
     public Color color = Color.white;
     public float meshEmission = 0.6f; // 메쉬는 발광이라 같은 비율이면 약해 보인다. 여기에 곱한다
