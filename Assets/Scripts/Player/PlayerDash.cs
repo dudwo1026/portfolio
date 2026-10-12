@@ -72,6 +72,8 @@ public class PlayerDash : MonoBehaviour
 
     // 대시는 한 프레임에 0.34씩 건너뛴다. 난간·울타리처럼 얇은 콜라이더는 그 사이로 그냥 통과한다.
     // 움직이기 전에 몸통을 쓸어보고, 막힌 만큼 잘라낸다.
+    const float WalkableNormalY = 0.5f; // 법선 y가 이 이상이면 바닥(경사 60° 이하)
+
     float AllowedStep(float step)
     {
         const float skin = 0.06f;
@@ -82,6 +84,10 @@ public class PlayerDash : MonoBehaviour
         for (int i = 0; i < hits.Length; i++)
         {
             if (Blocked(hits[i].collider) == false) continue;
+            // 위를 향한 면은 벽이 아니라 밟고 설 바닥이다. 높이는 PlayerGroundSnap이 맞춘다.
+            // 보도블록 타일(Set_B_Tiles)은 블록 사이에 비스듬한 홈이 파여 있어서, 캡슐 바닥이
+            // 그 경사(법선 y 0.8)에 걸리면 정면 벽으로 읽혀 대시가 그 자리에서 끊겼다
+            if (hits[i].normal.y >= WalkableNormalY) continue;
             // 벽에 붙어 옆으로 대시하는 중이면 막지 않는다. 정면으로 파고들 때만 자른다
             if (Vector3.Dot(hits[i].normal, dashDir) > -0.1f) continue;
             float d = hits[i].distance - skin;

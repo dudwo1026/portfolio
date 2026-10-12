@@ -22,6 +22,7 @@ public class PlayerGroundSnap : MonoBehaviour
     CapsuleCollider capsule;
     PlayerAirborne airborne;
     TopDownMove mover;
+    PlayerDash dash;
     float fallSpeed;
 
     void Awake()
@@ -30,6 +31,7 @@ public class PlayerGroundSnap : MonoBehaviour
         capsule = GetComponent<CapsuleCollider>();
         airborne = GetComponent<PlayerAirborne>();
         mover = GetComponent<TopDownMove>();
+        dash = GetComponent<PlayerDash>();
     }
 
     void FixedUpdate()
@@ -121,7 +123,8 @@ public class PlayerGroundSnap : MonoBehaviour
     {
         if (stepAhead <= 0f || mover == null) return float.NegativeInfinity;
 
-        Vector3 dir = mover.MoveDirection;
+        // 대시 중에는 TopDownMove가 잠겨 MoveDirection이 0이다. 대시 방향으로 앞을 짚는다
+        Vector3 dir = dash != null && dash.IsDashing ? dash.DashDirection : mover.MoveDirection;
         dir.y = 0f;
         if (dir.sqrMagnitude < 0.0001f) return float.NegativeInfinity;
         dir.Normalize();
