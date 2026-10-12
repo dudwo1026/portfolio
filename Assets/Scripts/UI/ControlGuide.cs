@@ -17,6 +17,17 @@ public class ControlGuide : MonoBehaviour
         "조준|[RMB] 누르고 있기\n공격|[LMB]\n유탄 발사|[F]\n재장전|[R]\n무기 교체|[1][2][3]",
         "상호작용|[E] 누르고 있기\n소모품|[Ctrl]",
     };
+    // 조작 가이드 뒤에 이어지는 진행 가이드. 그림(있으면) + 아래 설명 한 줄
+    [TextArea(2, 4)]
+    public string[] storyPages =
+    {
+        "몬스터를 쓰러뜨리면 우상단의 <color=#FFC83C>혼돈 게이지</color>가 누적됩니다.",
+        "게이지가 누적될 때마다 맵 어딘가에 <color=#FFC83C>열쇠</color>가 등장합니다.",
+        "<color=#FFC83C>혼돈 게이지 최대치</color> + <color=#FFC83C>모든 열쇠 수집</color> 시 옥상으로 향하는 문이 열립니다.",
+        "옥상에서 당신을 기다리고 있는 <color=#FF5A4A>보스</color>를 마주하고 쓰러뜨리세요.",
+    };
+    public Sprite[] storyImages; // storyPages와 같은 순서. 비어 있으면 글만
+
     public bool onlyFromTitle = true; // 게임 씬을 바로 플레이할 때(테스트)는 띄우지 않는다
     // 뜬 직후 이 시간(실시간) 동안은 입력을 무시한다. 무기 선택 화면에서 연타한 Enter·클릭이
     // 씬이 넘어오자마자 처리돼 가이드를 넘겨 버리는 것을 막는다
@@ -60,16 +71,18 @@ public class ControlGuide : MonoBehaviour
         bool next = (kb != null && (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame))
                     || (mouse != null && mouse.leftButton.wasPressedThisFrame);
         if (!next) return;
-        if (page + 1 < pages.Length) Show(page + 1);
+        if (page + 1 < pages.Length + storyPages.Length) Show(page + 1);
         else Close();
     }
 
+    // 0..pages-1 = 조작 가이드, 그 뒤 = 진행 가이드
     void Show(int i)
     {
         page = i;
-        title.text = "조작 가이드  (" + (i + 1) + " / " + pages.Length + ")";
-
         for (int c = body.childCount - 1; c >= 0; c--) Destroy(body.GetChild(c).gameObject);
+
+        if (i >= pages.Length) { ShowStory(i - pages.Length); return; }
+        title.text = "조작 가이드  (" + (i + 1) + " / " + pages.Length + ")";
 
         string[] lines = pages[i].Split('\n');
         float y = (lines.Length - 1) * RowHeight * 0.5f;
@@ -82,6 +95,27 @@ public class ControlGuide : MonoBehaviour
             if (parts.Length > 1) BuildRow(parts[1], y);
             y -= RowHeight;
         }
+    }
+
+    // 그림은 760x280 안에 비율을 지켜 맞추고, 설명은 그 아래. 그림이 없으면 설명만 가운데
+    void ShowStory(int s)
+    {
+        title.text = "게임 진행  (" + (s + 1) + " / " + storyPages.Length + ")";
+        Sprite img = storyImages != null && s < storyImages.Length ? storyImages[s] : null;
+        if (img != null)
+        {
+            float scale = Mathf.Min(760f / img.rect.width, 280f / img.rect.height);
+            Image pic = NewImage("Picture", img);
+            RectTransform r = pic.rectTransform;
+            r.sizeDelta = new Vector2(img.rect.width * scale, img.rect.height * scale);
+            r.anchoredPosition = new Vector2(0f, 45f);
+            Outline o = pic.gameObject.AddComponent<Outline>();
+            o.effectColor = new Color(0.6f, 0.6f, 0.65f, 1f);
+            o.effectDistance = new Vector2(2f, -2f);
+        }
+        Text t = NewText("Story", body, 30, new Vector2(840f, 90f), new Vector2(0f, img != null ? -140f : 0f), TextAnchor.MiddleCenter);
+        t.horizontalOverflow = HorizontalWrapMode.Wrap;
+        t.text = storyPages[s];
     }
 
     // "[W][A] 누르고 있기" → 키캡, 키캡, 글자. 이름 칸 오른쪽(-20)부터 왼쪽 정렬로 늘어놓는다
