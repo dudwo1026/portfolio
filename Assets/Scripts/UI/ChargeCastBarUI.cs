@@ -117,7 +117,7 @@ public class ChargeCastBarUI : MonoBehaviour
         prompt.alignment = TextAnchor.MiddleCenter;
         prompt.horizontalOverflow = HorizontalWrapMode.Overflow; // 문구가 길어도 줄바꿈 없이
         prompt.verticalOverflow = VerticalWrapMode.Overflow;
-        prompt.lineSpacing = 1.5f; // 이름 줄과 "[E] 홀드" 줄 사이를 띄운다
+        prompt.lineSpacing = 1.3f; // 이름 줄과 "[E] 홀드" 줄 사이를 띄운다
         prompt.color = Color.white;
         prompt.raycastTarget = false;
         Outline o = t.GetComponent<Outline>();
