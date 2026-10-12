@@ -7,6 +7,7 @@ public interface IChargePad
 {
     float Progress { get; }  // 0~1
     Color BarColor { get; }  // 캐스팅바 색. 보통 장판 자기 색을 그대로 돌려준다
+    string Prompt { get; }   // 상호작용 가능 거리 안이면 안내 문구, 아니면 null
 }
 
 // 보급 장판 공통 캐스팅바. E를 누르고 있는 동안 플레이어 머리 위에 원형 게이지가 찬다.
@@ -26,8 +27,11 @@ public class ChargeCastBarUI : MonoBehaviour
     public Color fallbackFillColor = new Color(0.45f, 1f, 0.55f, 1f); // 장판이 색을 안 주면 쓰는 값
     public float fillAlpha = 0.95f;
 
+    public int promptFontSize = 24;
+
     RectTransform container;
     RectTransform root;
+    Text prompt; // 상호작용 거리 안에 들어가면 "[E] ..." 안내. 링 바로 위
     Image track;
     Image fill;
     Sprite ringSprite;
@@ -94,6 +98,23 @@ public class ChargeCastBarUI : MonoBehaviour
         fill.fillAmount = 0f;
 
         root.gameObject.SetActive(false);
+
+        GameObject t = new GameObject("Prompt", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text), typeof(Outline));
+        RectTransform tr = (RectTransform)t.transform;
+        tr.SetParent(container, false);
+        tr.anchorMin = tr.anchorMax = tr.pivot = new Vector2(0.5f, 0.5f);
+        tr.sizeDelta = new Vector2(400f, 40f);
+        prompt = t.GetComponent<Text>();
+        prompt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        prompt.fontSize = promptFontSize;
+        prompt.fontStyle = FontStyle.Bold;
+        prompt.alignment = TextAnchor.MiddleCenter;
+        prompt.color = Color.white;
+        prompt.raycastTarget = false;
+        Outline o = t.GetComponent<Outline>();
+        o.effectColor = Color.black;
+        o.effectDistance = new Vector2(2f, -2f);
+        t.SetActive(false);
     }
 
     Image NewImage(string goName, RectTransform parent, Color color)
@@ -115,6 +136,10 @@ public class ChargeCastBarUI : MonoBehaviour
     void LateUpdate()
     {
         if (root == null) return;
+        if (viewCamera == null) viewCamera = Camera.main;
+        if (viewCamera == null || player == null) return;
+
+        UpdatePrompt();
 
         IChargePad active = ActivePad();
         if (active == null)
@@ -122,9 +147,6 @@ public class ChargeCastBarUI : MonoBehaviour
             if (root.gameObject.activeSelf) root.gameObject.SetActive(false);
             return;
         }
-
-        if (viewCamera == null) viewCamera = Camera.main;
-        if (viewCamera == null || player == null) return;
 
         if (!root.gameObject.activeSelf) root.gameObject.SetActive(true);
         fill.fillAmount = active.Progress;
@@ -135,6 +157,21 @@ public class ChargeCastBarUI : MonoBehaviour
         fill.color = c;
 
         Place();
+    }
+
+    // 거리 안에 든 것 하나의 안내 문구를 링 바로 위에 띄운다
+    void UpdatePrompt()
+    {
+        string text = null;
+        for (int i = 0; i < pads.Count && text == null; i++) text = pads[i].Prompt;
+
+        bool show = !string.IsNullOrEmpty(text);
+        if (prompt.gameObject.activeSelf != show) prompt.gameObject.SetActive(show);
+        if (!show) return;
+
+        prompt.text = text;
+        Vector2 local;
+        if (HeadLocal(out local)) ((RectTransform)prompt.transform).anchoredPosition = local + new Vector2(0f, size * 0.5f + 24f);
     }
 
     // 진행 중인 장판 하나. 두 장판이 겹칠 일이 없으므로 가장 많이 찬 것을 고른다
@@ -153,13 +190,16 @@ public class ChargeCastBarUI : MonoBehaviour
     // 플레이어 머리 위 월드 좌표를 캔버스 좌표로 옮긴다
     void Place()
     {
-        Vector3 world = player.position + Vector3.up * headHeight;
-        Vector3 screen = viewCamera.WorldToScreenPoint(world);
-        if (screen.z <= 0f) return; // 카메라 뒤면 그리지 않는다
-
         Vector2 local;
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(container, screen, null, out local))
-            root.anchoredPosition = local;
+        if (HeadLocal(out local)) root.anchoredPosition = local;
+    }
+
+    bool HeadLocal(out Vector2 local)
+    {
+        local = Vector2.zero;
+        Vector3 screen = viewCamera.WorldToScreenPoint(player.position + Vector3.up * headHeight);
+        if (screen.z <= 0f) return false; // 카메라 뒤면 그리지 않는다
+        return RectTransformUtility.ScreenPointToLocalPointInRectangle(container, screen, null, out local);
     }
 
     // 가운데가 뚫린 링. 스프라이트 에셋을 두지 않으려고 런타임에 그린다

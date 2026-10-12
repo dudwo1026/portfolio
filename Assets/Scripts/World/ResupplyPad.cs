@@ -22,6 +22,8 @@ public class ResupplyPad : MonoBehaviour, IChargePad
 
     // 캐스팅바 색. 장판은 충전 중에 색이 밝아지므로, 기준이 되는 평소 색을 돌려준다
     public Color BarColor { get { return idleColor; } }
+    public string Prompt { get { return player != null && OnPad() ? (usable ? "[E] 회복약 보급" : "회복약이 가득 찼습니다") : null; } }
+    bool usable;
 
     Transform player;
     PlayerConsumables consumables;
@@ -43,7 +45,7 @@ public class ResupplyPad : MonoBehaviour, IChargePad
 
         bool onPad = OnPad();
         // consumables는 기절·에어본 중에 꺼진다. 그 상태에서는 충전도 막는다
-        bool usable = consumables != null && consumables.enabled && !consumables.IsFull;
+        usable = consumables != null && consumables.enabled && !consumables.IsFull;
         bool holding = Keyboard.current != null && Keyboard.current.eKey.isPressed;
 
         if (onPad && usable && holding)
