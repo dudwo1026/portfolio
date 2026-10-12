@@ -19,6 +19,7 @@ public class PlayerCombat : MonoBehaviour
     public float meleeRadius = 0.8f;
 
     public float bulletSpeed = 30f; // 20 -> 30 (1.5배). 주무기와 권총이 같이 쓴다
+    public float muzzleLift = 0.3f; // 총구를 몸 중심보다 이만큼 올린다. 아래 Muzzle() 참고
     // 총알 사거리 = bulletSpeed * bulletLifeTime. 탄속을 30으로 올렸으므로
     // 사거리를 예전과 같은 60으로 유지하려면 수명은 2초여야 한다 (30 * 2 = 60)
     public float bulletLifeTime = 2f;
@@ -218,7 +219,7 @@ void Awake()
         if (!laserFiring) { laserFiring = true; laserDir = transform.forward; laserStartTime = Time.time; } // 쏘기 시작 = 방향 고정
 
         Vector3 dir = laserDir;
-        Vector3 origin = transform.position + dir * 0.8f; // 총알과 같은 총구
+        Vector3 origin = Muzzle(dir); // 총알과 같은 총구
         float length = LaserLength(origin, dir);
 
         if (laserLine == null) laserLine = BuildLaserLine();
@@ -390,11 +391,20 @@ void Fire()
         EnemyAI.AlertGunshot(transform.position, gunshotAlertRadius); // 유탄도 시끄럽다
     }
 
+    // 총구: 몸 앞 0.8, 몸 중심(발 +1.0)보다 muzzleLift만큼 위.
+    // 차도(0.05)와 보도(1.02) 사이 턱이 1.0 가까이 돼서, 몸 중심 높이로 쏘면 차도에서 보도 쪽으로
+    // 쏜 총알·레이저가 턱 옆면에 박혔다. 탄 반지름(0.1)까지 넘기도록 조금 올린다.
+    // 너무 올리면 보도에서 차도의 몹(키 2.6)을 넘겨 버린다
+    Vector3 Muzzle(Vector3 dir)
+    {
+        return transform.position + dir * 0.8f + Vector3.up * muzzleLift;
+    }
+
     void SpawnBullet(float damage, Vector3 dir)
     {
         GameObject bullet = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         bullet.name = "Bullet";
-        bullet.transform.position = transform.position + transform.forward * 0.8f;
+        bullet.transform.position = Muzzle(transform.forward);
         bullet.transform.localScale = Vector3.one * 0.2f;
         bullet.GetComponent<Renderer>().material.color = Color.black;
 
