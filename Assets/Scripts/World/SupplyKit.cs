@@ -11,7 +11,11 @@ public class SupplyKit : MonoBehaviour
     public float bobSpeed = 2f;
     public float spinSpeed = 45f;
     public float pickupRadius = 1.2f;  // 트리거가 놓쳐도 이 거리면 줍는다
+    public float lifetime = 15f;       // 이 시간 안에 안 주우면 사라진다
+    public float blinkFor = 5f;        // 사라지기 전 이 시간 동안 깜빡인다
+    public float blinkInterval = 0.15f;
 
+    float age;
     float baseY;
     float bobPhase;
     Transform player;
@@ -61,6 +65,11 @@ public class SupplyKit : MonoBehaviour
 
     void Update()
     {
+        age += Time.deltaTime;
+        if (age >= lifetime) { Destroy(gameObject); return; }
+        float left = lifetime - age;
+        if (left <= blinkFor) GetComponent<Renderer>().enabled = Mathf.FloorToInt(left / blinkInterval) % 2 == 0;
+
         bobPhase += Time.deltaTime * bobSpeed;
         Vector3 pos = transform.position;
         pos.y = baseY + Mathf.Sin(bobPhase) * bobAmplitude;
