@@ -24,7 +24,7 @@ public class ControlGuide : MonoBehaviour
         "몬스터를 쓰러뜨리면 우상단의\n<color=#FFC83C>혼돈 게이지</color>가 누적됩니다.",
         "게이지가 누적될 때마다\n맵 어딘가에 <color=#FFC83C>열쇠</color>가 등장합니다.",
         "<color=#FFC83C>혼돈 게이지 최대치</color> + <color=#FFC83C>모든 열쇠 수집</color>\n시 옥상으로 향하는 문이 열립니다.",
-        "옥상에서 당신을 기다리고 있는\n<color=#FF5A4A>보스</color>를 마주하고 쓰러뜨리세요.",
+        "옥상에서 당신을 기다리고 있는 <color=#FF5A4A>보스</color>를 마주하고 쓰러뜨리세요.",
     };
     public Sprite[] storyImages; // storyPages와 같은 순서. 비어 있으면 글만
 
@@ -39,13 +39,13 @@ public class ControlGuide : MonoBehaviour
     const float Gap = 10f;
 
     static readonly Vector2 ControlBoxSize = new Vector2(940f, 560f);
-    static readonly Vector2 StoryBoxSize = new Vector2(940f, 660f); // 2x2 칸이 들어가게 조금 더 높다
+    static readonly Vector2 StoryBoxSize = new Vector2(1700f, 800f); // 사진 세 장을 가로로 크게 놓는다
 
     GameObject panel;
     RectTransform box, body;
     Text title;
     Font font;
-    Sprite keycap, mouseLeft, mouseRight;
+    Sprite keycap, mouseLeft, mouseRight, arrowHead;
     readonly List<Texture2D> textures = new List<Texture2D>();
     int page;
 
@@ -101,33 +101,79 @@ public class ControlGuide : MonoBehaviour
         }
     }
 
-    // 진행 가이드 한 장. 2x2 칸을 왼→오, 위→아래 순서로 채운다.
-    // 칸마다 위에 그림(400x140 안에 비율 유지), 아래에 설명. 그림이 없는 칸은 설명만 가운데
+    // 진행 가이드 한 장. 마지막 줄을 뺀 단계들은 윗줄에 가로로 늘어놓고 → 로 잇는다.
+    // 칸마다 위에 그림(액자 FrameW x FrameH 안에 비율 유지), 아래에 설명.
+    // 마지막 줄(보스)은 맨 아래 가운데 한 줄. 마지막 칸 밑에서 꺾인 화살표가 그리로 이어진다
     void ShowStory()
     {
         box.sizeDelta = StoryBoxSize;
         title.text = "게임 진행";
-        const float cellW = 430f, cellH = 220f, picW = 400f, picH = 140f;
-        for (int s = 0; s < storyPages.Length; s++)
+        const float spacing = 530f, frameW = 460f, frameH = 220f, picY = 150f, textY = -25f, finalY = -230f;
+        int steps = storyPages.Length - 1;
+        float firstX = -(steps - 1) * spacing * 0.5f;
+
+        for (int s = 0; s < steps; s++)
         {
-            Vector2 cell = new Vector2((s % 2 - 0.5f) * cellW, (0.5f - s / 2) * cellH);
+            float x = firstX + s * spacing;
+            Image frame = NewImage("Frame", null);
+            frame.color = new Color(0f, 0f, 0f, 0.35f);
+            frame.rectTransform.sizeDelta = new Vector2(frameW, frameH);
+            frame.rectTransform.anchoredPosition = new Vector2(x, picY);
+            Outline o = frame.gameObject.AddComponent<Outline>();
+            o.effectColor = new Color(0.6f, 0.6f, 0.65f, 1f);
+            o.effectDistance = new Vector2(2f, -2f);
+
             Sprite img = storyImages != null && s < storyImages.Length ? storyImages[s] : null;
             if (img != null)
             {
-                float scale = Mathf.Min(picW / img.rect.width, picH / img.rect.height);
+                float scale = Mathf.Min(frameW / img.rect.width, frameH / img.rect.height);
                 Image pic = NewImage("Picture", img);
-                RectTransform r = pic.rectTransform;
-                r.sizeDelta = new Vector2(img.rect.width * scale, img.rect.height * scale);
-                r.anchoredPosition = cell + new Vector2(0f, 32f);
-                Outline o = pic.gameObject.AddComponent<Outline>();
-                o.effectColor = new Color(0.6f, 0.6f, 0.65f, 1f);
-                o.effectDistance = new Vector2(2f, -2f);
+                pic.rectTransform.sizeDelta = new Vector2(img.rect.width * scale, img.rect.height * scale);
+                pic.rectTransform.anchoredPosition = new Vector2(x, picY);
             }
-            Text t = NewText("Story", body, 24, new Vector2(picW, 70f), cell + new Vector2(0f, img != null ? -75f : 0f), TextAnchor.MiddleCenter);
+
+            Text t = NewText("Story", body, 26, new Vector2(spacing - 10f, 80f), new Vector2(x, textY), TextAnchor.MiddleCenter);
             t.horizontalOverflow = HorizontalWrapMode.Wrap;
             t.verticalOverflow = VerticalWrapMode.Overflow; // 줄이 넘쳐도 잘리지 않게
             t.text = storyPages[s];
+
+            // 다음 칸으로: 액자 사이 틈 가운데에 →
+            if (s + 1 < steps) Arrow(new Vector2(x + spacing * 0.5f - 25f, picY), new Vector2(x + spacing * 0.5f + 25f, picY));
         }
+
+        Text fin = NewText("Final", body, 32, new Vector2(1500f, 60f), new Vector2(0f, finalY), TextAnchor.MiddleCenter);
+        fin.text = storyPages[steps];
+
+        // 마지막 칸 설명 밑에서 아래로 내려와, 왼쪽으로 꺾여 보스 안내 끝에 닿는다
+        float lastX = firstX + (steps - 1) * spacing;
+        float tipX = fin.preferredWidth * 0.5f + 18f;
+        Segment(new Vector2(lastX, textY - 50f), new Vector2(lastX, finalY));
+        Arrow(new Vector2(lastX, finalY), new Vector2(tipX, finalY));
+    }
+
+    static readonly Color ArrowColor = new Color(0.75f, 0.85f, 1f, 1f);
+    const float ArrowThick = 5f, HeadSize = 24f;
+
+    // from → to. 촉 끝이 to에 닿는다
+    void Arrow(Vector2 from, Vector2 to)
+    {
+        Vector2 dir = (to - from).normalized;
+        Segment(from, to - dir * (HeadSize - 4f));
+        Image head = NewImage("ArrowHead", arrowHead);
+        head.color = ArrowColor;
+        RectTransform r = head.rectTransform;
+        r.sizeDelta = new Vector2(HeadSize, HeadSize);
+        r.anchoredPosition = to - dir * HeadSize * 0.5f;
+        r.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
+    }
+
+    // 가로·세로 선분. 끝을 두께 절반만큼 늘려 꺾이는 곳이 이어져 보이게 한다
+    void Segment(Vector2 a, Vector2 b)
+    {
+        Image line = NewImage("ArrowLine", null);
+        line.color = ArrowColor;
+        line.rectTransform.sizeDelta = new Vector2(Mathf.Abs(b.x - a.x) + ArrowThick, Mathf.Abs(b.y - a.y) + ArrowThick);
+        line.rectTransform.anchoredPosition = (a + b) * 0.5f;
     }
 
     // "[W][A] 누르고 있기" → 키캡, 키캡, 글자. 이름 칸 오른쪽(-20)부터 왼쪽 정렬로 늘어놓는다
@@ -203,6 +249,7 @@ public class ControlGuide : MonoBehaviour
         keycap = KeycapSprite();
         mouseLeft = MouseSprite(true);
         mouseRight = MouseSprite(false);
+        arrowHead = ArrowHeadSprite();
 
         panel = new GameObject("ControlGuide", typeof(RectTransform), typeof(Image));
         RectTransform pr = (RectTransform)panel.transform;
@@ -321,6 +368,26 @@ public class ControlGuide : MonoBehaviour
         tex.SetPixels(px);
         tex.Apply();
         return Sprite.Create(tex, new Rect(0, 0, W, H), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    // 화살촉: 오른쪽을 가리키는 삼각형. 돌려서 다른 방향에도 쓴다
+    Sprite ArrowHeadSprite()
+    {
+        const int S = 32;
+        Texture2D tex = NewTexture(S, S);
+        Color[] px = new Color[S * S];
+        for (int y = 0; y < S; y++)
+            for (int x = 0; x < S; x++)
+            {
+                float fx = x + 0.5f, fy = Mathf.Abs(y + 0.5f - S * 0.5f);
+                // 왼쪽 변(x=2)과 두 빗변 (2,±15)→(30,0) 안쪽까지의 거리. 1px만 부드럽게
+                float slant = ((30f - fx) * 15f / 28f - fy) * 28f / Mathf.Sqrt(28f * 28f + 15f * 15f);
+                float a = Mathf.Clamp01(Mathf.Min(fx - 2f, slant) + 0.5f);
+                px[y * S + x] = new Color(1f, 1f, 1f, a);
+            }
+        tex.SetPixels(px);
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, S, S), new Vector2(0.5f, 0.5f), 100f);
     }
 
     Texture2D NewTexture(int w, int h)

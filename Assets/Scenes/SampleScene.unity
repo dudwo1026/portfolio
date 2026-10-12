@@ -20990,8 +20990,8 @@ MonoBehaviour:
   - "<color=#FFC83C>\uD63C\uB3C8 \uAC8C\uC774\uC9C0 \uCD5C\uB300\uCE58</color> +
     <color=#FFC83C>\uBAA8\uB4E0 \uC5F4\uC1E0 \uC218\uC9D1</color>\n\uC2DC \uC625\uC0C1\uC73C\uB85C
     \uD5A5\uD558\uB294 \uBB38\uC774 \uC5F4\uB9BD\uB2C8\uB2E4."
-  - "\uC625\uC0C1\uC5D0\uC11C \uB2F9\uC2E0\uC744 \uAE30\uB2E4\uB9AC\uACE0 \uC788\uB294\n<color=#FF5A4A>\uBCF4\uC2A4</color>\uB97C
-    \uB9C8\uC8FC\uD558\uACE0 \uC4F0\uB7EC\uB728\uB9AC\uC138\uC694."
+  - "\uC625\uC0C1\uC5D0\uC11C \uB2F9\uC2E0\uC744 \uAE30\uB2E4\uB9AC\uACE0 \uC788\uB294
+    <color=#FF5A4A>\uBCF4\uC2A4</color>\uB97C \uB9C8\uC8FC\uD558\uACE0 \uC4F0\uB7EC\uB728\uB9AC\uC138\uC694."
   storyImages:
   - {fileID: 21300000, guid: cb704432554264c43ba4fe01f7e1facb, type: 3}
   - {fileID: 21300000, guid: 1df557ddf0450a041b5e11753b6405fb, type: 3}
