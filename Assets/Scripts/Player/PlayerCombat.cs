@@ -54,7 +54,16 @@ public class PlayerCombat : MonoBehaviour
     public float laserWidthChangeTime = 0.15f; // 단계가 오를 때 이 시간에 걸쳐 굵어진다
     public Color laserColor = new Color(0.1f, 0.55f, 1f, 1f); // 이펙트가 없을 때의 단색 선
     public GameObject laserEffectPrefab; // Laser AOE Player. 비워 두면 단색 선(LineRenderer)으로 그린다
+    // 최대 차지 때 이펙트 색. 프리팹은 1단 색(황금)으로 칠해 두고, 굵기와 같은 비율로 이 색 쪽으로 옮겨 간다.
+    // 부위마다 밝기·투명도는 원래대로 두고 색상(H)만 옮긴다 (채도는 더 진해질 때만 따라간다)
+    public Color laserChargedColor = new Color(1f, 0.5f, 0.31f); // 코랄
+    // 최대 차지 때 밝기 배율. 빔 재질이 매우 밝아(HDR x4.75) 원래 밝기로는 붉은 기가 넘쳐 노랗게 보인다.
+    // 밝기를 낮춰야 코랄이 진하게 남는다
+    public float laserChargedBrightness = 0.5f;
     GameObject laserFx;
+    ParticleSystem[] laserFxAll;
+    Vector4[] laserFxBaseHsv;        // 부위별 원래 색 (h, s, v, a)
+    float laserFxTint = -1f;         // 마지막으로 칠한 차지 비율. 바뀔 때만 다시 칠한다
     ParticleSystem[] laserFxBeams;   // 빔 = 늘림 배율이 음수인 파티클. 굵기·길이를 매 프레임 맞춘다
     float[] laserFxBeamSizes;        // 프리팹 원래 크기. 가장 굵은 빔이 laserWidth가 되도록 같은 비율로 줄인다
     float laserFxWidest;
@@ -325,9 +334,21 @@ void Awake()
                 laserFxWidest = Mathf.Max(laserFxWidest, laserFxBeamSizes[i]);
             }
             if (laserFxBuf == null) laserFxBuf = new ParticleSystem.Particle[64];
+
+            laserFxAll = laserFx.GetComponentsInChildren<ParticleSystem>();
+            laserFxBaseHsv = new Vector4[laserFxAll.Length];
+            for (int i = 0; i < laserFxAll.Length; i++)
+            {
+                Color c = laserFxAll[i].main.startColor.color;
+                float h, s, v;
+                Color.RGBToHSV(c, out h, out s, out v);
+                laserFxBaseHsv[i] = new Vector4(h, s, v, c.a);
+            }
+            laserFxTint = -1f;
         }
 
         laserFx.transform.SetPositionAndRotation(origin, Quaternion.FromToRotation(Vector3.up, dir));
+        TintLaserFx(width);
         if (laserFxWidest <= 0f) return;
 
         for (int i = 0; i < laserFxBeams.Length; i++)
@@ -341,6 +362,28 @@ void Awake()
             for (int j = 0; j < n; j++) laserFxBuf[j].startSize = size;
             ps.SetParticles(laserFxBuf, n);
             ps.GetComponent<ParticleSystemRenderer>().lengthScale = -length / size;
+        }
+    }
+
+    // 1단 굵기 = 원래 색, 최대 굵기 = laserChargedColor. 사이는 굵기 비율대로 (2단은 60% 지점)
+    void TintLaserFx(float width)
+    {
+        float minWidth = laserWidth * (laserRampBySecond != null && laserRampBySecond.Length > 0 ? laserRampBySecond[0] : 1f);
+        float t = Mathf.InverseLerp(minWidth, laserWidth, width);
+        if (Mathf.Abs(t - laserFxTint) < 0.01f) return;
+        laserFxTint = t;
+
+        float ch, cs, cv;
+        Color.RGBToHSV(laserChargedColor, out ch, out cs, out cv);
+        for (int i = 0; i < laserFxAll.Length; i++)
+        {
+            Vector4 b = laserFxBaseHsv[i];
+            // 채도는 내리지 않는다. 코랄(채도 0.69)이 황금(0.95)보다 옅어서 그대로 섞으면
+            // 발광 재질 위에서 하얗게 바래 오히려 연해 보였다
+            Color c = Color.HSVToRGB(Mathf.Lerp(b.x, ch, t), Mathf.Lerp(b.y, Mathf.Max(b.y, cs), t), b.z * Mathf.Lerp(1f, laserChargedBrightness, t));
+            c.a = b.w;
+            ParticleSystem.MainModule m = laserFxAll[i].main;
+            m.startColor = c;
         }
     }
 
