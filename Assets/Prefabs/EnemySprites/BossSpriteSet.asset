@@ -25,8 +25,8 @@ MonoBehaviour:
     footCenterPx: 186
     sizeScale: 1
   - texture: {fileID: 2800000, guid: 9ebdbb1b75c204f4e9fb472d494d7cde, type: 3}
-    charHeightPx: 343
-    charBottomPx: 7
+    charHeightPx: 338
+    charBottomPx: 12
     footCenterPx: 188
     sizeScale: 1
   - texture: {fileID: 2800000, guid: ff2d2043df0e13049a757428c1a9bb81, type: 3}
@@ -35,8 +35,8 @@ MonoBehaviour:
     footCenterPx: 189.5
     sizeScale: 1
   - texture: {fileID: 2800000, guid: 52091200b6b15e14ea31fe9892318be1, type: 3}
-    charHeightPx: 341
-    charBottomPx: 7
+    charHeightPx: 337
+    charBottomPx: 11
     footCenterPx: 187
     sizeScale: 1
   - texture: {fileID: 2800000, guid: eb1fcce21b04bdf4181ea437050c9e10, type: 3}
