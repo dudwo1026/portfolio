@@ -8,6 +8,7 @@ using UnityEngine;
 // 도화선이 붙기 전에 죽이면 대신 '처치 폭발'이 난다. 플레이어에게는 피해가 없고
 // 주변 적만 쓸어버리므로, 원거리에서 먼저 잡아내는 것이 손해가 아니라 보상이 된다.
 // 도화선이 붙은 뒤에 죽이면 그 자리에서 바로 자폭한다 (붙어서 잡는다고 피할 수 없다).
+// 노말은 explodeWhenKilledLit을 꺼서, 터지기 전에만 잡으면 점화 전과 똑같이 처치 폭발로 끝난다.
 [RequireComponent(typeof(EnemyAI))]
 public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
 {
@@ -26,6 +27,8 @@ public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
     public float damagePercent = 20f;    // 플레이어 최대 체력 대비 %
     public float tauntDuration = 30f;     // 도발: 자폭 실행 시 항상 부여
     public float confusionDuration = 8f;  // 혼란: 폭발 대미지를 입었을 때만 추가로 부여
+    // 점화된 뒤 폭발 전에 죽으면 그 자리에서 자폭한다. 끄면 점화 전과 똑같이 처치 폭발만 난다 (노말)
+    public bool explodeWhenKilledLit = true;
 
     [Header("처치 폭발")]
     // 도화선이 붙기 전(lit == false)에 죽었을 때만 터진다.
@@ -80,7 +83,7 @@ public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
     {
         if (exploded) return;
         if (selfHealth == null || selfHealth.CurrentHealth > 0f) return;
-        if (lit) Explode();
+        if (lit && explodeWhenKilledLit) Explode();
         else DeathBlast();
     }
 

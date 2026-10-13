@@ -50,7 +50,12 @@ public static class NormalDifficulty
         if (erupt != null) { erupt.cooldown *= ElitePatternCooldownScale; erupt.weakenDuration = WeakenDuration; erupt.damagePercent *= dmg; }
 
         EliteSelfDestructPattern bomb = ai.GetComponent<EliteSelfDestructPattern>();
-        if (bomb != null) { bomb.confusionDuration = ConfusionDuration; bomb.tauntDuration = TauntDuration; bomb.damagePercent *= dmg; } // deathBlastDamage는 몹만 맞는다
+        if (bomb != null)
+        {
+            bomb.confusionDuration = ConfusionDuration; bomb.tauntDuration = TauntDuration;
+            bomb.damagePercent *= dmg;          // deathBlastDamage는 몹만 맞는다
+            bomb.explodeWhenKilledLit = false;  // 점화돼도 터지기 전에 잡으면 자폭하지 않는다
+        }
 
         if (!boss) return;
         BossMeleeAttack melee = ai.GetComponent<BossMeleeAttack>();
