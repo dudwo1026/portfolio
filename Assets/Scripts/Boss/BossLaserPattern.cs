@@ -18,6 +18,7 @@ public class BossLaserPattern : MonoBehaviour
     // 각속도로 고정하면 거리에 따라 체감이 달라지므로, 선속도 기준으로 매 프레임 환산한다
     public float trackLinearSpeed = 6f;
     public bool matchPlayerMoveSpeed = true; // 켜면 플레이어의 실제 이동속도를 그대로 따라간다
+    public float trackSpeedScale = 1f;       // 위 속도에 곱한다. 1보다 작으면 계속 움직이는 플레이어를 놓친다 (노말 0.8)
 
     [Header("피해")]
     public float damagePerSecond = 100f;
@@ -220,7 +221,7 @@ public class BossLaserPattern : MonoBehaviour
             d.y = 0f;
             dist = Mathf.Max(0.5f, d.magnitude);
         }
-        return speed / dist; // rad/s
+        return speed * trackSpeedScale / dist; // rad/s
     }
 
     Vector3 FlatDirTo(Vector3 point)

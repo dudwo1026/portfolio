@@ -16,6 +16,16 @@ public static class NormalDifficulty
     public const float EliteRespawnDelay = 45f;   // 정예 재등장 (하드 30초)
     public const float ElitePatternCooldownScale = 1.25f; // 정예 특수패턴 쿨타임 (A 20→25, B·C 15→19, D 4→5, E 13→16)
 
+    // 보스 패턴
+    public const float BossPatternCooldownAdd = 4f;   // 분신·운석·충격파·레이저 쿨타임 18~23 → 22~27초
+    public const float BossPatternCooldownFloor = 8f; // 페이즈가 올라도 이 밑으로는 안 줄어든다 (하드 5초)
+    public const float BossMeleeCooldownAdd = 2f;     // 근접 6 → 8초
+    public const float BossLaserTrackScale = 0.8f;    // 레이저가 플레이어 이동속도의 80%로만 따라온다
+    public const int BossMeteorBaseCount = 3;         // 운석 4개 → 3개부터 (페이즈마다 +1은 그대로)
+    public const float BossShockwaveMinInterval = 0.4f; // 충격파 점프 최소 간격 0.25 → 0.4초
+    public const float BossGuardRecast = 40f;         // 방어 토템 재시전 30 → 40초
+    public const float BossGuardHealMultiplier = 0f;  // 방어 중 맞으면 하드는 맞은 양의 2배를 회복. 노말은 무적만
+
     // 정예 상태이상 시간 (하드 → 노말)
     public const float StunDuration = 1.5f;       // C 기절 2초
     // D 실명은 노말에서 아예 없다 (실명탄을 쏘지 않는다)
@@ -63,17 +73,45 @@ public static class NormalDifficulty
         }
 
         if (!boss) return;
+        const float cdAdd = BossPatternCooldownAdd, cdFloor = BossPatternCooldownFloor;
+
         BossMeleeAttack melee = ai.GetComponent<BossMeleeAttack>();
-        if (melee != null) melee.damage *= dmg;
+        if (melee != null) { melee.damage *= dmg; melee.cooldown += BossMeleeCooldownAdd; }
+
         BossClonePattern clone = ai.GetComponent<BossClonePattern>();
-        if (clone != null) { clone.cloneDamage *= dmg; clone.moleDamage *= dmg; }
+        if (clone != null)
+        {
+            clone.cloneDamage *= dmg; clone.moleDamage *= dmg;
+            clone.cooldownMin += cdAdd; clone.cooldownMax += cdAdd; clone.cooldownFloor = cdFloor;
+        }
+
         BossMeteorPattern meteor = ai.GetComponent<BossMeteorPattern>();
-        if (meteor != null) meteor.damage *= dmg;
+        if (meteor != null)
+        {
+            meteor.damage *= dmg; meteor.baseCount = BossMeteorBaseCount;
+            meteor.cooldownMin += cdAdd; meteor.cooldownMax += cdAdd; meteor.cooldownFloor = cdFloor;
+        }
+
         BossShockwavePattern wave = ai.GetComponent<BossShockwavePattern>();
-        if (wave != null) wave.waveDamage *= dmg;
+        if (wave != null)
+        {
+            wave.waveDamage *= dmg; wave.minInterval = BossShockwaveMinInterval;
+            wave.cooldownMin += cdAdd; wave.cooldownMax += cdAdd; wave.cooldownFloor = cdFloor;
+        }
+
         BossLaserPattern laser = ai.GetComponent<BossLaserPattern>();
-        if (laser != null) laser.damagePerSecond *= dmg;
+        if (laser != null)
+        {
+            laser.damagePerSecond *= dmg; laser.trackSpeedScale = BossLaserTrackScale;
+            laser.cooldownMin += cdAdd; laser.cooldownMax += cdAdd; laser.cooldownFloor = cdFloor;
+        }
+
         BossGuardPattern guard = ai.GetComponent<BossGuardPattern>();
-        if (guard != null) guard.totemDamagePercent *= dmg;
+        if (guard != null)
+        {
+            guard.totemDamagePercent *= dmg;
+            guard.recastCooldown = BossGuardRecast;
+            guard.healMultiplier = BossGuardHealMultiplier; // 피해는 계속 무효, 덤 회복만 없앤다
+        }
     }
 }
