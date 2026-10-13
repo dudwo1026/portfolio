@@ -2632,12 +2632,12 @@ MonoBehaviour:
   - {fileID: 2800000, guid: aec9192117eca7946a58d1d4f3498279, type: 3}
   - {fileID: 2800000, guid: 8d1359a9d84c382489da36bfb4dfb3c3, type: 3}
   meteorMaterial: {fileID: 2100000, guid: f85676f9dbde0de4db4e50ca105ce2b7, type: 2}
-  meteorFramesPerSecond: 10
+  meteorFramesPerSecond: 15
   meteorSpriteWidth: 6
   meteorHeadPx: {x: 106, y: 128}
   meteorArtAngle: 204
   spriteFallHeight: 10
-  fallSlant: 1.2
+  fallSlant: 0.17
   meteorLandHeight: 1
   castColor: {r: 1, g: 0.45, b: 0.05, a: 1}
   warningColor: {r: 1, g: 0.25, b: 0.05, a: 1}

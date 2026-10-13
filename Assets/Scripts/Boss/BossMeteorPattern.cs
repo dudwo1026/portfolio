@@ -40,13 +40,15 @@ public class BossMeteorPattern : MonoBehaviour, IBossMotion
     [Header("운석 그림 (비워 두면 구체)")]
     public Texture2D[] meteorFrames;          // 번갈아 재생한다
     public Material meteorMaterial;           // 몹 스프라이트와 같은 재질
-    public float meteorFramesPerSecond = 10f;
+    public float meteorFramesPerSecond = 15f; // 그림 번갈아 재생 속도만. 낙하 시간은 warningDelay
     public float meteorSpriteWidth = 6f;      // 그림 가로 폭(월드). 바위 머리 지름이 약 2.5
     public Vector2 meteorHeadPx = new Vector2(106f, 128f); // 그림 속 바위 머리 중심 (아래에서 위로 px)
     public float meteorArtAngle = 204f;       // 그림 속 진행 방향(도, 화면 오른쪽 = 0, 반시계). 꼬리가 오른쪽 위로 끌린다
     // 그림 운석은 이 높이에서 떨어진다. 카메라가 가까이 내려다봐서 fallHeight(25)에서 떨구면 대부분 화면 밖이다
     public float spriteFallHeight = 10f;
-    public float fallSlant = 1.2f;            // 화면 오른쪽에서 비스듬히 떨어진다. 낙하 높이 대비 가로 거리
+    // 화면 오른쪽 위에서 떨어진다. 낙하 높이 대비 가로 거리. 카메라가 40도 내려다봐서 높이는 화면에 0.77배로 보이므로
+    // 화면상 각도 = atan(0.77 / 이 값). 0.17이면 약 77도
+    public float fallSlant = 0.17f;
     public float meteorLandHeight = 1f;       // 바위 머리가 이 높이에 닿는 순간 터진다
 
     [Header("색")]
