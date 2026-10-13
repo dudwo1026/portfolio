@@ -2674,6 +2674,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac513eab2445a084ea29185607b1bfda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossLaserPattern
+  recoveryTime: 0.45
   cooldownMin: 18
   cooldownMax: 23
   cooldownStepPerPhase: 1
@@ -2696,7 +2697,7 @@ MonoBehaviour:
   beamColor: {r: 1, g: 0.25, b: 0.6, a: 1}
   beamEffectPrefab: {fileID: 7478731271839673279, guid: a81d754f5aa107d4e9816ae2616a778e, type: 3}
   effectLeadTime: 1.7
-  effectOrbitRadius: 4.5
+  effectOrbitRadius: 0.8
   effectCircleScale: 0.525
   effectLift: 0.5
 --- !u!114 &146723436

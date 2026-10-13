@@ -57,8 +57,8 @@ public class BossLaserPattern : MonoBehaviour, IBossMotion
     // 이 값을 바꾸면 그 프리팹의 최상위 버스트 시각(1.2)도 같이 옮겨야 한다
     public float effectLeadTime = 1.7f;
     // 마법진은 보스 주변을 레이저 방향으로 따라 돌고, 레이저는 그 중심에서 나간다.
-    // 보스(한 변 6) 모서리(중심에서 4.24)에 묻히지 않는 거리
-    public float effectOrbitRadius = 4.5f;
+    // 큐브 몸체는 숨기고 스프라이트로 그리므로, 고리가 입 속 빛구슬(발사 장) 위에 겹치는 거리
+    public float effectOrbitRadius = 0.8f;
     // 원본 마법진 지름 약 12.8 → 6.7 (반지름 3.36)
     public float effectCircleScale = 0.525f;
     // 보스 중심은 바닥 위 3이라 반지름 3.36짜리 마법진은 바닥에 박힌다. 그만큼 이펙트를 띄운다 (판정은 평면이라 무관)
