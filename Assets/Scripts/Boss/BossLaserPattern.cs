@@ -61,7 +61,7 @@ public class BossLaserPattern : MonoBehaviour, IBossMotion
     public float effectOrbitRadius = 0.8f;
     // 발사 시작점(입)을 보스 중심에서 월드 기준으로 이만큼 옮긴다 (+X = 동쪽).
     // 판정·길이 측정·워닝도 같은 지점에서 나가므로 보이는 빔과 맞는다
-    public Vector3 muzzleOffset = new Vector3(2f, 0f, 0f);
+    public Vector3 muzzleOffset = new Vector3(1f, 0f, 0f);
     // 마법진은 시작점에서 레이저 방향으로 이만큼 앞에 둔다. 레이저가 마법진을 관통해 나간다
     public float effectCircleForward = 3.7f;
     // 원본 마법진 지름 약 12.8 → 6.7 (반지름 3.36)
