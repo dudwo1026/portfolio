@@ -65,6 +65,8 @@ public class EnemySpriteSet : ScriptableObject
     [Header("좌우 반전")]
     [Tooltip("원본 그림이 화면 왼쪽을 보고 있으면 켠다. 반대로 나오면 끄면 된다")]
     public bool artFacesScreenLeft = true;
+    [Tooltip("켜면 이동·조준과 상관없이 모든 모션이 항상 화면 왼쪽을 본다 (보스)")]
+    public bool alwaysFaceScreenLeft = false;
     [Tooltip("넉백 중 밀려나는 쪽을 보게 한다. 슬라임의 궤적, 고스트의 불꽃처럼 " +
              "진행 방향이 그림에 드러나는 몹에 켠다. 끄면 맞기 직전 방향(= 플레이어 쪽)을 그대로 유지한다")]
     public bool faceKnockbackDirection = false;

@@ -292,7 +292,9 @@ public class EnemySpriteAnimator : MonoBehaviour
         // 스케일 x를 음수로 두면 좌우가 뒤집힌다. 머티리얼이 양면(_Cull Off)이라 그대로 보인다.
         // 가로 보정(offsetX)에도 같은 부호를 곱해야 뒤집힌 그림의 발 위치가 따라온다.
         // 크기는 월드 단위로 계산했으므로 부모가 커져 있으면(보스 큐브 x6) 그만큼 나눠 준다
-        int flip = facing * renderFlip;
+        // 방향 고정 셋은 보던 방향(facing)을 무시하고 항상 화면 왼쪽을 본다
+        int face = set.alwaysFaceScreenLeft ? (set.artFacesScreenLeft ? 1 : -1) : facing;
+        int flip = face * renderFlip;
         Vector3 ps = transform.parent != null ? transform.parent.lossyScale : Vector3.one;
         transform.localScale = new Vector3(quadW * flip / ps.x, quadH / ps.y, 1f / ps.z);
 
