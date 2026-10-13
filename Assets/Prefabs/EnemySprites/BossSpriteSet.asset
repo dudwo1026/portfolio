@@ -158,7 +158,62 @@ MonoBehaviour:
       sizeScale: 1
     hitFrame: 0
     holdFrame: 5
+  - name: Meteor
+    frames:
+    - texture: {fileID: 2800000, guid: 2bcc05a77c6b8a3479c50fee159b16d6, type: 3}
+      charHeightPx: 356.6
+      charBottomPx: 18
+      footCenterPx: 188.4
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 0b82937da166db14c8a9e593b9def497, type: 3}
+      charHeightPx: 349.46802
+      charBottomPx: 7.6400003
+      footCenterPx: 180.632
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 79f68b4a7fd915d41addec077db33127, type: 3}
+      charHeightPx: 345.902
+      charBottomPx: 11.460001
+      footCenterPx: 184.748
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: dfaacc1001960e942acb2e2ac867b1d0, type: 3}
+      charHeightPx: 349.46802
+      charBottomPx: 27.64
+      footCenterPx: 178.632
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: cf9b21cf52d67a540b4a34150a1b499b, type: 3}
+      charHeightPx: 353.034
+      charBottomPx: 25.82
+      footCenterPx: 182.51599
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: c2c7c099e70e2704eb263910cf838550, type: 3}
+      charHeightPx: 353.034
+      charBottomPx: 23.82
+      footCenterPx: 184.51599
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: c7651e6d1acf8234c82e585a24720b47, type: 3}
+      charHeightPx: 349.46802
+      charBottomPx: 19.64
+      footCenterPx: 184.632
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 4b759b9577c0b724e999839c00ceb0ae, type: 3}
+      charHeightPx: 353.034
+      charBottomPx: 21.82
+      footCenterPx: 180.51599
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: ec571e15fc4af0846a1acf3e14531aae, type: 3}
+      charHeightPx: 349.46802
+      charBottomPx: 21.64
+      footCenterPx: 178.632
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: b61ff5ff031c97f4794e057d5e70cdd8, type: 3}
+      charHeightPx: 356.6
+      charBottomPx: 22
+      footCenterPx: 184.4
+      sizeScale: 1
+    hitFrame: 9
+    holdFrame: 0
   characterHeight: 9
+  anchorFeetToIdle: 1
   moveFramesPerSecond: 6
   scaleFpsBySpeed: 1
   referenceSpeed: 2.5

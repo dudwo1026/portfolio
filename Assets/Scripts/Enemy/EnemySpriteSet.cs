@@ -69,6 +69,9 @@ public class EnemySpriteSet : ScriptableObject
     [Header("크기")]
     [Tooltip("그려진 몹의 기준 키(월드 단위). 캡슐 높이 2와 맞춰 두면 콜라이더와 겹친다")]
     public float characterHeight = 2f;
+    [Tooltip("카메라를 마주 보는 판은 기울어 있어서, 세로로 긴 장(빛기둥 등)일수록 발이 카메라 쪽 아래로 밀린다. " +
+             "켜면 대기 첫 장의 높이를 기준으로 그 차이를 되돌려 모든 장의 발을 같은 자리에 둔다 (보스)")]
+    public bool anchorFeetToIdle = false;
 
     [Header("이동 애니메이션")]
     [Tooltip("걸을 때 프레임 전환 속도")]

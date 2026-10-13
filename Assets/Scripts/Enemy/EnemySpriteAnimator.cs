@@ -316,6 +316,15 @@ public class EnemySpriteAnimator : MonoBehaviour
 
     // 쿼드 크기와 위치를 그림 속 몹의 치수에서 매번 계산한다.
     // 이렇게 해 두면 sizeScale을 만져도 발 위치와 가로 정렬이 저절로 따라온다
+    // 대기 첫 장(숨쉬기 없이)의 발~판 중심 거리(월드). anchorFeetToIdle의 기준
+    float IdleFootLift()
+    {
+        EnemySpriteSet.Frame r = set.idleFrames != null && set.idleFrames.Length > 0 ? set.idleFrames[0] : set.idle;
+        if (r == null || r.texture == null) return 0f;
+        float h = set.characterHeight * Mathf.Max(0.01f, r.sizeScale) * r.texture.height / Mathf.Max(1f, r.charHeightPx);
+        return h * 0.5f - (r.charBottomPx / r.texture.height) * h;
+    }
+
     void Apply(EnemySpriteSet.Frame f, bool breathe = false)
     {
         if (f == null || f.texture == null || rend == null) return;
@@ -354,6 +363,14 @@ public class EnemySpriteAnimator : MonoBehaviour
         Camera cam = Camera.main;
         Vector3 screenRight = cam != null ? cam.transform.right : Vector3.right;
         transform.position = basePos + screenRight * (offsetX * flip);
+
+        // 판의 위쪽(transform.up)이 기울어 있으면 발 = 중심 - 판위쪽 x (발~중심 거리) 라서,
+        // 그 거리가 대기 장과 다른 만큼 발이 비스듬히 밀린다. 그 차이만큼 되돌린다
+        if (set.anchorFeetToIdle)
+        {
+            float lift = quadH * 0.5f - (f.charBottomPx / texH) * quadH;
+            transform.position += (transform.up - Vector3.up) * (lift - IdleFootLift());
+        }
 
         if (mpb == null) mpb = new MaterialPropertyBlock();
         rend.GetPropertyBlock(mpb);
