@@ -29,6 +29,9 @@ public class PlayerCombat : MonoBehaviour
     public float meleeKnockbackForce = 4f;
     public float meleeKnockbackDuration = 0.5f;
     public float meleeConeAngle = 120f;
+    public float meleeWindup = 0.15f;   // 누르고 나서 판정이 나가기까지. 이 사이에 대시하면 취소된다
+    float meleeHitAt = -1f;             // 판정 예약 시각 (-1 = 없음)
+    Vector3 meleeDir;                   // 누른 순간의 방향. 선딜 중에 몸을 돌려도 그쪽으로 친다
 
     [Header("근접 연출")]
     public GameObject meleeHitVfx;            // CFXR4 Sword Hit PLAIN (Cross). 맞은 적마다 X자 섬광
@@ -174,6 +177,13 @@ void Awake()
         // 일시정지(가이드·메뉴·확인창·게임오버) 중에는 입력을 받지 않는다. 풀린 뒤에도 그 클릭을 쥔 채라면
         // 소총·레이저가 바로 쏴 버리므로, 좌클릭을 한 번 뗄 때까지 공격을 막는다
         if (Time.timeScale == 0f) { waitFireRelease = true; secondaryFireBuffered = false; return; }
+
+        // 예약된 근접 판정. 선딜 중에 대시하면 그 공격은 나가지 않는다
+        if (meleeHitAt >= 0f)
+        {
+            if (dash != null && dash.IsDashing) meleeHitAt = -1f;
+            else if (Time.time >= meleeHitAt) { meleeHitAt = -1f; MeleeAttack(); }
+        }
         Keyboard kb = Keyboard.current;
         if (kb != null)
         {
@@ -327,6 +337,7 @@ void Awake()
     void OnDisable()
     {
         StopLaserVisual();
+        meleeHitAt = -1f; // 선딜 중에 기절 등으로 꺼지면 그 공격은 버린다
     }
 
     // 이펙트는 위로 뻗는 레이저라 위쪽을 dir로 눕힌다 (보스 레이저와 같은 방식).
@@ -459,7 +470,10 @@ void Fire()
 
         if (currentSlot == WeaponSlot.Melee)
         {
-            MeleeAttack();
+            // 판정은 meleeWindup 뒤에 나간다. 방향은 누른 순간으로 고정
+            meleeDir = transform.forward;
+            if (meleeWindup > 0f) meleeHitAt = Time.time + meleeWindup;
+            else MeleeAttack();
             LastMeleeTime = Time.time; // 근접 모션이 이 시각을 보고 자세를 바꾼다
             if (isBound) bound.Release(); // meleeing breaks the bind
             nextFireTime = Time.time + meleeCooldown;
@@ -578,7 +592,7 @@ void MeleeAttack()
             Vector3 dir = hits[i].transform.position - transform.position;
             dir.y = 0f;
             if (dir.sqrMagnitude < 0.0001f) continue;
-            if (Vector3.Angle(transform.forward, dir) > meleeConeAngle * 0.5f) continue;
+            if (Vector3.Angle(meleeDir, dir) > meleeConeAngle * 0.5f) continue;
 
             // 보스 방어 토템은 근접으로만 부서진다 (Health가 없어 총알·유탄은 통하지 않는다)
             BossTotem totem = hits[i].GetComponent<BossTotem>();
@@ -610,7 +624,7 @@ void MeleeAttack()
         CapsuleCollider capsule = GetComponent<CapsuleCollider>();
         float feet = capsule != null ? transform.position.y - capsule.height * 0.5f * transform.lossyScale.y : transform.position.y - 1f;
         Vector3 ground = new Vector3(transform.position.x, feet + 0.15f, transform.position.z);
-        MeleeSlashArc.Spawn(ground, transform.forward, 0.45f, reach, meleeConeAngle, meleeArcColor,
+        MeleeSlashArc.Spawn(ground, meleeDir, 0.45f, reach, meleeConeAngle, meleeArcColor,
                             meleeArcSweepTime, meleeArcFadeTime, meleeSwingDir);
         meleeSwingDir = -meleeSwingDir;
     }
