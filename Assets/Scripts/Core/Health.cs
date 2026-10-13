@@ -23,6 +23,13 @@ public void TakeDamage(float amount)
     }
 
 
+// 난이도처럼 시작할 때 최대 체력을 바꿀 때. 현재 체력도 가득 채운다
+    public void SetMaxHealth(float value)
+    {
+        maxHealth = value;
+        CurrentHealth = value;
+    }
+
 public void Heal(float amount)
     {
         CurrentHealth = Mathf.Clamp(CurrentHealth + amount, 0f, maxHealth);

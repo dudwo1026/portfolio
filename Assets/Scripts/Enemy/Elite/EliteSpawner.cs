@@ -30,6 +30,7 @@ public class EliteSpawner : MonoBehaviour
 
     void Start()
     {
+        if (NormalDifficulty.Active) respawnDelay = NormalDifficulty.EliteRespawnDelay;
         EnsureArrays();
         FindPlayer();
         for (int i = 0; i < ActiveSlots; i++) Spawn(i);

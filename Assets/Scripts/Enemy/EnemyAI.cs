@@ -140,6 +140,7 @@ public class EnemyAI : MonoBehaviour
         MeasureBody();
         selfHealth = GetComponent<Health>();
         if (selfHealth != null && GetComponent<HitFlash>() == null) gameObject.AddComponent<HitFlash>(); // 맞으면 하얗게
+        NormalDifficulty.ApplyToEnemy(this); // 노말이면 체력·정예 패턴 수치를 낮춘다
         GameObject playerGO = GameObject.Find("Player");
         if (playerGO != null)
         {

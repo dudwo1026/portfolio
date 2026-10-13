@@ -60,6 +60,14 @@ public class KillGauge : MonoBehaviour
     void Awake()
     {
         Instance = this;
+
+        // 노말: 추격 모드를 게이지가 가득 찰 때로 미룬다. 그 순간 뜨던 마지막 공세 경보도 같이 옮긴다
+        if (NormalDifficulty.Active)
+        {
+            for (int i = 0; i < warnAt.Length; i++)
+                if (Mathf.Approximately(warnAt[i], eliteHuntAt)) warnAt[i] = NormalDifficulty.EliteHuntAt;
+            eliteHuntAt = NormalDifficulty.EliteHuntAt;
+        }
     }
 
     void Start()

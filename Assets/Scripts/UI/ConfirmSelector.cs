@@ -15,9 +15,13 @@ public class ConfirmSelector : MonoBehaviour
     public float selectedScale = 1.15f;
 
     int index; // -1 = 아직 아무것도 안 고름
+    // 켜진 프레임에는 입력을 받지 않는다. 앞 화면에서 Enter로 이 창을 열었으면
+    // 같은 프레임의 그 Enter가 여기서도 눌린 것으로 잡혀 첫 버튼이 바로 눌린다
+    int enabledFrame = -1;
 
     void OnEnable()
     {
+        enabledFrame = Time.frameCount;
         if (startUnselected) index = -1;
         else SelectDefault();
         Apply();
@@ -33,6 +37,7 @@ public class ConfirmSelector : MonoBehaviour
     {
         Keyboard kb = Keyboard.current;
         if (kb == null || buttons.Length == 0) return;
+        if (Time.frameCount == enabledFrame) return;
 
         bool prev = vertical ? (kb.upArrowKey.wasPressedThisFrame || kb.wKey.wasPressedThisFrame)
                              : (kb.leftArrowKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame);
