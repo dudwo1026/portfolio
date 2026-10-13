@@ -625,7 +625,7 @@ void MeleeAttack()
         float feet = capsule != null ? transform.position.y - capsule.height * 0.5f * transform.lossyScale.y : transform.position.y - 1f;
         Vector3 ground = new Vector3(transform.position.x, feet + 0.15f, transform.position.z);
         MeleeSlashArc.Spawn(ground, meleeDir, 0.45f, reach, meleeConeAngle, meleeArcColor,
-                            meleeArcSweepTime, meleeArcFadeTime, meleeSwingDir);
+                            meleeArcSweepTime, meleeArcFadeTime, meleeSwingDir, transform);
         meleeSwingDir = -meleeSwingDir;
     }
 

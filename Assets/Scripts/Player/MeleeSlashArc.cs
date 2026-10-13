@@ -13,6 +13,9 @@ public class MeleeSlashArc : MonoBehaviour
 
     float inner, outer, halfAngle, sweepTime, fadeTime, t;
     int direction; // 1 = 왼쪽에서 오른쪽, -1 = 반대
+    // 휘두르는 사람. 움직이면서 쳐도 궤적이 제자리에 남지 않고 따라온다 (방향은 그대로)
+    Transform follow;
+    Vector3 followOffset;
     Color color;
     Mesh mesh;
     Material mat;
@@ -20,7 +23,8 @@ public class MeleeSlashArc : MonoBehaviour
     Color[] colors;
 
     public static void Spawn(Vector3 groundCenter, Vector3 forward, float innerRadius, float outerRadius,
-                             float angle, Color color, float sweepTime, float fadeTime, int direction)
+                             float angle, Color color, float sweepTime, float fadeTime, int direction,
+                             Transform follow = null)
     {
         forward.y = 0f;
         if (forward.sqrMagnitude < 0.0001f) return;
@@ -36,6 +40,8 @@ public class MeleeSlashArc : MonoBehaviour
         a.sweepTime = sweepTime;
         a.fadeTime = fadeTime;
         a.direction = direction >= 0 ? 1 : -1;
+        a.follow = follow;
+        if (follow != null) a.followOffset = groundCenter - follow.position;
         a.Init();
         Destroy(go, sweepTime + fadeTime + 0.05f);
     }
@@ -72,6 +78,12 @@ public class MeleeSlashArc : MonoBehaviour
     {
         t += Time.deltaTime;
         Build();
+    }
+
+    // 플레이어 이동은 FixedUpdate라 Update 시점엔 아직 덜 움직였을 수 있다. 그린 직전에 맞춘다
+    void LateUpdate()
+    {
+        if (follow != null) transform.position = follow.position + followOffset;
     }
 
     void Build()
