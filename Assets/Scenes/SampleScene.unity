@@ -2711,6 +2711,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65ac14c2a23c24f43ba06df8d714ad05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossMeleeAttack
+  followThroughTime: 0.57
   radius: 12
   cooldown: 6
   windupTime: 1.5

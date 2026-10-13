@@ -17,7 +17,7 @@ public class BossMeleeAttack : MonoBehaviour, IBossMotion
             return 1f + Mathf.Clamp01((Time.time - strikeTime) / Mathf.Max(0.01f, followThroughTime));
         }
     }
-    public float followThroughTime = 0.4f; // 타격 뒤 휘두르는 모션 길이
+    public float followThroughTime = 0.57f; // 타격 뒤 휘두르는 모션 길이 (0.4초의 70% 속도)
     float strikeTime = -999f;
 
     public float radius = 10f;
