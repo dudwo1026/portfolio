@@ -42,10 +42,22 @@ public class BossMeleeAttack : MonoBehaviour, IBossMotion
     float strikeTimer;
     bool winding;
 
+    IBossMotion[] motions;
+
     void Awake()
     {
         ai = GetComponent<EnemyAI>();
         rend = GetComponent<Renderer>();
+        motions = GetComponents<IBossMotion>();
+    }
+
+    // 다른 패턴(레이저·운석 등)이 자기 모션을 재생 중인가. 그동안 내려찍으면 모션 없이 판정만 나간다
+    bool OtherMotionActive()
+    {
+        if (motions == null) return false;
+        for (int i = 0; i < motions.Length; i++)
+            if ((object)motions[i] != this && motions[i] != null && motions[i].MotionActive) return true;
+        return false;
     }
 
     // 옥상 입장 직후처럼, 한동안 손을 놓아야 할 때
@@ -67,6 +79,7 @@ public class BossMeleeAttack : MonoBehaviour, IBossMotion
 
         if (ai.IsStunned) return;
         if (Time.time < nextAttackTime) return;
+        if (OtherMotionActive()) return; // 다른 패턴 모션 중에는 시전하지 않는다
 
         Transform p = ai.PlayerTransform;
         if (p == null) return;
@@ -82,6 +95,9 @@ public class BossMeleeAttack : MonoBehaviour, IBossMotion
     void UpdateWindup()
     {
         if (ai.IsStunned) { ClearWarning(); winding = false; return; } // 스턴당하면 취소
+        // 예고 도중 다른 패턴이 시작돼도 취소한다 (그 모션에 가려 내려찍는 모습이 안 보인다).
+        // 쿨타임은 돌려줘서 그 패턴이 끝나면 다시 쓸 수 있다
+        if (OtherMotionActive()) { ClearWarning(); winding = false; nextAttackTime = Time.time; return; }
 
         strikeTimer -= Time.fixedDeltaTime;
         if (strikeTimer > 0f) return;
