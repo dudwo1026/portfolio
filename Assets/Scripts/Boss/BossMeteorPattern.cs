@@ -50,6 +50,9 @@ public class BossMeteorPattern : MonoBehaviour, IBossMotion
     // 화면상 각도 = atan(0.77 / 이 값). 0.17이면 약 77도
     public float fallSlant = 0.17f;
     public float meteorLandHeight = 1f;       // 바위 머리가 이 높이에 닿는 순간 터진다
+    // 보이는 낙하 속도 배율. 워닝~착탄 시간(warningDelay)은 그대로이고,
+    // 운석은 그만큼 늦게 나타나 같은 경로를 더 빨리 떨어진다 (1.5 = 1.5초 중 마지막 1초)
+    public float spriteFallSpeedScale = 1.5f;
 
     [Header("색")]
     public Color castColor = new Color(1f, 0.45f, 0.05f);
@@ -180,6 +183,9 @@ public class BossMeteorPattern : MonoBehaviour, IBossMotion
         Vector3 to = impact + Vector3.up * meteorLandHeight;
         Vector3 from = to + Vector3.up * spriteFallHeight + right * spriteFallHeight * fallSlant;
 
+        float fallTime = warningDelay / Mathf.Max(1f, spriteFallSpeedScale);
+        if (warningDelay > fallTime) yield return new WaitForSeconds(warningDelay - fallTime); // 워닝만 먼저 깔려 있다
+
         GameObject rock = GameObject.CreatePrimitive(PrimitiveType.Quad);
         rock.name = "Meteor";
         Destroy(rock.GetComponent<Collider>()); // 낙하 중에는 부딪히지 않는다
@@ -198,7 +204,7 @@ public class BossMeteorPattern : MonoBehaviour, IBossMotion
             : Vector3.zero;
 
         float t = 0f;
-        while (t < warningDelay)
+        while (t < fallTime)
         {
             t += Time.deltaTime;
             if (rock == null) yield break;
@@ -216,7 +222,7 @@ public class BossMeteorPattern : MonoBehaviour, IBossMotion
                 float pathDeg = Mathf.Atan2(Vector3.Dot(move, cam.transform.up), Vector3.Dot(move, cam.transform.right)) * Mathf.Rad2Deg;
                 rot = rot * Quaternion.Euler(0f, 0f, pathDeg - meteorArtAngle);
             }
-            Vector3 head = Vector3.Lerp(from, to, Mathf.Clamp01(t / warningDelay));
+            Vector3 head = Vector3.Lerp(from, to, Mathf.Clamp01(t / fallTime));
             rock.transform.SetPositionAndRotation(head - rot * headLocal, rot);
             yield return null;
         }
