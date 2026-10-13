@@ -33,8 +33,8 @@ public class PlayerCombat : MonoBehaviour
     [Header("근접 연출")]
     public GameObject meleeHitVfx;            // CFXR4 Sword Hit PLAIN (Cross). 맞은 적마다 X자 섬광
     public float meleeHitVfxScale = 0.6f;
-    // 휘두르는 궤적 (판정 부채꼴 그대로). 바닥이 밝아서 옅은 색은 묻힌다 — 진한 금색
-    public Color meleeArcColor = new Color(1f, 0.72f, 0.2f, 0.9f);
+    // 휘두르는 궤적 (판정 부채꼴 그대로). 보도블록이 거의 흰색이라 옅은 색은 묻힌다 — 진한 주황
+    public Color meleeArcColor = new Color(1f, 0.5f, 0.05f, 1f);
     public Color meleeHitTint = new Color(1f, 0.85f, 0.4f, 1f); // X자 섬광 색 (원본은 흰색이라 밝은 바닥·몹 위에서 안 보인다)
     public float meleeArcSweepTime = 0.09f;   // 쓸고 지나가는 시간
     public float meleeArcFadeTime = 0.15f;    // 다 쓸고 나서 사라지는 시간
