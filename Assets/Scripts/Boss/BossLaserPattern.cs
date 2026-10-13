@@ -57,8 +57,13 @@ public class BossLaserPattern : MonoBehaviour, IBossMotion
     // 이 값을 바꾸면 그 프리팹의 최상위 버스트 시각(1.2)도 같이 옮겨야 한다
     public float effectLeadTime = 1.7f;
     // 마법진은 보스 주변을 레이저 방향으로 따라 돌고, 레이저는 그 중심에서 나간다.
-    // 큐브 몸체는 숨기고 스프라이트로 그리므로, 고리가 입 속 빛구슬(발사 장) 위에 겹치는 거리
+    // 큐브 몸체는 숨기고 스프라이트로 그리므로, 레이저가 입 속 빛구슬(발사 장)에서 나가는 거리
     public float effectOrbitRadius = 0.8f;
+    // 발사 시작점(입)을 보스 중심에서 월드 기준으로 이만큼 옮긴다 (+X = 동쪽).
+    // 판정·길이 측정·워닝도 같은 지점에서 나가므로 보이는 빔과 맞는다
+    public Vector3 muzzleOffset = new Vector3(2f, 0f, 0f);
+    // 마법진은 시작점에서 레이저 방향으로 이만큼 앞에 둔다. 레이저가 마법진을 관통해 나간다
+    public float effectCircleForward = 3.7f;
     // 원본 마법진 지름 약 12.8 → 6.7 (반지름 3.36)
     public float effectCircleScale = 0.525f;
     // 보스 중심은 바닥 위 3이라 반지름 3.36짜리 마법진은 바닥에 박힌다. 그만큼 이펙트를 띄운다 (판정은 평면이라 무관)
@@ -112,7 +117,7 @@ public class BossLaserPattern : MonoBehaviour, IBossMotion
         actionLock.LockFor(warningTime + lockDelay + fireDuration); // 레이저 내내 다른 패턴 금지
 
         Transform p = ai.PlayerTransform;
-        Vector3 dir = FlatDirTo(p != null ? p.position : transform.position + transform.forward);
+        Vector3 dir = FlatDirTo(p != null ? p.position : Origin + transform.forward);
 
         // 1) 워닝: 플레이어를 따라다닌다
         GameObject warning = MakeBar("BossLaserWarning", warningColor, 0.1f);
@@ -209,7 +214,10 @@ public class BossLaserPattern : MonoBehaviour, IBossMotion
                 m.startSize = m.startSize.constantMax * beamWidth / widest;
             }
             else if (r.alignment == ParticleSystemRenderSpace.Local)
+            {
                 r.transform.localScale = Vector3.one * effectCircleScale;
+                r.transform.localPosition = Vector3.up * effectCircleForward; // 이펙트의 위쪽 = 레이저 방향
+            }
         }
     }
 
@@ -218,7 +226,7 @@ public class BossLaserPattern : MonoBehaviour, IBossMotion
     float PlaceEffect(GameObject fx, Vector3 dir)
     {
         float length = ClearLength(dir, beamWidth, beamHeight);
-        fx.transform.SetPositionAndRotation(transform.position + dir * effectOrbitRadius + Vector3.up * effectLift, Quaternion.FromToRotation(Vector3.up, dir));
+        fx.transform.SetPositionAndRotation(Origin + dir * effectOrbitRadius + Vector3.up * effectLift, Quaternion.FromToRotation(Vector3.up, dir));
 
         float visible = Mathf.Max(0.5f, length - effectOrbitRadius);
         foreach (ParticleSystemRenderer r in fx.GetComponentsInChildren<ParticleSystemRenderer>())
@@ -239,16 +247,19 @@ public class BossLaserPattern : MonoBehaviour, IBossMotion
         float dist = 0.5f;
         if (ai.PlayerTransform != null)
         {
-            Vector3 d = ai.PlayerTransform.position - transform.position;
+            Vector3 d = ai.PlayerTransform.position - Origin;
             d.y = 0f;
             dist = Mathf.Max(0.5f, d.magnitude);
         }
         return speed * trackSpeedScale / dist; // rad/s
     }
 
+    // 레이저가 나가는 지점 (입). 높이는 보스 중심 그대로
+    Vector3 Origin { get { return transform.position + muzzleOffset; } }
+
     Vector3 FlatDirTo(Vector3 point)
     {
-        Vector3 d = point - transform.position;
+        Vector3 d = point - Origin;
         d.y = 0f;
         return d.sqrMagnitude > 0.0001f ? d.normalized : transform.forward;
     }
@@ -259,7 +270,7 @@ public class BossLaserPattern : MonoBehaviour, IBossMotion
     // 실제로 앞을 가로막은 것만 재도록 중심선 한 줄로 훑는다.
     float ClearLength(Vector3 dir, float width, float height)
     {
-        Vector3 origin = transform.position;
+        Vector3 origin = Origin;
         origin.y = FindGroundY() + probeHeight; // 바닥에서 가슴 높이 — 낮은 장애물도 빔을 끊는다
 
         RaycastHit[] hits = Physics.RaycastAll(origin, dir, maxLength, ~0, QueryTriggerInteraction.Ignore);
@@ -295,7 +306,7 @@ public class BossLaserPattern : MonoBehaviour, IBossMotion
         if (bar == null) return 0f;
 
         float length = ClearLength(dir, width, height);
-        Vector3 mid = transform.position + dir * (length * 0.5f);
+        Vector3 mid = Origin + dir * (length * 0.5f);
         float y = onGround ? FindGroundY() + groundOffset + height * 0.5f : transform.position.y;
         bar.transform.position = new Vector3(mid.x, y, mid.z);
         bar.transform.rotation = Quaternion.LookRotation(dir);
@@ -313,7 +324,7 @@ public class BossLaserPattern : MonoBehaviour, IBossMotion
         Transform p = ai.PlayerTransform;
         if (p == null) return;
 
-        Vector3 d = p.position - transform.position;
+        Vector3 d = p.position - Origin;
         d.y = 0f;
         float along = Vector3.Dot(d, dir);
         if (along < 0f || along > length) return;
