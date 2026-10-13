@@ -50,6 +50,19 @@ public class EnemySpriteSet : ScriptableObject
     [Tooltip("기절 자세. 돌진이 벽에 박힌 뒤 3~5초 동안 쓰인다")]
     public Frame stun;
 
+    [System.Serializable]
+    public class Motion
+    {
+        [Tooltip("IBossMotion.MotionName과 같은 이름")]
+        public string name;
+        public Frame[] frames;
+        [Tooltip("이 장(0부터)부터는 타격 판정이 생긴 뒤에만 나온다. 0이면 구분 없이 진행도대로 펼친다")]
+        public int hitFrame;
+    }
+
+    [Header("보스 패턴 모션 (없으면 비워 둔다)")]
+    public Motion[] motions;
+
     [Header("크기")]
     [Tooltip("그려진 몹의 기준 키(월드 단위). 캡슐 높이 2와 맞춰 두면 콜라이더와 겹친다")]
     public float characterHeight = 2f;

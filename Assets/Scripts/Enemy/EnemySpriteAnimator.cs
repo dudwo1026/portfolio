@@ -30,6 +30,8 @@ public class EnemySpriteAnimator : MonoBehaviour
     EnemyAI ai;
     // 특수 패턴이 있는 정예만 잡힌다. 일반 잡몹은 null이라 특수 분기를 통째로 건너뛴다
     IElitePatternVisual pattern;
+    // 보스 패턴들. 셋의 motions에서 이름이 같은 모션을 그린다
+    IBossMotion[] bossMotions;
     float chargeStartTime = -999f;
     Renderer rend;
     MaterialPropertyBlock mpb;
@@ -54,6 +56,7 @@ public class EnemySpriteAnimator : MonoBehaviour
         {
             ai = transform.parent.GetComponent<EnemyAI>();
             pattern = transform.parent.GetComponent<IElitePatternVisual>();
+            bossMotions = transform.parent.GetComponents<IBossMotion>();
         }
         chargeStartTime = -999f;
 
@@ -133,6 +136,22 @@ public class EnemySpriteAnimator : MonoBehaviour
             index = 0;
             Apply(set.stun); // 보던 방향은 그대로 둔다. 뻗은 놈이 몸을 돌리면 이상하다
             return;
+        }
+
+        // 보스 패턴 모션. 재생 중인 패턴이 있으면 그 모션이 이긴다
+        if (bossMotions != null && set.motions != null)
+        {
+            for (int i = 0; i < bossMotions.Length; i++)
+            {
+                IBossMotion m = bossMotions[i];
+                if (m == null || !m.MotionActive) continue;
+                EnemySpriteSet.Motion motion = FindMotion(m.MotionName);
+                if (motion == null) continue;
+                timer = 0f;
+                index = 0;
+                Apply(MotionFrame(motion, m.MotionProgress));
+                return;
+            }
         }
 
         // 정예 특수 패턴. 넉백(피격)보다 위에 두는 이유는 패턴 중에 밀려도 패턴은 멈추지 않기 때문이다
@@ -245,6 +264,27 @@ public class EnemySpriteAnimator : MonoBehaviour
         if (Mathf.Abs(side) < flipDeadzone) return;
 
         facing = (set.artFacesScreenLeft ? side > 0f : side < 0f) ? -1 : 1;
+    }
+
+    EnemySpriteSet.Motion FindMotion(string motionName)
+    {
+        for (int i = 0; i < set.motions.Length; i++)
+            if (set.motions[i] != null && set.motions[i].name == motionName && set.motions[i].frames != null && set.motions[i].frames.Length > 0)
+                return set.motions[i];
+        return null;
+    }
+
+    // 진행도 0~1은 hitFrame 앞쪽 장들에, 1~2는 hitFrame부터의 장들에 펼친다.
+    // 그래서 hitFrame 이후 장은 타격 판정이 생기기 전에는 절대 나오지 않는다
+    static EnemySpriteSet.Frame MotionFrame(EnemySpriteSet.Motion m, float p)
+    {
+        int n = m.frames.Length;
+        int h = m.hitFrame;
+        if (h <= 0 || h >= n)
+            return m.frames[Mathf.Clamp(Mathf.FloorToInt(Mathf.Clamp01(p) * n), 0, n - 1)];
+        if (p < 1f)
+            return m.frames[Mathf.Clamp(Mathf.FloorToInt(Mathf.Max(0f, p) * h), 0, h - 1)];
+        return m.frames[Mathf.Clamp(h + Mathf.FloorToInt((p - 1f) * (n - h)), h, n - 1)];
     }
 
     // 대기 자세. 여러 장이 있으면 시간에 맞춰 순환하고, 숨쉬기를 얹는다

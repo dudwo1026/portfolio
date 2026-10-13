@@ -3,8 +3,23 @@ using UnityEngine;
 // 보스 일반공격: 워닝사인을 깔고 1초 뒤 반경 10을 내려찍는다.
 // 보스는 이동하지 않으므로 EnemyAI의 기본 근접공격(attackDamage) 대신 이쪽을 쓴다.
 [RequireComponent(typeof(EnemyAI))]
-public class BossMeleeAttack : MonoBehaviour
+public class BossMeleeAttack : MonoBehaviour, IBossMotion
 {
+    // 스프라이트 모션: 워닝 동안 0→1(팔을 들어 올리는 장들), 타격 후 followThroughTime 동안 1→2(휘두르는 장들).
+    // 휘두르는 장(셋의 hitFrame부터)은 판정이 들어간 뒤에만 나온다. 스턴으로 취소되면 바로 대기로 돌아간다
+    public string MotionName { get { return "Melee"; } }
+    public bool MotionActive { get { return winding || Time.time - strikeTime < followThroughTime; } }
+    public float MotionProgress
+    {
+        get
+        {
+            if (winding) return windupTime > 0f ? Mathf.Clamp01(1f - strikeTimer / windupTime) : 1f;
+            return 1f + Mathf.Clamp01((Time.time - strikeTime) / Mathf.Max(0.01f, followThroughTime));
+        }
+    }
+    public float followThroughTime = 0.4f; // 타격 뒤 휘두르는 모션 길이
+    float strikeTime = -999f;
+
     public float radius = 10f;
     public float cooldown = 4f;         // 워닝 시작 기준
     public float windupTime = 1.5f;     // 워닝사인 출현 ~ 실제 타격까지
@@ -79,6 +94,7 @@ public class BossMeleeAttack : MonoBehaviour
     // 타격 순간에 다시 판정한다. 워닝 동안 반경 밖으로 빠지면 맞지 않는다
     void Strike()
     {
+        strikeTime = Time.time; // 이 순간부터 휘두르는 장이 나온다
         SpawnSlam();
 
         Transform p = ai.PlayerTransform;
