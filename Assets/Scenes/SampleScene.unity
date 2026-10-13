@@ -32878,6 +32878,9 @@ MonoBehaviour:
   laserTopStageTint: 0.7
   laserShimmer: 0.08
   laserShimmerSpeed: 18
+  laserHitVfx: {fileID: 8500920156052182585, guid: 830e92a3f95c4b04caf8edd648aed9bd, type: 3}
+  laserHitVfxScale: 0.6
+  laserHitVfxMaxPerTick: 4
   laserPierceFalloff: 0.15
   laserMinDamageRatio: 0.1
   laserRampBySecond:

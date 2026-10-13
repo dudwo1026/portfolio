@@ -82,7 +82,12 @@ public class PlayerCombat : MonoBehaviour
     public float laserTopStageTint = 0.7f; // 2단 → 3단 색 변화를 이 비율만큼만 (0.7이면 3단 = 88% 지점, 1이면 laserChargedColor 그대로)
     public float laserShimmer = 0.08f;     // 보이는 굵기가 이 비율(±)만큼 일렁인다
     public float laserShimmerSpeed = 18f;  // 일렁임 빠르기
+    // 착탄: 빔이 벽·장애물에 닿은 끝에서 계속 튀는 연출(프리팹의 Impact)과, 관통당한 적마다 튀는 불꽃
+    public GameObject laserHitVfx;          // Sparks explode white. 피해가 들어갈 때마다(초당 8번) 맞은 적 자리에
+    public float laserHitVfxScale = 0.6f;
+    public int laserHitVfxMaxPerTick = 4;   // 한 번에 불꽃을 띄울 적 수 (줄줄이 관통할 때 화면이 덮이지 않게)
     GameObject laserFx;
+    Transform laserFxImpact;
     ParticleSystem[] laserFxAll;
     Vector4[] laserFxBaseHsv;        // 부위별 원래 색 (h, s, v, a)
     float laserFxTint = -1f;         // 마지막으로 칠한 차지 비율. 바뀔 때만 다시 칠한다
@@ -318,6 +323,8 @@ void Awake()
         RaycastHit[] hits = Physics.SphereCastAll(origin, laserRadius, dir, length, ~0, QueryTriggerInteraction.Ignore);
         System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance)); // 가까운 적부터 뚫는다
         var struck = new System.Collections.Generic.HashSet<Health>(); // 콜라이더가 여럿인 적이 두 번 맞지 않게
+        Color sparkTint = LaserStageColor();
+        Camera cam = Camera.main;
         for (int i = 0; i < hits.Length; i++)
         {
             if (hits[i].collider.GetComponentInParent<EnemyAI>() == null) continue;
@@ -326,7 +333,20 @@ void Awake()
             // 첫 적 100%, 둘째 85%, 셋째 70%, ... 일곱째부터 10%
             float ratio = Mathf.Max(laserMinDamageRatio, 1f - laserPierceFalloff * (struck.Count - 1));
             h.TakeDamage(damage * ratio);
+
+            // 관통당한 자리에 불꽃. 빔이 몸을 지나는 점에서, 스프라이트에 묻히지 않게 카메라 쪽으로 당긴다
+            if (struck.Count > laserHitVfxMaxPerTick) continue;
+            Vector3 at = hits[i].distance > 0f ? origin + dir * hits[i].distance : hits[i].collider.bounds.center;
+            if (cam != null) at -= cam.transform.forward * 1.5f;
+            SpawnTintedOnce(laserHitVfx, at, laserHitVfxScale, sparkTint);
         }
+    }
+
+    // 지금 차지 단계의 빔 색 (황금 → laserChargedColor). 착탄 불꽃을 빔과 같은 색으로 칠할 때 쓴다
+    Color LaserStageColor()
+    {
+        Color gold = new Color(1f, 0.8f, 0.3f, 1f);
+        return Color.Lerp(gold, laserChargedColor, Mathf.Clamp01(laserFxTint));
     }
 
     void StopLaserVisual()
@@ -375,9 +395,18 @@ void Awake()
                 laserFxBaseHsv[i] = new Vector4(h, s, v, c.a);
             }
             laserFxTint = -1f;
+            laserFxImpact = laserFx.transform.Find("Impact");
         }
 
         laserFx.transform.SetPositionAndRotation(origin, Quaternion.FromToRotation(Vector3.up, dir));
+
+        // 빔 끝에 착탄 연출. 아무것도 안 맞고 사거리 끝까지 나갔으면 끈다
+        if (laserFxImpact != null)
+        {
+            bool blocked = length < laserRange - 0.05f;
+            if (laserFxImpact.gameObject.activeSelf != blocked) laserFxImpact.gameObject.SetActive(blocked);
+            laserFxImpact.localPosition = Vector3.up * length; // 이펙트는 위쪽(+Y)이 빔 방향
+        }
         TintLaserFx(width); // 색은 일렁임 전 굵기로 정한다. 일렁인 값으로 정하면 색까지 깜빡인다
         if (laserFxWidest <= 0f) return;
 
@@ -641,12 +670,12 @@ void MeleeAttack()
         Camera cam = Camera.main;
         if (cam != null) pos -= cam.transform.forward * 1.5f;
 
-        SpawnTintedOnce(meleeHitVfx, pos, meleeHitVfxScale);
-        SpawnTintedOnce(meleeSparksVfx, pos, meleeSparksScale);
+        SpawnTintedOnce(meleeHitVfx, pos, meleeHitVfxScale, meleeHitTint);
+        SpawnTintedOnce(meleeSparksVfx, pos, meleeSparksScale, meleeHitTint);
     }
 
-    // 맞은 자리 연출 하나를 금색으로 칠해 한 번만 재생한다
-    void SpawnTintedOnce(GameObject prefab, Vector3 pos, float scale)
+    // 맞은 자리 연출 하나를 tint 색으로 칠해 한 번만 재생한다 (근접·레이저 착탄 공용)
+    void SpawnTintedOnce(GameObject prefab, Vector3 pos, float scale, Color tint)
     {
         if (prefab == null) return;
         GameObject fx = Instantiate(prefab, pos, Quaternion.identity);
@@ -657,7 +686,7 @@ void MeleeAttack()
             m.loop = false; // 불꽃 프리팹은 반복 재생으로 되어 있다
             m.simulationSpeed *= Mathf.Max(0.01f, meleeHitVfxSpeed);
             Color c = m.startColor.color;
-            m.startColor = new Color(c.r * meleeHitTint.r, c.g * meleeHitTint.g, c.b * meleeHitTint.b, c.a * meleeHitTint.a);
+            m.startColor = new Color(c.r * tint.r, c.g * tint.g, c.b * tint.b, c.a * tint.a);
         }
         Destroy(fx, 1.5f / Mathf.Max(0.01f, meleeHitVfxSpeed)); // 둘 다 스스로 지워지지 않는다
     }
