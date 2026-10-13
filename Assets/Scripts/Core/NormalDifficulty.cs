@@ -18,7 +18,7 @@ public static class NormalDifficulty
 
     // 정예 상태이상 시간 (하드 → 노말)
     public const float StunDuration = 1.5f;       // C 기절 2초
-    public const float BlindDuration = 6f;        // D 실명 10초
+    // D 실명은 노말에서 아예 없다 (실명탄을 쏘지 않는다)
     public const float WeakenDuration = 2f;       // E 약화 3초
     public const float ConfusionDuration = 5f;    // F 혼란 8초
     public const float TauntDuration = 20f;       // F 도발 30초
@@ -44,7 +44,12 @@ public static class NormalDifficulty
         if (knock != null) { knock.cooldown *= ElitePatternCooldownScale; knock.stunDuration = StunDuration; knock.damagePercent *= dmg; knock.impactDamagePercent *= dmg; }
 
         EliteRangedAttack ranged = ai.GetComponent<EliteRangedAttack>();
-        if (ranged != null) { ranged.attackInterval *= ElitePatternCooldownScale; ranged.blindDuration = BlindDuration; ranged.damagePercent *= dmg; }
+        if (ranged != null)
+        {
+            ranged.attackInterval *= ElitePatternCooldownScale;
+            ranged.damagePercent *= dmg;
+            ranged.specialEveryNShots = 0; // 실명탄(하드: 4발마다)을 쏘지 않는다
+        }
 
         EliteEruptionPattern erupt = ai.GetComponent<EliteEruptionPattern>();
         if (erupt != null) { erupt.cooldown *= ElitePatternCooldownScale; erupt.weakenDuration = WeakenDuration; erupt.damagePercent *= dmg; }
