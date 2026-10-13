@@ -276,9 +276,18 @@ public class EnemySpriteAnimator : MonoBehaviour
 
     // 진행도 0~1은 hitFrame 앞쪽 장들에, 1~2는 hitFrame부터의 장들에 펼친다.
     // 그래서 hitFrame 이후 장은 타격 판정이 생기기 전에는 절대 나오지 않는다
+    // holdFrame이 있으면 0~1은 그 앞 장들, 1~2는 holdFrame 고정, 2~3은 그 뒤 장들 (레이저: 충전 → 발사 유지 → 마무리)
     static EnemySpriteSet.Frame MotionFrame(EnemySpriteSet.Motion m, float p)
     {
         int n = m.frames.Length;
+        int hold = m.holdFrame;
+        if (hold > 0 && hold < n)
+        {
+            if (p < 1f) return m.frames[Mathf.Clamp(Mathf.FloorToInt(Mathf.Max(0f, p) * hold), 0, hold - 1)];
+            int rest = n - hold - 1;
+            if (p < 2f || rest <= 0) return m.frames[hold];
+            return m.frames[Mathf.Clamp(hold + 1 + Mathf.FloorToInt((p - 2f) * rest), hold + 1, n - 1)];
+        }
         int h = m.hitFrame;
         if (h <= 0 || h >= n)
             return m.frames[Mathf.Clamp(Mathf.FloorToInt(Mathf.Clamp01(p) * n), 0, n - 1)];

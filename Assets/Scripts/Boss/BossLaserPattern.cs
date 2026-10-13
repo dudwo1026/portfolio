@@ -4,8 +4,24 @@ using UnityEngine;
 // 보스 특수패턴 6: 본체에서 굵은 레이저를 쏜다.
 // 워닝 1.5초(플레이어 추적) → 시작지점 확정 → 0.7초 후 발사 → 2.5초간 플레이어를 따라 휘두른다.
 [RequireComponent(typeof(EnemyAI))]
-public class BossLaserPattern : MonoBehaviour
+public class BossLaserPattern : MonoBehaviour, IBossMotion
 {
+    // 스프라이트 모션: 워닝+확정 동안 0→1(입을 벌리며 충전), 발사 내내 1~2(발사 장 고정),
+    // 발사가 끝난 뒤 recoveryTime 동안 2→3(입을 다무는 장들)
+    public string MotionName { get { return "Laser"; } }
+    public bool MotionActive { get { return running || Time.time < recoverEnd; } }
+    public float MotionProgress
+    {
+        get
+        {
+            if (running) return motionProgress;
+            return 3f - Mathf.Clamp01((recoverEnd - Time.time) / Mathf.Max(0.01f, recoveryTime));
+        }
+    }
+    public float recoveryTime = 0.45f;
+    float motionProgress;
+    float recoverEnd = -999f;
+
     [Header("쿨타임")]
     public float cooldownMin = 18f;
     public float cooldownMax = 23f;
@@ -91,6 +107,8 @@ public class BossLaserPattern : MonoBehaviour
     IEnumerator Run()
     {
         running = true;
+        motionProgress = 0f;
+        float windup = Mathf.Max(0.01f, warningTime + lockDelay);
         actionLock.LockFor(warningTime + lockDelay + fireDuration); // 레이저 내내 다른 패턴 금지
 
         Transform p = ai.PlayerTransform;
@@ -102,6 +120,7 @@ public class BossLaserPattern : MonoBehaviour
         while (t < warningTime)
         {
             t += Time.deltaTime;
+            motionProgress = Mathf.Clamp01(t / windup);
             if (ai.PlayerTransform != null) dir = FlatDirTo(ai.PlayerTransform.position);
             PlaceBar(warning, dir, beamWidth, 0.1f, true);
             TickEffect(warningTime - t + lockDelay, dir);
@@ -116,6 +135,7 @@ public class BossLaserPattern : MonoBehaviour
         while (locked < lockDelay)
         {
             locked += Time.deltaTime;
+            motionProgress = Mathf.Clamp01((warningTime + locked) / windup);
             TickEffect(lockDelay - locked, dir);
             yield return null;
         }
@@ -128,6 +148,7 @@ public class BossLaserPattern : MonoBehaviour
         {
             float dt = Time.deltaTime;
             fired += dt;
+            motionProgress = 1f + Mathf.Clamp01(fired / fireDuration) * 0.999f; // 발사 내내 발사 장
 
             if (ai.PlayerTransform != null)
             {
@@ -148,6 +169,7 @@ public class BossLaserPattern : MonoBehaviour
         if (beam != null) Destroy(beam);
         if (fx != null) Destroy(fx);
         fx = null;
+        recoverEnd = Time.time + recoveryTime; // 이제 입을 다문다
         running = false;
     }
 

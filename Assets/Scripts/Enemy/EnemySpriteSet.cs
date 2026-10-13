@@ -58,6 +58,9 @@ public class EnemySpriteSet : ScriptableObject
         public Frame[] frames;
         [Tooltip("이 장(0부터)부터는 타격 판정이 생긴 뒤에만 나온다. 0이면 구분 없이 진행도대로 펼친다")]
         public int hitFrame;
+        [Tooltip("이 장(0부터)을 진행도 1~2 동안 붙잡아 둔다 (레이저 발사 유지). " +
+                 "0~1은 그 앞 장들, 2~3은 그 뒤 장들에 펼친다. 0이면 안 쓴다(hitFrame 방식)")]
+        public int holdFrame;
     }
 
     [Header("보스 패턴 모션 (없으면 비워 둔다)")]

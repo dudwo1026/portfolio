@@ -108,6 +108,56 @@ MonoBehaviour:
       footCenterPx: 187.5
       sizeScale: 1
     hitFrame: 4
+    holdFrame: 0
+  - name: Laser
+    frames:
+    - texture: {fileID: 2800000, guid: ac4c50d488c2ffe4497859113b453481, type: 3}
+      charHeightPx: 364
+      charBottomPx: 9
+      footCenterPx: 189.5
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 0e33f09d19335264b8f76e7f2ebb8278, type: 3}
+      charHeightPx: 364
+      charBottomPx: 23
+      footCenterPx: 189.5
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 8b32ae8aa3f98ed4886457661eda8b35, type: 3}
+      charHeightPx: 364
+      charBottomPx: 21
+      footCenterPx: 204.5
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 28871c178609a494cbf6dc00396fbe16, type: 3}
+      charHeightPx: 364
+      charBottomPx: 27
+      footCenterPx: 200
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 116259de313ae3d409704433f36bb7a9, type: 3}
+      charHeightPx: 364
+      charBottomPx: 26
+      footCenterPx: 194
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: dd792e59596df7c43b801750cdc89d44, type: 3}
+      charHeightPx: 364
+      charBottomPx: 18
+      footCenterPx: 183
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 7a71901710b6ac2419d4b979d8706dc2, type: 3}
+      charHeightPx: 364
+      charBottomPx: 26
+      footCenterPx: 194
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 2b126ef5aef8889458156b5578b3e864, type: 3}
+      charHeightPx: 364
+      charBottomPx: 21
+      footCenterPx: 204.5
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 02aec5cd023432b4e8f6798f474bc9f6, type: 3}
+      charHeightPx: 364
+      charBottomPx: 9
+      footCenterPx: 189.5
+      sizeScale: 1
+    hitFrame: 0
+    holdFrame: 5
   characterHeight: 9
   moveFramesPerSecond: 6
   scaleFpsBySpeed: 1
