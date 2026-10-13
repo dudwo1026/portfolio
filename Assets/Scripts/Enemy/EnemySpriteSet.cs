@@ -24,6 +24,14 @@ public class EnemySpriteSet : ScriptableObject
     }
 
     public Frame idle;
+    [Tooltip("여러 장으로 된 대기 모션. 넣으면 idle 대신 이걸 돌린다 (보스)")]
+    public Frame[] idleFrames;
+    public float idleFramesPerSecond = 4f;
+    [Tooltip("1→N→1로 왕복한다. 장끼리 미세하게 다른 그림이라 N→1로 바로 넘어가면 툭 튄다")]
+    public bool idlePingPong = true;
+    [Tooltip("대기 중 숨쉬기. 세로로 이 비율만큼 늘었다 줄어든다(가로는 절반만큼 반대로). 0이면 없음. 발은 제자리")]
+    public float breatheAmount = 0f;
+    public float breathePeriod = 2.4f;
     [Tooltip("이동 중 순환. 한 장만 넣으면 그 자세로 고정된다")]
     public Frame[] moveFrames;
     [Tooltip("공격 모션. 선딜 전체에 걸쳐 고르게 펼쳐 재생하므로 장수는 자유다")]

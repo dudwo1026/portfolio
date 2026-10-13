@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7809889133a0fa648b11ffd32f01476e, type: 3}
+  m_Name: BossSpriteSet
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySpriteSet
+  idle:
+    texture: {fileID: 2800000, guid: ebed2b6745504a444a6caf85398eeb31, type: 3}
+    charHeightPx: 343
+    charBottomPx: 15
+    footCenterPx: 186
+    sizeScale: 1
+  idleFrames:
+  - texture: {fileID: 2800000, guid: ebed2b6745504a444a6caf85398eeb31, type: 3}
+    charHeightPx: 343
+    charBottomPx: 15
+    footCenterPx: 186
+    sizeScale: 1
+  - texture: {fileID: 2800000, guid: 9ebdbb1b75c204f4e9fb472d494d7cde, type: 3}
+    charHeightPx: 343
+    charBottomPx: 7
+    footCenterPx: 188
+    sizeScale: 1
+  - texture: {fileID: 2800000, guid: ff2d2043df0e13049a757428c1a9bb81, type: 3}
+    charHeightPx: 337
+    charBottomPx: 10
+    footCenterPx: 189.5
+    sizeScale: 1
+  - texture: {fileID: 2800000, guid: 52091200b6b15e14ea31fe9892318be1, type: 3}
+    charHeightPx: 341
+    charBottomPx: 7
+    footCenterPx: 187
+    sizeScale: 1
+  - texture: {fileID: 2800000, guid: eb1fcce21b04bdf4181ea437050c9e10, type: 3}
+    charHeightPx: 335
+    charBottomPx: 8
+    footCenterPx: 189.5
+    sizeScale: 1
+  - texture: {fileID: 2800000, guid: b02e686833777d04782dc9e259aa5feb, type: 3}
+    charHeightPx: 337
+    charBottomPx: 13
+    footCenterPx: 189.5
+    sizeScale: 1
+  idleFramesPerSecond: 4
+  idlePingPong: 1
+  breatheAmount: 0.03
+  breathePeriod: 2.4
+  moveFrames: []
+  attackFrames: []
+  chargeFrames: []
+  chargeFramesPerSecond: 10
+  chargeFrameEasing: 1
+  stun:
+    texture: {fileID: 0}
+    charHeightPx: 1
+    charBottomPx: 0
+    footCenterPx: 0
+    sizeScale: 1
+  characterHeight: 7.5
+  moveFramesPerSecond: 6
+  scaleFpsBySpeed: 1
+  referenceSpeed: 2.5
+  artFacesScreenLeft: 0
+  faceKnockbackDirection: 0
+  attackArtFlipped: 0

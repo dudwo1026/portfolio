@@ -62,7 +62,7 @@ public class EnemySpriteAnimator : MonoBehaviour
         speed = 0f;
         timer = 0f;
         index = 0;
-        if (set != null) Apply(set.idle);
+        if (set != null) ApplyIdle();
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.update += EditorTick;
 #endif
@@ -185,7 +185,7 @@ public class EnemySpriteAnimator : MonoBehaviour
             speed = 0f; // 밀린 속도가 남아 있으면 넉백이 끝난 직후 몇 프레임 동안 걷는 자세가 샌다
             timer = 0f;
             index = 0;
-            Apply(set.idle);
+            ApplyIdle();
             return;
         }
 
@@ -214,7 +214,7 @@ public class EnemySpriteAnimator : MonoBehaviour
         {
             timer = 0f;
             index = 0;
-            Apply(set.idle);
+            ApplyIdle();
             return;
         }
 
@@ -247,9 +247,27 @@ public class EnemySpriteAnimator : MonoBehaviour
         facing = (set.artFacesScreenLeft ? side > 0f : side < 0f) ? -1 : 1;
     }
 
+    // 대기 자세. 여러 장이 있으면 시간에 맞춰 순환하고, 숨쉬기를 얹는다
+    void ApplyIdle()
+    {
+        Apply(IdleFrame(), true);
+    }
+
+    EnemySpriteSet.Frame IdleFrame()
+    {
+        if (set.idleFrames == null || set.idleFrames.Length == 0) return set.idle;
+        int n = set.idleFrames.Length;
+        if (n == 1 || !Application.isPlaying) return set.idleFrames[0];
+
+        // 왕복이면 1..N..2 (N장이 2N-2칸), 아니면 1..N
+        int steps = set.idlePingPong ? 2 * n - 2 : n;
+        int s = Mathf.FloorToInt(Time.time * Mathf.Max(0.01f, set.idleFramesPerSecond)) % steps;
+        return set.idleFrames[s < n ? s : steps - s];
+    }
+
     // 쿼드 크기와 위치를 그림 속 몹의 치수에서 매번 계산한다.
     // 이렇게 해 두면 sizeScale을 만져도 발 위치와 가로 정렬이 저절로 따라온다
-    void Apply(EnemySpriteSet.Frame f)
+    void Apply(EnemySpriteSet.Frame f, bool breathe = false)
     {
         if (f == null || f.texture == null || rend == null) return;
         lastFrame = f;
@@ -259,13 +277,24 @@ public class EnemySpriteAnimator : MonoBehaviour
         float charPx = Mathf.Max(1f, f.charHeightPx);
         float quadH = set.characterHeight * Mathf.Max(0.01f, f.sizeScale) * texH / charPx;
         float quadW = quadH * texW / texH;
+
+        // 숨쉬기: 세로로 늘면 가로는 그 절반만큼 줄어든다. 발 높이는 아래 localY가 다시 맞춘다
+        if (breathe && set.breatheAmount > 0f && Application.isPlaying)
+        {
+            float b = set.breatheAmount * Mathf.Sin(Time.time * 2f * Mathf.PI / Mathf.Max(0.1f, set.breathePeriod));
+            quadH *= 1f + b;
+            quadW *= 1f - b * 0.5f;
+        }
+
         float localY = quadH * 0.5f - (f.charBottomPx / texH) * quadH + pivotYOffset;
         float offsetX = -((f.footCenterPx - texW * 0.5f) / texW) * quadW;
 
         // 스케일 x를 음수로 두면 좌우가 뒤집힌다. 머티리얼이 양면(_Cull Off)이라 그대로 보인다.
-        // 가로 보정(offsetX)에도 같은 부호를 곱해야 뒤집힌 그림의 발 위치가 따라온다
+        // 가로 보정(offsetX)에도 같은 부호를 곱해야 뒤집힌 그림의 발 위치가 따라온다.
+        // 크기는 월드 단위로 계산했으므로 부모가 커져 있으면(보스 큐브 x6) 그만큼 나눠 준다
         int flip = facing * renderFlip;
-        transform.localScale = new Vector3(quadW * flip, quadH, 1f);
+        Vector3 ps = transform.parent != null ? transform.parent.lossyScale : Vector3.one;
+        transform.localScale = new Vector3(quadW * flip / ps.x, quadH / ps.y, 1f / ps.z);
 
         // 가로 보정을 UV로 처리하면 wrap이 Clamp라 쿼드 밖으로 밀려난 부분이 잘린다.
         // 그래서 텍스처는 건드리지 않고 쿼드 자체를 화면 가로 방향으로 민다.
