@@ -68,8 +68,10 @@ public class PlayerCombat : MonoBehaviour
     public float laserDps = 192f;
     public float laserRange = 60f;      // 소총 사거리(탄속 45 x 수명 1.33)와 같게
     public float laserRadius = 0.3f;    // 판정 굵기 (반지름)
-    // 최대 차지 때 보이는 굵기. 차지 단계마다 피해 배율(laserRampBySecond)만큼 가늘게 시작한다 (50% → 80% → 100%)
-    public float laserWidth = 0.45f;
+    // 보이는 굵기. 1단 laserMinWidth에서 시작해 최대 차지 laserWidth까지, 피해 배율(laserRampBySecond)과
+    // 같은 비율로 굵어진다 (배율 50% → 80% → 100% = 굵기 0.225 → 0.44 → 0.585)
+    public float laserMinWidth = 0.225f;
+    public float laserWidth = 0.585f;
     public float laserWidthChangeTime = 0.15f; // 단계가 오를 때 이 시간에 걸쳐 굵어진다
     public Color laserColor = new Color(0.1f, 0.55f, 1f, 1f); // 이펙트가 없을 때의 단색 선
     public GameObject laserEffectPrefab; // Laser AOE Player. 비워 두면 단색 선(LineRenderer)으로 그린다
@@ -274,7 +276,7 @@ void Awake()
         float length = LaserLength(origin, dir);
 
         // 차지 단계에 맞춰 굵어진다. 처음 프레임은 1단 굵기에서 바로 시작
-        float targetWidth = laserWidth * LaserRamp();
+        float targetWidth = LaserStageWidth(LaserRamp());
         laserShownWidth = laserShownWidth <= 0f ? targetWidth
             : Mathf.MoveTowards(laserShownWidth, targetWidth, laserWidth / Mathf.Max(0.01f, laserWidthChangeTime) * Time.deltaTime);
 
@@ -427,16 +429,23 @@ void Awake()
         }
     }
 
+    // 피해 배율(1단 laserRampBySecond[0] ~ 1)을 보이는 굵기(laserMinWidth ~ laserWidth)로 옮긴다
+    float LaserStageWidth(float ramp)
+    {
+        float r0 = laserRampBySecond != null && laserRampBySecond.Length > 0 ? laserRampBySecond[0] : 1f;
+        return Mathf.Lerp(laserMinWidth, laserWidth, Mathf.InverseLerp(r0, 1f, ramp));
+    }
+
     // 1단 굵기 = 원래 색, 최대 굵기 = laserChargedColor 쪽. 사이는 굵기 비율대로 (2단은 60% 지점).
     // 2단 → 3단 구간은 laserTopStageTint만큼만 옮겨 3단이 2단과 너무 동떨어지지 않게 한다 (0.7이면 3단 = 88% 지점)
     void TintLaserFx(float width)
     {
         bool hasRamp = laserRampBySecond != null && laserRampBySecond.Length > 0;
-        float minWidth = laserWidth * (hasRamp ? laserRampBySecond[0] : 1f);
+        float minWidth = laserMinWidth;
         float t = Mathf.InverseLerp(minWidth, laserWidth, width);
         if (hasRamp && laserRampBySecond.Length > 2)
         {
-            float t2 = Mathf.InverseLerp(minWidth, laserWidth, laserWidth * laserRampBySecond[1]);
+            float t2 = Mathf.InverseLerp(minWidth, laserWidth, LaserStageWidth(laserRampBySecond[1]));
             if (t > t2) t = t2 + (t - t2) * laserTopStageTint;
         }
         if (Mathf.Abs(t - laserFxTint) < 0.01f) return;

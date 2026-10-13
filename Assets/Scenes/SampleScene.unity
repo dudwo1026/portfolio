@@ -32869,7 +32869,8 @@ MonoBehaviour:
   laserDps: 192
   laserRange: 60
   laserRadius: 0.3
-  laserWidth: 0.45
+  laserMinWidth: 0.225
+  laserWidth: 0.585
   laserWidthChangeTime: 0.15
   laserColor: {r: 0.1, g: 0.55, b: 1, a: 1}
   laserEffectPrefab: {fileID: 7478731271839673279, guid: 1a93e8504c343504480e5958e5e4ff01, type: 3}
