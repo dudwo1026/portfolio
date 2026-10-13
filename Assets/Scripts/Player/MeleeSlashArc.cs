@@ -22,9 +22,16 @@ public class MeleeSlashArc : MonoBehaviour
     Vector3[] verts;
     Color[] colors;
 
+    // 빛 번짐 층. 같은 모양을 한 번 더, 1보다 밝은(HDR) 색으로 그려 블룸(문턱 1)에 걸리게 한다.
+    // 휘두르는 끝과 바깥 테두리에 몰려 있고, 끝 부분은 흰색에 가깝다
+    float glowIntensity;
+    Mesh glowMesh;
+    Material glowMat;
+    Color[] glowColors;
+
     public static void Spawn(Vector3 groundCenter, Vector3 forward, float innerRadius, float outerRadius,
                              float angle, Color color, float sweepTime, float fadeTime, int direction,
-                             Transform follow = null)
+                             Transform follow = null, float glowIntensity = 0f)
     {
         forward.y = 0f;
         if (forward.sqrMagnitude < 0.0001f) return;
@@ -42,6 +49,7 @@ public class MeleeSlashArc : MonoBehaviour
         a.direction = direction >= 0 ? 1 : -1;
         a.follow = follow;
         if (follow != null) a.followOffset = groundCenter - follow.position;
+        a.glowIntensity = glowIntensity;
         a.Init();
         Destroy(go, sweepTime + fadeTime + 0.05f);
     }
@@ -52,6 +60,12 @@ public class MeleeSlashArc : MonoBehaviour
         mesh.MarkDynamic();
         verts = new Vector3[(Segments + 1) * Rings];
         colors = new Color[verts.Length];
+        if (glowIntensity > 0f)
+        {
+            glowMesh = new Mesh { name = "MeleeSlashGlow" };
+            glowMesh.MarkDynamic();
+            glowColors = new Color[verts.Length];
+        }
 
         // 링 사이 띠 3개 x 각도 칸. 칸마다 사각형 하나 = 삼각형 2개
         int[] tris = new int[Segments * (Rings - 1) * 6];
@@ -72,6 +86,20 @@ public class MeleeSlashArc : MonoBehaviour
         r.sharedMaterial = mat;
         r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         r.receiveShadows = false;
+
+        if (glowMesh == null) return;
+        glowMesh.triangles = tris;
+        GameObject g = new GameObject("Glow", typeof(MeshFilter), typeof(MeshRenderer));
+        g.transform.SetParent(transform, false);
+        g.transform.localPosition = Vector3.up * 0.02f; // 바탕 위
+        g.GetComponent<MeshFilter>().sharedMesh = glowMesh;
+        MeshRenderer gr = g.GetComponent<MeshRenderer>();
+        glowMat = new Material(Shader.Find("Sprites/Default"));
+        glowMat.color = new Color(glowIntensity, glowIntensity, glowIntensity, 1f); // 정점 색에 곱해져 1을 넘는다
+        glowMat.renderQueue = mat.renderQueue + 1; // 바탕 다음에 그린다
+        gr.sharedMaterial = glowMat;
+        gr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        gr.receiveShadows = false;
     }
 
     void Update()
@@ -113,15 +141,32 @@ public class MeleeSlashArc : MonoBehaviour
             colors[v + 1] = new Color(color.r, color.g, color.b, a * 0.75f);
             colors[v + 2] = new Color(rim.r, rim.g, rim.b, a);
             colors[v + 3] = new Color(rim.r, rim.g, rim.b, a);
+
+            if (glowColors == null) continue;
+            // 빛: 끝으로 갈수록 급격히 밝아지고(along^3), 맨 끝만 밝은 금색으로 달아오른다.
+            // 흰색으로 올리면 바탕 주황을 덮어 오히려 바래고, 흰 보도블록 위에서는 번짐도 안 보인다 — 색을 유지한다
+            float g = fade * along * along * along;
+            Color hot = Color.Lerp(color, new Color(1f, 0.85f, 0.5f, 1f), Mathf.InverseLerp(0.75f, 1f, along));
+            glowColors[v] = new Color(hot.r, hot.g, hot.b, 0f);
+            glowColors[v + 1] = new Color(hot.r, hot.g, hot.b, g * 0.35f);
+            glowColors[v + 2] = new Color(hot.r, hot.g, hot.b, g);
+            glowColors[v + 3] = new Color(hot.r, hot.g, hot.b, 0f);
         }
         mesh.vertices = verts;
         mesh.colors = colors;
         mesh.RecalculateBounds();
+
+        if (glowMesh == null) return;
+        glowMesh.vertices = verts;
+        glowMesh.colors = glowColors;
+        glowMesh.RecalculateBounds();
     }
 
     void OnDestroy()
     {
         if (mesh != null) Destroy(mesh);
         if (mat != null) Destroy(mat);
+        if (glowMesh != null) Destroy(glowMesh);
+        if (glowMat != null) Destroy(glowMat);
     }
 }

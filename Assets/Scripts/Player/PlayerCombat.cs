@@ -39,6 +39,9 @@ public class PlayerCombat : MonoBehaviour
     // 휘두르는 궤적 (판정 부채꼴 그대로). 보도블록이 거의 흰색이라 옅은 색은 묻힌다 — 진한 주황
     public Color meleeArcColor = new Color(1f, 0.5f, 0.05f, 1f);
     public Color meleeHitTint = new Color(1f, 0.85f, 0.4f, 1f); // X자 섬광 색 (원본은 흰색이라 밝은 바닥·몹 위에서 안 보인다)
+    public float meleeArcGlow = 3f;           // 궤적 빛 번짐 층의 밝기 배율. 1을 넘어야 블룸에 걸린다 (0이면 빛 층 없음)
+    public GameObject meleeSparksVfx;         // Sparks explode white. 맞은 자리에서 튀는 불꽃 (섬광과 같이)
+    public float meleeSparksScale = 1.6f;
     public float meleeArcSweepTime = 0.09f;   // 쓸고 지나가는 시간
     public float meleeArcFadeTime = 0.15f;    // 다 쓸고 나서 사라지는 시간
     public float meleeHitShake = 0.12f;       // 하나라도 맞히면 화면이 짧게 떨린다 (유탄 0.35)
@@ -625,7 +628,7 @@ void MeleeAttack()
         float feet = capsule != null ? transform.position.y - capsule.height * 0.5f * transform.lossyScale.y : transform.position.y - 1f;
         Vector3 ground = new Vector3(transform.position.x, feet + 0.15f, transform.position.z);
         MeleeSlashArc.Spawn(ground, meleeDir, 0.45f, reach, meleeConeAngle, meleeArcColor,
-                            meleeArcSweepTime, meleeArcFadeTime, meleeSwingDir, transform);
+                            meleeArcSweepTime, meleeArcFadeTime, meleeSwingDir, transform, meleeArcGlow);
         meleeSwingDir = -meleeSwingDir;
     }
 
@@ -633,20 +636,28 @@ void MeleeAttack()
     // 몹 스프라이트는 깊이를 쓰므로 몸 한가운데에 두면 그림 뒤로 반쯤 묻힌다
     void SpawnMeleeHit(Collider target)
     {
-        if (meleeHitVfx == null) return;
         Vector3 pos = target.bounds.center;
         Camera cam = Camera.main;
         if (cam != null) pos -= cam.transform.forward * 1.5f;
 
-        GameObject fx = Instantiate(meleeHitVfx, pos, Quaternion.identity);
-        fx.transform.localScale = Vector3.one * meleeHitVfxScale;
+        SpawnTintedOnce(meleeHitVfx, pos, meleeHitVfxScale);
+        SpawnTintedOnce(meleeSparksVfx, pos, meleeSparksScale);
+    }
+
+    // 맞은 자리 연출 하나를 금색으로 칠해 한 번만 재생한다
+    void SpawnTintedOnce(GameObject prefab, Vector3 pos, float scale)
+    {
+        if (prefab == null) return;
+        GameObject fx = Instantiate(prefab, pos, Quaternion.identity);
+        fx.transform.localScale = Vector3.one * scale;
         foreach (ParticleSystem ps in fx.GetComponentsInChildren<ParticleSystem>())
         {
             ParticleSystem.MainModule m = ps.main;
+            m.loop = false; // 불꽃 프리팹은 반복 재생으로 되어 있다
             Color c = m.startColor.color;
             m.startColor = new Color(c.r * meleeHitTint.r, c.g * meleeHitTint.g, c.b * meleeHitTint.b, c.a * meleeHitTint.a);
         }
-        Destroy(fx, 1.2f); // 프리팹이 스스로 지워지지 않는다
+        Destroy(fx, 1.5f); // 둘 다 스스로 지워지지 않는다
     }
 
 void OnDrawGizmosSelected()

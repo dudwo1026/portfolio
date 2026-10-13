@@ -32841,10 +32841,14 @@ MonoBehaviour:
   meleeKnockbackForce: 4
   meleeKnockbackDuration: 0.5
   meleeConeAngle: 120
+  meleeWindup: 0.15
   meleeHitVfx: {fileID: 8525990746615576120, guid: b85d21f3b8fed714bacf0c4fd50fa512, type: 3}
   meleeHitVfxScale: 0.6
   meleeArcColor: {r: 1, g: 0.5, b: 0.05, a: 1}
   meleeHitTint: {r: 1, g: 0.85, b: 0.4, a: 1}
+  meleeArcGlow: 3
+  meleeSparksVfx: {fileID: 8500920156052182585, guid: 830e92a3f95c4b04caf8edd648aed9bd, type: 3}
+  meleeSparksScale: 1.6
   meleeArcSweepTime: 0.09
   meleeArcFadeTime: 0.15
   meleeHitShake: 0.12
