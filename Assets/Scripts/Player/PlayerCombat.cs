@@ -29,6 +29,18 @@ public class PlayerCombat : MonoBehaviour
     public float meleeKnockbackForce = 4f;
     public float meleeKnockbackDuration = 0.5f;
     public float meleeConeAngle = 120f;
+
+    [Header("근접 연출")]
+    public GameObject meleeHitVfx;            // CFXR4 Sword Hit PLAIN (Cross). 맞은 적마다 X자 섬광
+    public float meleeHitVfxScale = 0.6f;
+    // 휘두르는 궤적 (판정 부채꼴 그대로). 바닥이 밝아서 옅은 색은 묻힌다 — 진한 금색
+    public Color meleeArcColor = new Color(1f, 0.72f, 0.2f, 0.9f);
+    public Color meleeHitTint = new Color(1f, 0.85f, 0.4f, 1f); // X자 섬광 색 (원본은 흰색이라 밝은 바닥·몹 위에서 안 보인다)
+    public float meleeArcSweepTime = 0.09f;   // 쓸고 지나가는 시간
+    public float meleeArcFadeTime = 0.15f;    // 다 쓸고 나서 사라지는 시간
+    public float meleeHitShake = 0.12f;       // 하나라도 맞히면 화면이 짧게 떨린다 (유탄 0.35)
+    public float meleeHitShakeTime = 0.1f;
+    int meleeSwingDir = 1;                    // 휘두를 때마다 방향을 바꾼다
     public float gunshotAlertRadius = 30f; // 사격 소리가 닿는 범위
     public GameObject bulletImpactVfx;     // 착탄 이펙트: CFXR3 Fire Explosion B 프리팹
     public float bulletImpactVfxScale = 0.4f;
@@ -555,6 +567,9 @@ void Fire()
 void MeleeAttack()
     {
         float reach = meleeRange + meleeRadius;
+        SpawnMeleeArc(reach);
+        bool landed = false;
+
         Collider[] hits = Physics.OverlapSphere(transform.position, reach);
         for (int i = 0; i < hits.Length; i++)
         {
@@ -567,9 +582,10 @@ void MeleeAttack()
 
             // 보스 방어 토템은 근접으로만 부서진다 (Health가 없어 총알·유탄은 통하지 않는다)
             BossTotem totem = hits[i].GetComponent<BossTotem>();
-            if (totem != null) { totem.TakeMeleeHit(); continue; }
+            if (totem != null) { SpawnMeleeHit(hits[i]); landed = true; totem.TakeMeleeHit(); continue; }
 
             Health h = hits[i].GetComponent<Health>();
+            if (h != null && h.CurrentHealth > 0f) { SpawnMeleeHit(hits[i]); landed = true; }
             if (h != null) h.TakeDamage(meleeDamage);
 
             EnemyAI ai = hits[i].GetComponent<EnemyAI>();
@@ -584,6 +600,39 @@ void MeleeAttack()
             if (hitRb != null)
                 hitRb.AddForce(dir.normalized * meleeKnockbackForce, ForceMode.Impulse);
         }
+
+        if (landed) CameraFollow.Shake(meleeHitShake, meleeHitShakeTime);
+    }
+
+    // 판정 부채꼴을 바닥에 그대로 그린다. 안쪽 반지름은 몸통에 겹치지 않게 조금 띄운다
+    void SpawnMeleeArc(float reach)
+    {
+        CapsuleCollider capsule = GetComponent<CapsuleCollider>();
+        float feet = capsule != null ? transform.position.y - capsule.height * 0.5f * transform.lossyScale.y : transform.position.y - 1f;
+        Vector3 ground = new Vector3(transform.position.x, feet + 0.15f, transform.position.z);
+        MeleeSlashArc.Spawn(ground, transform.forward, 0.45f, reach, meleeConeAngle, meleeArcColor,
+                            meleeArcSweepTime, meleeArcFadeTime, meleeSwingDir);
+        meleeSwingDir = -meleeSwingDir;
+    }
+
+    // 맞은 자리에 X자 섬광. 몸통 가운데에서 카메라 쪽으로 당겨 터뜨린다 —
+    // 몹 스프라이트는 깊이를 쓰므로 몸 한가운데에 두면 그림 뒤로 반쯤 묻힌다
+    void SpawnMeleeHit(Collider target)
+    {
+        if (meleeHitVfx == null) return;
+        Vector3 pos = target.bounds.center;
+        Camera cam = Camera.main;
+        if (cam != null) pos -= cam.transform.forward * 1.5f;
+
+        GameObject fx = Instantiate(meleeHitVfx, pos, Quaternion.identity);
+        fx.transform.localScale = Vector3.one * meleeHitVfxScale;
+        foreach (ParticleSystem ps in fx.GetComponentsInChildren<ParticleSystem>())
+        {
+            ParticleSystem.MainModule m = ps.main;
+            Color c = m.startColor.color;
+            m.startColor = new Color(c.r * meleeHitTint.r, c.g * meleeHitTint.g, c.b * meleeHitTint.b, c.a * meleeHitTint.a);
+        }
+        Destroy(fx, 1.2f); // 프리팹이 스스로 지워지지 않는다
     }
 
 void OnDrawGizmosSelected()

@@ -2683,6 +2683,7 @@ MonoBehaviour:
   fireDuration: 2.5
   trackLinearSpeed: 6
   matchPlayerMoveSpeed: 1
+  trackSpeedScale: 1
   damagePerSecond: 100
   tickInterval: 0.2
   beamWidth: 3
@@ -32840,6 +32841,14 @@ MonoBehaviour:
   meleeKnockbackForce: 4
   meleeKnockbackDuration: 0.5
   meleeConeAngle: 120
+  meleeHitVfx: {fileID: 8525990746615576120, guid: b85d21f3b8fed714bacf0c4fd50fa512, type: 3}
+  meleeHitVfxScale: 0.6
+  meleeArcColor: {r: 1, g: 0.72, b: 0.2, a: 0.9}
+  meleeHitTint: {r: 1, g: 0.85, b: 0.4, a: 1}
+  meleeArcSweepTime: 0.09
+  meleeArcFadeTime: 0.15
+  meleeHitShake: 0.12
+  meleeHitShakeTime: 0.1
   gunshotAlertRadius: 30
   bulletImpactVfx: {fileID: 8194992990867289339, guid: 99bc28c0d45f51c4fbac01080b73edc7, type: 3}
   bulletImpactVfxScale: 0.4
