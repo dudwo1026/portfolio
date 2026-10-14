@@ -28,6 +28,8 @@ public class BossGuardPattern : MonoBehaviour
     public float sideAngle = 30f;      // 2개일 때 동쪽을 중심으로 좌우로 벌리는 각
     public Vector3 totemSize = new Vector3(1.8f, 4.5f, 1.8f);
     public Color totemColor = new Color(0.95f, 0.80f, 0.20f, 1f);
+    [Tooltip("넣어 두면 원기둥 대신 이 모델을 높이 totemSize.y에 맞춰(비율 유지) 세운다. 충돌도 모델 폭에 맞춘다")]
+    public GameObject totemPrefab;
     public Color guardColor = new Color(0.35f, 0.65f, 1f, 1f); // 방어 중 보스 색
 
     [Header("토템 공격")]
@@ -128,7 +130,7 @@ public class BossGuardPattern : MonoBehaviour
             Vector3 pos = transform.position + dir.normalized * totemDistance;
             float y = BossGround.Y(pos, groundY); // 토템 자리의 바닥 (다른 소환물·몹 위에 올라서지 않게)
             pos.y = y + totemSize.y * 0.5f;
-            totems.Add(BossTotem.Spawn(this, pos, totemSize, totemColor, totemMeleeHits, y));
+            totems.Add(BossTotem.Spawn(this, pos, totemSize, totemColor, totemMeleeHits, y, totemPrefab));
         }
 
         nextCastTime = float.PositiveInfinity; // 서 있는 동안에는 재발동 타이머를 돌리지 않는다
@@ -191,6 +193,7 @@ public class BossTotem : MonoBehaviour
     Color baseColor;
     int hitsLeft;
     int hitsTotal;
+    bool ownsMaterial;
 
     float groundY;        // 워닝 장판을 깔 높이
     float nextCastTime;   // 다음 시전 가능 시각
@@ -199,20 +202,44 @@ public class BossTotem : MonoBehaviour
 
     static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
-    public static BossTotem Spawn(BossGuardPattern owner, Vector3 pos, Vector3 size, Color color, int hits, float groundY)
+    public static BossTotem Spawn(BossGuardPattern owner, Vector3 pos, Vector3 size, Color color, int hits, float groundY, GameObject prefab = null)
     {
-        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        go.name = "BossTotem";
-        go.transform.position = pos;
-        go.transform.localScale = new Vector3(size.x, size.y * 0.5f, size.z); // 실린더 기본 높이가 2다
-
-        Material m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-        m.color = color;
-        go.GetComponent<Renderer>().sharedMaterial = m;
+        GameObject go;
+        Renderer rend;
+        bool ownsMaterial = prefab == null;
+        if (prefab != null)
+        {
+            go = new GameObject("BossTotem");
+            go.transform.position = pos;
+            GameObject model = Instantiate(prefab, go.transform); // 모델 루트 회전(FBX -90도)은 그대로
+            foreach (Collider c in model.GetComponentsInChildren<Collider>()) Destroy(c);
+            rend = model.GetComponentInChildren<Renderer>();
+            model.transform.localScale *= size.y / rend.bounds.size.y; // 높이를 맞추고 비율 유지
+            Bounds b = rend.bounds;
+            model.transform.position += new Vector3(pos.x - b.center.x, groundY - b.min.y, pos.z - b.center.z); // 바닥에 세운다
+            b = rend.bounds;
+            CapsuleCollider cap = go.AddComponent<CapsuleCollider>();
+            cap.radius = Mathf.Max(b.extents.x, b.extents.z);
+            cap.height = b.size.y;
+            cap.center = go.transform.InverseTransformPoint(b.center);
+            color = Color.white; // 맞을수록 어두워지는 색을 텍스처 위에 곱한다
+        }
+        else
+        {
+            go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            go.name = "BossTotem";
+            go.transform.position = pos;
+            go.transform.localScale = new Vector3(size.x, size.y * 0.5f, size.z); // 실린더 기본 높이가 2다
+            Material m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            m.color = color;
+            rend = go.GetComponent<Renderer>();
+            rend.sharedMaterial = m;
+        }
 
         BossTotem t = go.AddComponent<BossTotem>();
         t.owner = owner;
-        t.rend = go.GetComponent<Renderer>();
+        t.rend = rend;
+        t.ownsMaterial = ownsMaterial;
         t.block = new MaterialPropertyBlock();
         t.baseColor = color;
         t.hitsLeft = Mathf.Max(1, hits);
@@ -285,7 +312,7 @@ public class BossTotem : MonoBehaviour
     void OnDestroy()
     {
         if (warning != null) Destroy(warning);
-        if (rend != null && rend.sharedMaterial != null) Destroy(rend.sharedMaterial);
+        if (ownsMaterial && rend != null && rend.sharedMaterial != null) Destroy(rend.sharedMaterial); // 모델 재질은 에셋이라 지우면 안 된다
     }
 
     // 보스 자신의 공격(분신 돌진·레이저)이 자기 토템에 막히지 않도록 쓰는 판별.
