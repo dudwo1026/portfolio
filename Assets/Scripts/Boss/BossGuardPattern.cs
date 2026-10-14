@@ -35,6 +35,10 @@ public class BossGuardPattern : MonoBehaviour
     public float totemDropTime = 0.2f;
     public GameObject totemImpactEffect;       // 꽂히는 순간 발밑에서 터뜨린다
     public float totemImpactEffectScale = 3f;
+    public GameObject totemStrikeEffect;       // 주위 공격 판정 순간 발밑에서 터뜨린다 (맞든 안 맞든)
+    public float totemStrikeEffectScale = 1f;
+    public GameObject totemStrikeEffect2;      // 같이 겹쳐 터뜨리는 두 번째 이펙트
+    public float totemStrikeEffectScale2 = 1f;
     public Color guardColor = new Color(0.35f, 0.65f, 1f, 1f); // 방어 중 보스 색
 
     [Header("토템 공격")]
@@ -333,12 +337,30 @@ public class BossTotem : MonoBehaviour
         strikeTime = -1f;
         if (warning != null) { Destroy(warning); warning = null; }
 
+        Vector3 foot = new Vector3(transform.position.x, groundY, transform.position.z);
+        SpawnFx(owner.totemStrikeEffect, owner.totemStrikeEffectScale, foot);
+        SpawnFx(owner.totemStrikeEffect2, owner.totemStrikeEffectScale2, foot);
+
         // 워닝이 끝나는 순간에 다시 잰다 — 그 사이에 빠져나갔으면 헛친다
         Transform p = owner.PlayerTransform;
         Health h = owner.PlayerHealth;
         if (p == null || h == null) return;
         if (FlatDistance(p.position) > owner.totemAttackRadius) return;
         h.TakeDamage(Mathf.Round(owner.TotemDamage));
+    }
+
+    static void SpawnFx(GameObject prefab, float scale, Vector3 at)
+    {
+        if (prefab == null) return;
+        GameObject fx = Instantiate(prefab, at, prefab.transform.rotation);
+        fx.transform.localScale = Vector3.one * scale;
+        // 파티클이 Local 크기 모드면 루트 스케일을 무시해 원본 크기로 나온다. 계층 스케일을 따르게 바꾼다
+        foreach (ParticleSystem ps in fx.GetComponentsInChildren<ParticleSystem>())
+        {
+            ParticleSystem.MainModule m = ps.main;
+            m.scalingMode = ParticleSystemScalingMode.Hierarchy;
+        }
+        Destroy(fx, 3f);
     }
 
     void OnDestroy()
