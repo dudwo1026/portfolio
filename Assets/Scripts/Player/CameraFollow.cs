@@ -29,8 +29,8 @@ public class CameraFollow : MonoBehaviour
     public float aimScreenFraction = 1f / 6f;
     [Tooltip("옮겨 가는 부드러움. 0.2면 약 0.6초에 자리 잡는다")]
     public float aimSmoothTime = 0.2f;
-    [Tooltip("우클릭을 뗀 뒤 가운데로 돌아오는 부드러움. 0.4면 약 1.2초")]
-    public float aimReturnSmoothTime = 0.4f;
+    [Tooltip("우클릭을 뗀 뒤 가운데로 돌아오는 부드러움. 0.3이면 약 0.9초")]
+    public float aimReturnSmoothTime = 0.3f;
 
     Vector2 aimWant, aimShift, aimVel;
 
