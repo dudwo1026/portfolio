@@ -2639,6 +2639,7 @@ MonoBehaviour:
   spriteFallHeight: 10
   fallSlant: 0.17
   meteorLandHeight: 1
+  spriteFallSpeedScale: 1.5
   castColor: {r: 1, g: 0.45, b: 0.05, a: 1}
   warningColor: {r: 1, g: 0.25, b: 0.05, a: 1}
   meteorColor: {r: 0.25, g: 0.06, b: 0.02, a: 1}
@@ -5961,6 +5962,10 @@ MonoBehaviour:
   pitch: 40
   distance: 16
   lookOffset: {x: 0, y: 0, z: 0}
+  aimScreenFraction: 0.16666667
+  aimSmoothTime: 0.2
+  aimVerticalScale: 0.5
+  aimReturnSmoothTime: 0.17
   shakeFrequency: 22
 --- !u!114 &330585549
 MonoBehaviour:
@@ -6356,6 +6361,89 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 4786106381246896, guid: 3f544eaa13dc7074cba3aed998b27842, type: 3}
   m_PrefabInstance: {fileID: 361954534}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &364220919
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 584608240}
+    m_Modifications:
+    - target: {fileID: 4617036660772024948, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_Name
+      value: RoofPortalEffect
+      objectReference: {fileID: 0}
+    - target: {fileID: 4617036660772024948, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 2.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -9.559999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.419
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.300003
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+--- !u!4 &364220920 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+  m_PrefabInstance: {fileID: 364220919}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &364220921 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4617036660772024948, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+  m_PrefabInstance: {fileID: 364220919}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &366287782
 PrefabInstance:
@@ -10343,6 +10431,7 @@ Transform:
   - {fileID: 2002803339}
   - {fileID: 1047274205}
   - {fileID: 738405107}
+  - {fileID: 364220920}
   m_Father: {fileID: 1708458838}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &585298972
@@ -20307,6 +20396,7 @@ MonoBehaviour:
   gaugeStep: 25
   keyColor: {r: 1, g: 0.8, b: 0.1, a: 1}
   spinSpeed: 90
+  groundLift: 0.2
   countLabel: {fileID: 80719181}
   announce: {fileID: 1661418288}
   slotLights:
@@ -34946,6 +35036,7 @@ MonoBehaviour:
   requireGaugeFull: 1
   requireKeys: 1
   visual: {fileID: 2002803341}
+  openEffect: {fileID: 364220921}
   closedColor: {r: 0.25, g: 0.25, b: 0.3, a: 1}
   openColor: {r: 0.3, g: 0.85, b: 1, a: 1}
   openPulseSpeed: 2.5

@@ -23,6 +23,7 @@ public class Portal : MonoBehaviour, IChargePad
     public bool requireGaugeFull = false;   // 처치 게이지가 가득 차야 열린다
     public bool requireKeys = false;        // 열쇠(KeyItemSpawner)를 다 모아야 열린다
     public Renderer visual;                 // 열림/닫힘을 색으로 보여줄 렌더러
+    public GameObject openEffect;           // 넣어 두면 열렸을 때 이걸 켜고 visual 판은 숨긴다 (포탈 이펙트)
     public Color closedColor = new Color(0.25f, 0.25f, 0.3f, 1f);
     public Color openColor = new Color(0.3f, 0.85f, 1f, 1f);
     public float openPulseSpeed = 2.5f;
@@ -59,6 +60,12 @@ public class Portal : MonoBehaviour, IChargePad
         if (open && !wasOpen && openMessage != null) openMessage.Show(openText);
         wasOpen = open;
         UpdateHold(open);
+
+        if (openEffect != null && openEffect.activeSelf != open)
+        {
+            openEffect.SetActive(open);
+            if (visual != null) visual.enabled = !open;
+        }
 
         if (visual == null) return;
         if (runtimeMat == null) runtimeMat = visual.material; // 이 포탈만의 인스턴스 재질
