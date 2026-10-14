@@ -39,6 +39,9 @@ public class BossGuardPattern : MonoBehaviour
     public float totemStrikeEffectScale = 1f;
     public GameObject totemStrikeEffect2;      // 같이 겹쳐 터뜨리는 두 번째 이펙트
     public float totemStrikeEffectScale2 = 1f;
+    // 첫 이펙트를 판정보다 이만큼 먼저 켠다. AoE slash는 재생 1초 뒤에 칼날이 퍼져 나가므로 1이면 판정과 겹친다
+    public float totemStrikeEffectLead = 1f;
+    public float totemStrikeEffectLift = 0.3f;   // 바닥에 묻히지 않게 띄운다
     public Color guardColor = new Color(0.35f, 0.65f, 1f, 1f); // 방어 중 보스 색
 
     [Header("토템 공격")]
@@ -208,6 +211,7 @@ public class BossTotem : MonoBehaviour
     float nextCastTime;   // 다음 시전 가능 시각
     float strikeTime = -1f; // 판정이 들어갈 시각 (-1이면 시전 중이 아님)
     GameObject warning;
+    bool leadFxSpawned;   // 이번 시전의 선행 이펙트(AoE slash)를 켰는가
 
     static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
@@ -293,6 +297,11 @@ public class BossTotem : MonoBehaviour
         // 시전 중이면 판정 시각만 기다린다
         if (strikeTime >= 0f)
         {
+            if (!leadFxSpawned && Time.time >= strikeTime - owner.totemStrikeEffectLead)
+            {
+                leadFxSpawned = true;
+                SpawnFx(owner.totemStrikeEffect, owner.totemStrikeEffectScale, FxPoint());
+            }
             if (Time.time < strikeTime) return;
             Strike();
             return;
@@ -318,6 +327,7 @@ public class BossTotem : MonoBehaviour
     {
         nextCastTime = Time.time + owner.totemAttackInterval; // 주기는 시전 시작 기준
         strikeTime = Time.time + owner.totemWarningTime;
+        leadFxSpawned = false;
 
         // 범위를 그대로 보여 주는 장판. 토템의 비균등 스케일을 타지 않도록 루트로 띄운다
         warning = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
@@ -337,9 +347,8 @@ public class BossTotem : MonoBehaviour
         strikeTime = -1f;
         if (warning != null) { Destroy(warning); warning = null; }
 
-        Vector3 foot = new Vector3(transform.position.x, groundY, transform.position.z);
-        SpawnFx(owner.totemStrikeEffect, owner.totemStrikeEffectScale, foot);
-        SpawnFx(owner.totemStrikeEffect2, owner.totemStrikeEffectScale2, foot);
+        if (!leadFxSpawned) SpawnFx(owner.totemStrikeEffect, owner.totemStrikeEffectScale, FxPoint());
+        SpawnFx(owner.totemStrikeEffect2, owner.totemStrikeEffectScale2, FxPoint());
 
         // 워닝이 끝나는 순간에 다시 잰다 — 그 사이에 빠져나갔으면 헛친다
         Transform p = owner.PlayerTransform;
@@ -349,11 +358,19 @@ public class BossTotem : MonoBehaviour
         h.TakeDamage(Mathf.Round(owner.TotemDamage));
     }
 
+    Vector3 FxPoint()
+    {
+        return new Vector3(transform.position.x, groundY + owner.totemStrikeEffectLift, transform.position.z);
+    }
+
     static void SpawnFx(GameObject prefab, float scale, Vector3 at)
     {
         if (prefab == null) return;
         GameObject fx = Instantiate(prefab, at, prefab.transform.rotation);
         fx.transform.localScale = Vector3.one * scale;
+        // 바닥 밑에서 뿜는 부품(AoE slash의 Sparks·Flares는 y=-1)을 바닥 위로 올린다
+        foreach (Transform c in fx.GetComponentsInChildren<Transform>())
+            if (c != fx.transform && c.localPosition.y < 0f) c.localPosition = new Vector3(c.localPosition.x, 0f, c.localPosition.z);
         // 파티클이 Local 크기 모드면 루트 스케일을 무시해 원본 크기로 나온다. 계층 스케일을 따르게 바꾼다
         foreach (ParticleSystem ps in fx.GetComponentsInChildren<ParticleSystem>())
         {
