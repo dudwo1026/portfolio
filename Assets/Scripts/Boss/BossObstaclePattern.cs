@@ -19,6 +19,8 @@ public class BossObstaclePattern : MonoBehaviour
     public Color warningColor = new Color(1f, 0.25f, 0.1f, 1f);
     public Color obstacleColor = new Color(0.12f, 0.14f, 0.18f);
     public float warningThickness = 0.15f;
+    [Tooltip("넣어 두면 큐브 대신 이 모델을 구역 크기에 꽉 차게 늘려 세운다. 판정은 구역 상자 그대로")]
+    public GameObject obstaclePrefab;
 
     Health health;
     int triggered;          // 지금까지 시전한 횟수
@@ -108,11 +110,44 @@ public class BossObstaclePattern : MonoBehaviour
             if (ph != null) ph.TakeDamage(ph.maxHealth * 1000f); // 확실히 즉사
         }
 
-        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        go.name = "BossObstacle_" + (zone + 1);
-        go.transform.position = pos;
-        go.transform.localScale = size;
-        go.GetComponent<Renderer>().sharedMaterial = MakeMaterial(obstacleColor);
+        GameObject go;
+        if (obstaclePrefab != null)
+        {
+            go = new GameObject("BossObstacle_" + (zone + 1));
+            go.transform.position = pos;
+            go.AddComponent<BoxCollider>().size = size;
+            // 한 개를 구역 크기로 늘리면 무늬까지 수십 배로 늘어난다.
+            // 높이를 구역에 맞춘 배율로 모델을 바둑판처럼 깔고, 칸 수에 맞게 가로·세로만 살짝 맞춘다
+            GameObject probe = Instantiate(obstaclePrefab);
+            Vector3 unit = probe.GetComponentInChildren<Renderer>().bounds.size; // 배율 1일 때 월드 크기
+            Destroy(probe);
+            float s = size.y / unit.y;
+            int nx = Mathf.Max(1, Mathf.RoundToInt(size.x / (unit.x * s)));
+            int nz = Mathf.Max(1, Mathf.RoundToInt(size.z / (unit.z * s)));
+            Vector3 cell = new Vector3(size.x / nx, size.y, size.z / nz);
+            for (int ix = 0; ix < nx; ix++)
+                for (int iz = 0; iz < nz; iz++)
+                {
+                    Vector3 center = pos + new Vector3((ix + 0.5f) * cell.x - size.x * 0.5f, 0f, (iz + 0.5f) * cell.z - size.z * 0.5f);
+                    // 모델 루트가 눕혀져(-90도) 있어서 회전은 그대로 두고, 회전 없는 받침을 월드 축으로 늘린다
+                    Transform holder = new GameObject("Piece").transform;
+                    holder.SetParent(go.transform, false);
+                    holder.position = center;
+                    GameObject model = Instantiate(obstaclePrefab, holder);
+                    foreach (Collider c in model.GetComponentsInChildren<Collider>()) Destroy(c); // 막는 건 위 상자만
+                    holder.localScale = new Vector3(cell.x / unit.x, cell.y / unit.y, cell.z / unit.z);
+                    Renderer r = model.GetComponentInChildren<Renderer>();
+                    holder.position += center - r.bounds.center;
+                }
+        }
+        else
+        {
+            go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            go.name = "BossObstacle_" + (zone + 1);
+            go.transform.position = pos;
+            go.transform.localScale = size;
+            go.GetComponent<Renderer>().sharedMaterial = MakeMaterial(obstacleColor);
+        }
         obstacles.Add(go);
     }
 
