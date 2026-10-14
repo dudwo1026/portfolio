@@ -29,6 +29,8 @@ public class CameraFollow : MonoBehaviour
     public float aimScreenFraction = 1f / 6f;
     [Tooltip("옮겨 가는 부드러움. 0.2면 약 0.6초에 자리 잡는다")]
     public float aimSmoothTime = 0.2f;
+    [Tooltip("위아래로 미는 양은 좌우의 이 비율. 0.5면 세로 3등분선의 절반까지만")]
+    public float aimVerticalScale = 0.5f;
     [Tooltip("우클릭을 뗀 뒤 가운데로 돌아오는 부드러움. 0.25면 약 0.75초")]
     public float aimReturnSmoothTime = 0.25f;
 
@@ -118,7 +120,7 @@ public class CameraFollow : MonoBehaviour
         aimShift = Vector2.SmoothDamp(aimShift, aimWant, ref aimVel, aiming ? aimSmoothTime : aimReturnSmoothTime);
         // 초점 거리에서 화면 세로 폭(월드). 카메라를 화면 평면으로 이만큼 밀면 플레이어가 화면에서 그만큼 움직인다
         float h = cam.orthographic ? cam.orthographicSize * 2f : 2f * distance * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
-        return rot * new Vector3(aimShift.x * h * cam.aspect, aimShift.y * h, 0f) * aimScreenFraction;
+        return rot * new Vector3(aimShift.x * h * cam.aspect, aimShift.y * h * aimVerticalScale, 0f) * aimScreenFraction;
     }
 
     // 화면 가로·세로로만 민다 (앞뒤로 밀면 확대·축소처럼 보인다). 끝으로 갈수록 약해진다
