@@ -29,6 +29,8 @@ public class CameraFollow : MonoBehaviour
     public float aimScreenFraction = 1f / 6f;
     [Tooltip("옮겨 가는 부드러움. 0.2면 약 0.6초에 자리 잡는다")]
     public float aimSmoothTime = 0.2f;
+    [Tooltip("우클릭을 뗀 뒤 가운데로 돌아오는 부드러움. 0.4면 약 1.2초")]
+    public float aimReturnSmoothTime = 0.4f;
 
     Vector2 aimWant, aimShift, aimVel;
 
@@ -103,7 +105,8 @@ public class CameraFollow : MonoBehaviour
         if (!Application.isPlaying || cam == null) return Vector3.zero;
 
         Mouse m = Mouse.current;
-        if (m != null && m.rightButton.isPressed)
+        bool aiming = m != null && m.rightButton.isPressed;
+        if (aiming)
         {
             Vector2 d = m.position.ReadValue() - (Vector2)cam.WorldToScreenPoint(target.position);
             d.x /= cam.pixelWidth; d.y /= cam.pixelHeight; // 화면 비율 기준 → 궤적이 3등분선에 닿는 원(화면상 타원)
@@ -112,7 +115,7 @@ public class CameraFollow : MonoBehaviour
         }
         else aimWant = Vector2.zero;
 
-        aimShift = Vector2.SmoothDamp(aimShift, aimWant, ref aimVel, aimSmoothTime);
+        aimShift = Vector2.SmoothDamp(aimShift, aimWant, ref aimVel, aiming ? aimSmoothTime : aimReturnSmoothTime);
         // 초점 거리에서 화면 세로 폭(월드). 카메라를 화면 평면으로 이만큼 밀면 플레이어가 화면에서 그만큼 움직인다
         float h = cam.orthographic ? cam.orthographicSize * 2f : 2f * distance * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
         return rot * new Vector3(aimShift.x * h * cam.aspect, aimShift.y * h, 0f) * aimScreenFraction;
