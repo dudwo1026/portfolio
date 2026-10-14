@@ -106,8 +106,9 @@ public class CameraFollow : MonoBehaviour
         if (m != null && m.rightButton.isPressed)
         {
             Vector2 d = m.position.ReadValue() - (Vector2)cam.WorldToScreenPoint(target.position);
-            d.x /= cam.pixelWidth; d.y /= cam.pixelHeight; // 화면 비율 기준 방향 → 궤적이 3등분선에 닿는 원(화면상 타원)
-            if (d.sqrMagnitude > 0.0004f) aimWant = d.normalized; // 플레이어 바로 위를 찍으면 방향이 튀니 직전 방향 유지
+            d.x /= cam.pixelWidth; d.y /= cam.pixelHeight; // 화면 비율 기준 → 궤적이 3등분선에 닿는 원(화면상 타원)
+            // 플레이어에서 화면 절반 거리(0.5) 이상 떨어진 곳을 찍으면 최대, 가까울수록 덜 민다
+            aimWant = Vector2.ClampMagnitude(d * 2f, 1f);
         }
         else aimWant = Vector2.zero;
 
