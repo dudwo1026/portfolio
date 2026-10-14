@@ -23,6 +23,9 @@ public class BossObstaclePattern : MonoBehaviour
     public GameObject obstaclePrefab;
     [Tooltip("켜면 모델을 여러 개 바둑판으로 깔고, 끄면 한 덩어리로 늘린다 (무늬도 같이 늘어난다)")]
     public bool tileObstacle = false;
+    [Tooltip("모델 색 밝기 배율. 1이면 원본")]
+    public float obstacleBrightness = 1f;
+    Material obstacleMat;
 
     Health health;
     int triggered;          // 지금까지 시전한 횟수
@@ -140,6 +143,14 @@ public class BossObstaclePattern : MonoBehaviour
                     holder.localScale = new Vector3(cell.x / unit.x, cell.y / unit.y, cell.z / unit.z);
                     Renderer r = model.GetComponentInChildren<Renderer>();
                     holder.position += center - r.bounds.center;
+                    if (obstacleMat == null)
+                    {
+                        obstacleMat = new Material(r.sharedMaterial);
+                        Color c = r.sharedMaterial.color * obstacleBrightness;
+                        c.a = 1f;
+                        obstacleMat.color = c;
+                    }
+                    r.sharedMaterial = obstacleMat;
                 }
         }
         else
