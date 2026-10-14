@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 // 타이틀에서 새 게임으로 들어오면 일시정지한 채 조작 가이드를 몇 장 보여 준다.
-// Enter / 좌클릭 = 다음 장, ESC = 건너뛰기. Canvas에 붙이면 UI는 스스로 만든다.
+// Space = 다음 장, ESC = 건너뛰기. Canvas에 붙이면 UI는 스스로 만든다.
 // 입력은 LateUpdate에서 받는다 — 같은 프레임의 Update(일시정지 메뉴의 ESC, 사격 클릭)가
 // 먼저 돌고 난 뒤에 풀어야 닫는 키가 다른 동작으로 새지 않는다
 public class ControlGuide : MonoBehaviour
@@ -69,11 +69,9 @@ public class ControlGuide : MonoBehaviour
         if (Time.unscaledTime < openedAt + inputDelay) return;
 
         Keyboard kb = Keyboard.current;
-        Mouse mouse = Mouse.current;
         if (kb != null && kb.escapeKey.wasPressedThisFrame) { Close(); return; }
-        bool next = (kb != null && (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame))
-                    || (mouse != null && mouse.leftButton.wasPressedThisFrame);
-        if (!next) return;
+        // 대시도 Space지만 일시정지 중엔 입력을 안 받고, 여기서 닫는 건 그 Update 뒤라 새지 않는다
+        if (kb == null || !kb.spaceKey.wasPressedThisFrame) return;
         if (page < pages.Length) Show(page + 1); // 마지막 조작 장 다음은 진행 가이드
         else Close();
     }
@@ -265,7 +263,7 @@ public class ControlGuide : MonoBehaviour
         body = NewRect("Body", box, new Vector2(860f, 340f), new Vector2(0f, 5f));
         Text hint = NewText("Hint", box, 24, new Vector2(860f, 40f), new Vector2(0f, 40f), TextAnchor.MiddleCenter);
         hint.rectTransform.anchorMin = hint.rectTransform.anchorMax = new Vector2(0.5f, 0f);
-        hint.text = "Enter / 좌클릭: 다음      ESC: 건너뛰기";
+        hint.text = "Space: 다음      ESC: 건너뛰기";
         hint.color = new Color(0.7f, 0.7f, 0.75f, 1f);
     }
 
