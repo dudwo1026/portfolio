@@ -13,6 +13,7 @@ public class KeyItemSpawner : MonoBehaviour
     public float gaugeStep = 25f;
     public Color keyColor = new Color(1f, 0.8f, 0.1f, 1f);
     public float spinSpeed = 90f;
+    public float groundLift = 0.2f; // 시작할 때 바닥 위 이만큼 띄워 둔다
     public UnityEngine.UI.Text countLabel; // 우상단 게이지 아래 "열쇠 n/7"
     public HudMessage announce; // 화면 중상단 "n번째 열쇠가 생성되었습니다"
     // 포탈 옆 열쇠 표시등. 왼쪽부터 순서대로 넣는다 — 모은 개수만큼 앞에서부터 켜진다
@@ -41,12 +42,29 @@ public class KeyItemSpawner : MonoBehaviour
             Collider c = p.GetComponent<Collider>();
             if (c != null) c.isTrigger = true; // 몸으로 막지 않고, 닿으면 줍는다
             Renderer r = p.GetComponent<Renderer>();
-            if (r != null) r.sharedMaterial = mat;
+            if (r != null) { r.sharedMaterial = mat; SnapToGround(p, r); }
             p.gameObject.AddComponent<KeyItem>();
             p.gameObject.SetActive(false);
             unused.Add(p);
         }
         RefreshLabel();
+    }
+
+    // 손으로 놓은 큐브가 지형(화분·타일)에 박히거나 뜨지 않게, 발밑 바닥 위 groundLift에 올려 둔다.
+    // 바닥 = 가운데·네 모서리 중 가장 높은 곳. 큐브 윗면보다 높은 것(나무 잎, 처마)은 바닥으로 안 친다
+    void SnapToGround(Transform p, Renderer r)
+    {
+        Bounds b = r.bounds;
+        float ground = float.NegativeInfinity;
+        for (int i = 0; i < 5; i++)
+        {
+            float sx = i == 0 ? 0f : (i % 2 == 0 ? 1f : -1f), sz = i == 0 ? 0f : (i < 3 ? 1f : -1f);
+            Vector3 from = new Vector3(b.center.x + sx * b.extents.x, b.max.y + 10f, b.center.z + sz * b.extents.z);
+            foreach (RaycastHit h in Physics.RaycastAll(from, Vector3.down, 60f, ~0, QueryTriggerInteraction.Ignore))
+                if (h.collider.transform != p && h.collider.GetComponentInParent<EnemyAI>() == null
+                    && h.point.y <= b.max.y + 0.5f && h.point.y > ground) ground = h.point.y;
+        }
+        if (ground > float.NegativeInfinity) p.position += Vector3.up * (ground + groundLift - b.min.y);
     }
 
     void Update()
