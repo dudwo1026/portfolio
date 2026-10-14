@@ -21,6 +21,8 @@ public class BossObstaclePattern : MonoBehaviour
     public float warningThickness = 0.15f;
     [Tooltip("넣어 두면 큐브 대신 이 모델을 구역 크기에 꽉 차게 늘려 세운다. 판정은 구역 상자 그대로")]
     public GameObject obstaclePrefab;
+    [Tooltip("켜면 모델을 여러 개 바둑판으로 깔고, 끄면 한 덩어리로 늘린다 (무늬도 같이 늘어난다)")]
+    public bool tileObstacle = false;
 
     Health health;
     int triggered;          // 지금까지 시전한 횟수
@@ -122,8 +124,8 @@ public class BossObstaclePattern : MonoBehaviour
             Vector3 unit = probe.GetComponentInChildren<Renderer>().bounds.size; // 배율 1일 때 월드 크기
             Destroy(probe);
             float s = size.y / unit.y;
-            int nx = Mathf.Max(1, Mathf.RoundToInt(size.x / (unit.x * s)));
-            int nz = Mathf.Max(1, Mathf.RoundToInt(size.z / (unit.z * s)));
+            int nx = tileObstacle ? Mathf.Max(1, Mathf.RoundToInt(size.x / (unit.x * s))) : 1;
+            int nz = tileObstacle ? Mathf.Max(1, Mathf.RoundToInt(size.z / (unit.z * s))) : 1;
             Vector3 cell = new Vector3(size.x / nx, size.y, size.z / nz);
             for (int ix = 0; ix < nx; ix++)
                 for (int iz = 0; iz < nz; iz++)
