@@ -224,10 +224,7 @@ public class BossTotem : MonoBehaviour
 {
     BossGuardPattern owner;
     Renderer rend;
-    MaterialPropertyBlock block;
-    Color baseColor;
     int hitsLeft;
-    int hitsTotal;
     bool ownsMaterial;
 
     float groundY;        // 워닝 장판을 깔 높이
@@ -236,8 +233,6 @@ public class BossTotem : MonoBehaviour
     GameObject warning;
     bool leadFxSpawned;   // 이번 시전의 선행 이펙트(AoE slash)를 켰는가
     GameObject leadFx;
-
-    static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
     public static BossTotem Spawn(BossGuardPattern owner, Vector3 pos, Vector3 size, Color color, int hits, float groundY, GameObject prefab = null)
     {
@@ -262,7 +257,6 @@ public class BossTotem : MonoBehaviour
             cap.radius = Mathf.Max(b.extents.x, b.extents.z);
             cap.height = b.size.y;
             cap.center = go.transform.InverseTransformPoint(b.center);
-            color = Color.white; // 맞을수록 어두워지는 색을 텍스처 위에 곱한다
         }
         else
         {
@@ -280,10 +274,7 @@ public class BossTotem : MonoBehaviour
         t.owner = owner;
         t.rend = rend;
         t.ownsMaterial = ownsMaterial;
-        t.block = new MaterialPropertyBlock();
-        t.baseColor = color;
         t.hitsLeft = Mathf.Max(1, hits);
-        t.hitsTotal = t.hitsLeft;
         t.groundY = groundY;
         // 세워지자마자 때리면 피할 틈이 없다. 첫 시전은 주기만큼 기다린다
         t.nextCastTime = Time.time + (owner != null ? owner.totemAttackInterval : 5f);
@@ -425,15 +416,7 @@ public class BossTotem : MonoBehaviour
     public void TakeMeleeHit()
     {
         hitsLeft--;
-        if (hitsLeft > 0)
-        {
-            // 남은 횟수가 줄수록 어두워져 진행도가 보인다
-            float t = (float)hitsLeft / hitsTotal;
-            rend.GetPropertyBlock(block);
-            block.SetColor(BaseColorId, Color.Lerp(Color.black, baseColor, 0.25f + 0.75f * t));
-            rend.SetPropertyBlock(block);
-            return;
-        }
+        if (hitsLeft > 0) return;
 
         if (owner != null) owner.NotifyTotemDestroyed(this);
         SupplyKit.Spawn(transform.position); // 부순 보상: 보급상자 확정 드랍
