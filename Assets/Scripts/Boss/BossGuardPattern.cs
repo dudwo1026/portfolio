@@ -30,6 +30,11 @@ public class BossGuardPattern : MonoBehaviour
     public Color totemColor = new Color(0.95f, 0.80f, 0.20f, 1f);
     [Tooltip("넣어 두면 원기둥 대신 이 모델을 높이 totemSize.y에 맞춰(비율 유지) 세운다. 충돌도 모델 폭에 맞춘다")]
     public GameObject totemPrefab;
+    public float totemYaw = 90f;               // 모델을 위에서 볼 때 시계 방향으로 이만큼 돌린다
+    public float totemDropHeight = 14f;        // 이 높이에서 떨어져 꽂힌다 (보이는 것만, 판정은 처음부터)
+    public float totemDropTime = 0.2f;
+    public GameObject totemImpactEffect;       // 꽂히는 순간 발밑에서 터뜨린다
+    public float totemImpactEffectScale = 3f;
     public Color guardColor = new Color(0.35f, 0.65f, 1f, 1f); // 방어 중 보스 색
 
     [Header("토템 공격")]
@@ -206,15 +211,18 @@ public class BossTotem : MonoBehaviour
     {
         GameObject go;
         Renderer rend;
+        Transform modelRoot = null;
         bool ownsMaterial = prefab == null;
         if (prefab != null)
         {
             go = new GameObject("BossTotem");
             go.transform.position = pos;
             GameObject model = Instantiate(prefab, go.transform); // 모델 루트 회전(FBX -90도)은 그대로
+            modelRoot = model.transform;
             foreach (Collider c in model.GetComponentsInChildren<Collider>()) Destroy(c);
             rend = model.GetComponentInChildren<Renderer>();
             model.transform.localScale *= size.y / rend.bounds.size.y; // 높이를 맞추고 비율 유지
+            if (owner != null) model.transform.Rotate(0f, owner.totemYaw, 0f, Space.World);
             Bounds b = rend.bounds;
             model.transform.position += new Vector3(pos.x - b.center.x, groundY - b.min.y, pos.z - b.center.z); // 바닥에 세운다
             b = rend.bounds;
@@ -247,7 +255,31 @@ public class BossTotem : MonoBehaviour
         t.groundY = groundY;
         // 세워지자마자 때리면 피할 틈이 없다. 첫 시전은 주기만큼 기다린다
         t.nextCastTime = Time.time + (owner != null ? owner.totemAttackInterval : 5f);
+        if (modelRoot != null && owner != null && owner.totemDropTime > 0f)
+            t.StartCoroutine(t.Drop(modelRoot, new Vector3(pos.x, groundY, pos.z)));
         return t;
+    }
+
+    // 하늘에서 가속하며 떨어져 꽂힌다. 꽂히는 순간 펑 + 짧은 흔들림
+    System.Collections.IEnumerator Drop(Transform model, Vector3 foot)
+    {
+        Vector3 end = model.position;
+        Vector3 start = end + Vector3.up * owner.totemDropHeight;
+        for (float t = 0f; t < owner.totemDropTime; t += Time.deltaTime)
+        {
+            float k = t / owner.totemDropTime;
+            model.position = Vector3.Lerp(start, end, k * k);
+            yield return null;
+        }
+        model.position = end;
+
+        if (owner.totemImpactEffect != null)
+        {
+            GameObject fx = Instantiate(owner.totemImpactEffect, foot, owner.totemImpactEffect.transform.rotation);
+            fx.transform.localScale = Vector3.one * owner.totemImpactEffectScale;
+            Destroy(fx, 3f);
+        }
+        CameraFollow.Shake(0.15f, 0.15f);
     }
 
     void Update()
