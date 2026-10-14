@@ -27,8 +27,8 @@ public class CameraFollow : MonoBehaviour
     [Header("우클릭 조준 시 그쪽을 비춘다")]
     [Tooltip("플레이어가 화면 중앙에서 이 비율만큼 조준 반대쪽으로 밀린다. 1/6이면 3등분선")]
     public float aimScreenFraction = 1f / 6f;
-    [Tooltip("옮겨 가는 부드러움. 0.1이면 약 0.3초에 자리 잡는다")]
-    public float aimSmoothTime = 0.1f;
+    [Tooltip("옮겨 가는 부드러움. 0.2면 약 0.6초에 자리 잡는다")]
+    public float aimSmoothTime = 0.2f;
 
     Vector2 aimWant, aimShift, aimVel;
 
@@ -96,7 +96,7 @@ public class CameraFollow : MonoBehaviour
     }
 
     // 우클릭(조준) 중이면 마우스 쪽으로 카메라를 화면 평면 위에서 민다. 떼면 가운데로 돌아온다.
-    // 좌우 조준이면 플레이어가 가로 3등분선, 상하면 세로 3등분선, 대각선이면 두 선이 만나는 곳에 선다
+    // 좌우 조준이면 플레이어가 가로 3등분선, 상하면 세로 3등분선에 서고, 그 사이는 둥글게 잇는다
     Vector3 AimOffset(Quaternion rot)
     {
         Camera cam = GetComponent<Camera>();
@@ -106,8 +106,8 @@ public class CameraFollow : MonoBehaviour
         if (m != null && m.rightButton.isPressed)
         {
             Vector2 d = m.position.ReadValue() - (Vector2)cam.WorldToScreenPoint(target.position);
-            float k = Mathf.Max(Mathf.Abs(d.x), Mathf.Abs(d.y));
-            if (k > 20f) aimWant = d / k; // 플레이어 바로 위를 찍으면 방향이 튀니 직전 방향 유지
+            d.x /= cam.pixelWidth; d.y /= cam.pixelHeight; // 화면 비율 기준 방향 → 궤적이 3등분선에 닿는 원(화면상 타원)
+            if (d.sqrMagnitude > 0.0004f) aimWant = d.normalized; // 플레이어 바로 위를 찍으면 방향이 튀니 직전 방향 유지
         }
         else aimWant = Vector2.zero;
 
