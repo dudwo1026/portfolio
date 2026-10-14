@@ -31,8 +31,8 @@ public class CameraFollow : MonoBehaviour
     public float aimSmoothTime = 0.2f;
     [Tooltip("위아래로 미는 양은 좌우의 이 비율. 0.5면 세로 3등분선의 절반까지만")]
     public float aimVerticalScale = 0.5f;
-    [Tooltip("우클릭을 뗀 뒤 가운데로 돌아오는 부드러움. 0.25면 약 0.75초")]
-    public float aimReturnSmoothTime = 0.25f;
+    [Tooltip("우클릭을 뗀 뒤 가운데로 돌아오는 부드러움. 자리 잡는 시간은 이 값의 약 3배 (0.17 → 약 0.5초)")]
+    public float aimReturnSmoothTime = 0.17f;
 
     Vector2 aimWant, aimShift, aimVel;
 
