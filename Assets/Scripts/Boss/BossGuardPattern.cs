@@ -42,6 +42,29 @@ public class BossGuardPattern : MonoBehaviour
     // 첫 이펙트를 판정보다 이만큼 먼저 켠다. AoE slash는 재생 1초 뒤에 칼날이 퍼져 나가므로 1이면 판정과 겹친다
     public float totemStrikeEffectLead = 1f;
     public float totemStrikeEffectLift = 0.3f;   // 바닥에 묻히지 않게 띄운다
+    // 판정(칼날 퍼짐) 뒤 이만큼 지나면 두 이펙트 모두 새로 뿜지 않고 totemStrikeFadeTime 안에 잦아든다.
+    // 둘 다 반복 재생 이펙트라 그냥 두면 판정 뒤에도 몇 초씩 남는다
+    public float totemStrikeFadeDelay = 0.15f;
+    public float totemStrikeFadeTime = 0.25f;
+
+    public System.Collections.IEnumerator FadeOut(GameObject a, GameObject b)
+    {
+        yield return new WaitForSeconds(totemStrikeFadeDelay);
+        foreach (GameObject fx in new GameObject[] { a, b })
+        {
+            if (fx == null) continue;
+            foreach (ParticleSystem ps in fx.GetComponentsInChildren<ParticleSystem>())
+            {
+                ps.Stop(false, ParticleSystemStopBehavior.StopEmitting);
+                ParticleSystem.Particle[] arr = new ParticleSystem.Particle[ps.particleCount];
+                int n = ps.GetParticles(arr);
+                for (int i = 0; i < n; i++)
+                    if (arr[i].remainingLifetime > totemStrikeFadeTime) arr[i].remainingLifetime = totemStrikeFadeTime; // 남은 수명을 줄이면 색 곡선 끝(투명)으로 빨리 간다
+                ps.SetParticles(arr, n);
+            }
+            Destroy(fx, totemStrikeFadeTime + 0.1f);
+        }
+    }
     public Color guardColor = new Color(0.35f, 0.65f, 1f, 1f); // 방어 중 보스 색
 
     [Header("토템 공격")]
@@ -212,6 +235,7 @@ public class BossTotem : MonoBehaviour
     float strikeTime = -1f; // 판정이 들어갈 시각 (-1이면 시전 중이 아님)
     GameObject warning;
     bool leadFxSpawned;   // 이번 시전의 선행 이펙트(AoE slash)를 켰는가
+    GameObject leadFx;
 
     static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
@@ -300,7 +324,7 @@ public class BossTotem : MonoBehaviour
             if (!leadFxSpawned && Time.time >= strikeTime - owner.totemStrikeEffectLead)
             {
                 leadFxSpawned = true;
-                SpawnFx(owner.totemStrikeEffect, owner.totemStrikeEffectScale, FxPoint());
+                leadFx = SpawnFx(owner.totemStrikeEffect, owner.totemStrikeEffectScale, FxPoint());
             }
             if (Time.time < strikeTime) return;
             Strike();
@@ -347,8 +371,10 @@ public class BossTotem : MonoBehaviour
         strikeTime = -1f;
         if (warning != null) { Destroy(warning); warning = null; }
 
-        if (!leadFxSpawned) SpawnFx(owner.totemStrikeEffect, owner.totemStrikeEffectScale, FxPoint());
-        SpawnFx(owner.totemStrikeEffect2, owner.totemStrikeEffectScale2, FxPoint());
+        if (!leadFxSpawned) leadFx = SpawnFx(owner.totemStrikeEffect, owner.totemStrikeEffectScale, FxPoint());
+        GameObject spark = SpawnFx(owner.totemStrikeEffect2, owner.totemStrikeEffectScale2, FxPoint());
+        owner.StartCoroutine(owner.FadeOut(leadFx, spark)); // 토템이 그사이 부서져도 보스가 마저 정리한다
+        leadFx = null;
 
         // 워닝이 끝나는 순간에 다시 잰다 — 그 사이에 빠져나갔으면 헛친다
         Transform p = owner.PlayerTransform;
@@ -363,9 +389,9 @@ public class BossTotem : MonoBehaviour
         return new Vector3(transform.position.x, groundY + owner.totemStrikeEffectLift, transform.position.z);
     }
 
-    static void SpawnFx(GameObject prefab, float scale, Vector3 at)
+    static GameObject SpawnFx(GameObject prefab, float scale, Vector3 at)
     {
-        if (prefab == null) return;
+        if (prefab == null) return null;
         GameObject fx = Instantiate(prefab, at, prefab.transform.rotation);
         fx.transform.localScale = Vector3.one * scale;
         // 바닥 밑에서 뿜는 부품(AoE slash의 Sparks·Flares는 y=-1)을 바닥 위로 올린다
@@ -376,8 +402,10 @@ public class BossTotem : MonoBehaviour
         {
             ParticleSystem.MainModule m = ps.main;
             m.scalingMode = ParticleSystemScalingMode.Hierarchy;
+            m.loop = false; // 반복 이펙트가 다시 돌지 않게
         }
         Destroy(fx, 3f);
+        return fx;
     }
 
     void OnDestroy()
