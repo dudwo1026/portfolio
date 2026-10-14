@@ -25,6 +25,10 @@ public class BossObstaclePattern : MonoBehaviour
     public bool tileObstacle = false;
     [Tooltip("모델 색 밝기 배율. 1이면 원본")]
     public float obstacleBrightness = 1f;
+    public float riseTime = 0.35f;              // 바닥에서 솟아오르는 시간 (판정은 처음부터 있다)
+    public GameObject spawnEffectPrefab;        // 솟을 때 가장자리·윗면에서 터뜨린다
+    public float spawnEffectScale = 3f;
+    public float spawnEffectSpacing = 8f;
     Material obstacleMat;
 
     Health health;
@@ -121,6 +125,9 @@ public class BossObstaclePattern : MonoBehaviour
             go = new GameObject("BossObstacle_" + (zone + 1));
             go.transform.position = pos;
             go.AddComponent<BoxCollider>().size = size;
+            // 모델은 이 받침 밑에 둔다. 판정(위 상자)은 바로 생기고, 보이는 것만 바닥에서 솟아오른다
+            Transform visual = new GameObject("Visual").transform;
+            visual.SetParent(go.transform, false);
             // 한 개를 구역 크기로 늘리면 무늬까지 수십 배로 늘어난다.
             // 높이를 구역에 맞춘 배율로 모델을 바둑판처럼 깔고, 칸 수에 맞게 가로·세로만 살짝 맞춘다
             GameObject probe = Instantiate(obstaclePrefab);
@@ -136,7 +143,7 @@ public class BossObstaclePattern : MonoBehaviour
                     Vector3 center = pos + new Vector3((ix + 0.5f) * cell.x - size.x * 0.5f, 0f, (iz + 0.5f) * cell.z - size.z * 0.5f);
                     // 모델 루트가 눕혀져(-90도) 있어서 회전은 그대로 두고, 회전 없는 받침을 월드 축으로 늘린다
                     Transform holder = new GameObject("Piece").transform;
-                    holder.SetParent(go.transform, false);
+                    holder.SetParent(visual, false);
                     holder.position = center;
                     GameObject model = Instantiate(obstaclePrefab, holder);
                     foreach (Collider c in model.GetComponentsInChildren<Collider>()) Destroy(c); // 막는 건 위 상자만
@@ -152,6 +159,8 @@ public class BossObstaclePattern : MonoBehaviour
                     }
                     r.sharedMaterial = obstacleMat;
                 }
+            StartCoroutine(Rise(visual, size.y));
+            SpawnEffects(pos, size);
         }
         else
         {
@@ -162,6 +171,41 @@ public class BossObstaclePattern : MonoBehaviour
             go.GetComponent<Renderer>().sharedMaterial = MakeMaterial(obstacleColor);
         }
         obstacles.Add(go);
+    }
+
+    // 바닥 밑 depth에서 제자리까지 riseTime 동안 솟는다. 끝에서 살짝 감속
+    System.Collections.IEnumerator Rise(Transform visual, float depth)
+    {
+        for (float t = 0f; t < riseTime && visual != null; t += Time.deltaTime)
+        {
+            float k = 1f - Mathf.Pow(1f - t / riseTime, 3f);
+            visual.localPosition = Vector3.down * depth * (1f - k);
+            yield return null;
+        }
+        if (visual != null) visual.localPosition = Vector3.zero;
+    }
+
+    // 긴 쪽을 따라 spawnEffectSpacing마다 양쪽 가장자리 바닥과 윗면 가운데에서 터뜨린다
+    void SpawnEffects(Vector3 pos, Vector3 size)
+    {
+        if (spawnEffectPrefab == null) return;
+        bool alongZ = size.z >= size.x;
+        float length = alongZ ? size.z : size.x, width = alongZ ? size.x : size.z;
+        int n = Mathf.Max(1, Mathf.RoundToInt(length / spawnEffectSpacing));
+        float groundY = pos.y - size.y * 0.5f;
+        for (int i = 0; i < n; i++)
+        {
+            float a = (i + 0.5f) * length / n - length * 0.5f;
+            float[] sides = { -width * 0.5f, width * 0.5f, 0f };
+            for (int s = 0; s < 3; s++)
+            {
+                Vector3 off = alongZ ? new Vector3(sides[s], 0f, a) : new Vector3(a, 0f, sides[s]);
+                Vector3 p = new Vector3(pos.x + off.x, s == 2 ? groundY + size.y : groundY, pos.z + off.z);
+                GameObject fx = Instantiate(spawnEffectPrefab, p, spawnEffectPrefab.transform.rotation);
+                fx.transform.localScale = Vector3.one * spawnEffectScale;
+                Destroy(fx, 3f);
+            }
+        }
     }
 
     Material MakeMaterial(Color c)

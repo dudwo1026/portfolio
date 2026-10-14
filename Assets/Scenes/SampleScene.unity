@@ -2569,6 +2569,12 @@ MonoBehaviour:
   obstacleColor: {r: 0.12, g: 0.14, b: 0.18, a: 1}
   warningThickness: 0.15
   obstaclePrefab: {fileID: 919132149155446097, guid: 936b0b6825eda994fbd6125d1671dffd, type: 3}
+  tileObstacle: 0
+  obstacleBrightness: 1
+  riseTime: 0.35
+  spawnEffectPrefab: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
+  spawnEffectScale: 3
+  spawnEffectSpacing: 8
 --- !u!114 &146723432
 MonoBehaviour:
   m_ObjectHideFlags: 0
