@@ -68,7 +68,7 @@ public class BossGuardPattern : MonoBehaviour
     public Color guardColor = new Color(0.35f, 0.65f, 1f, 1f); // 방어 중 보스 색
 
     [Header("토템 공격")]
-    public float totemAttackRadius = 3.5f;     // 피해 범위
+    public float totemAttackRadius = 5f;       // 피해 범위 (이펙트 크기와는 따로)
     public float totemAttackInterval = 5f;     // 시전 주기 (시전 시작 기준)
     public float totemWarningTime = 1.5f;      // 워닝 표시 유지 시간. 이 뒤에 판정이 들어간다
     public float totemDamagePercent = 10f;     // 플레이어 최대 체력 대비 %

@@ -2800,8 +2800,12 @@ MonoBehaviour:
   totemStrikeEffectScale: 1.85
   totemStrikeEffect2: {fileID: 9027514048236820045, guid: effb650189dc5714e9e9801b1cfb3991, type: 3}
   totemStrikeEffectScale2: 1.8
+  totemStrikeEffectLead: 1
+  totemStrikeEffectLift: 0.3
+  totemStrikeFadeDelay: 0.15
+  totemStrikeFadeTime: 0.25
   guardColor: {r: 0.35, g: 0.65, b: 1, a: 1}
-  totemAttackRadius: 3.5
+  totemAttackRadius: 5
   totemAttackInterval: 5
   totemWarningTime: 1.5
   totemDamagePercent: 10
