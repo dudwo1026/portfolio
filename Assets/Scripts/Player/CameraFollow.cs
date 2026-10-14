@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 // 플레이어를 따라다니는 카메라.
 // [ExecuteAlways]라서 에디트 모드에서도 동작한다 — 플레이를 누르지 않고 Game 뷰를 보면서
@@ -22,6 +23,14 @@ public class CameraFollow : MonoBehaviour
     [Header("화면 중심 보정")]
     [Tooltip("플레이어를 화면 정중앙이 아닌 곳에 두고 싶을 때. 예: y를 올리면 플레이어가 화면 아래로 내려가 앞이 더 보인다")]
     public Vector3 lookOffset = Vector3.zero;
+
+    [Header("우클릭 조준 시 그쪽을 비춘다")]
+    [Tooltip("플레이어가 화면 중앙에서 이 비율만큼 조준 반대쪽으로 밀린다. 1/6이면 3등분선")]
+    public float aimScreenFraction = 1f / 6f;
+    [Tooltip("옮겨 가는 부드러움. 0.1이면 약 0.3초에 자리 잡는다")]
+    public float aimSmoothTime = 0.1f;
+
+    Vector2 aimWant, aimShift, aimVel;
 
     [Header("화면 흔들림")]
     [Tooltip("초당 흔들리는 횟수 정도. 높을수록 잘게 떤다")]
@@ -82,8 +91,30 @@ public class CameraFollow : MonoBehaviour
 
         Vector3 focus = target.position + lookOffset;
         Quaternion rot = Quaternion.Euler(pitch, yaw, 0f);
-        transform.position = focus - rot * Vector3.forward * distance + ShakeOffset(rot);
+        transform.position = focus - rot * Vector3.forward * distance + AimOffset(rot) + ShakeOffset(rot);
         transform.rotation = rot;
+    }
+
+    // 우클릭(조준) 중이면 마우스 쪽으로 카메라를 화면 평면 위에서 민다. 떼면 가운데로 돌아온다.
+    // 좌우 조준이면 플레이어가 가로 3등분선, 상하면 세로 3등분선, 대각선이면 두 선이 만나는 곳에 선다
+    Vector3 AimOffset(Quaternion rot)
+    {
+        Camera cam = GetComponent<Camera>();
+        if (!Application.isPlaying || cam == null) return Vector3.zero;
+
+        Mouse m = Mouse.current;
+        if (m != null && m.rightButton.isPressed)
+        {
+            Vector2 d = m.position.ReadValue() - (Vector2)cam.WorldToScreenPoint(target.position);
+            float k = Mathf.Max(Mathf.Abs(d.x), Mathf.Abs(d.y));
+            if (k > 20f) aimWant = d / k; // 플레이어 바로 위를 찍으면 방향이 튀니 직전 방향 유지
+        }
+        else aimWant = Vector2.zero;
+
+        aimShift = Vector2.SmoothDamp(aimShift, aimWant, ref aimVel, aimSmoothTime);
+        // 초점 거리에서 화면 세로 폭(월드). 카메라를 화면 평면으로 이만큼 밀면 플레이어가 화면에서 그만큼 움직인다
+        float h = cam.orthographic ? cam.orthographicSize * 2f : 2f * distance * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
+        return rot * new Vector3(aimShift.x * h * cam.aspect, aimShift.y * h, 0f) * aimScreenFraction;
     }
 
     // 화면 가로·세로로만 민다 (앞뒤로 밀면 확대·축소처럼 보인다). 끝으로 갈수록 약해진다
