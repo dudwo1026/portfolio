@@ -33,6 +33,22 @@ public static class NormalDifficulty
     public const float ConfusionDuration = 5f;    // F 혼란 8초
     public const float TauntDuration = 20f;       // F 도발 30초
 
+    // 정예가 플레이어에게 주는 피해를 k배로 (노말 0.7배, 구획 미니보스 강화에도 쓴다)
+    public static void ScaleEliteDamage(EnemyAI ai, float k)
+    {
+        if (ai.isElite) ai.attackDamage *= k; // 정예 근접 (보스는 0이고 근접은 BossMeleeAttack이 따로 친다)
+        EliteChargePattern charge = ai.GetComponent<EliteChargePattern>();
+        if (charge != null) charge.damagePercent *= k; // mobDamagePercent(몹이 맞는 피해)는 그대로
+        EliteKnockbackPattern knock = ai.GetComponent<EliteKnockbackPattern>();
+        if (knock != null) { knock.damagePercent *= k; knock.impactDamagePercent *= k; }
+        EliteRangedAttack ranged = ai.GetComponent<EliteRangedAttack>();
+        if (ranged != null) ranged.damagePercent *= k;
+        EliteEruptionPattern erupt = ai.GetComponent<EliteEruptionPattern>();
+        if (erupt != null) erupt.damagePercent *= k;
+        EliteSelfDestructPattern bomb = ai.GetComponent<EliteSelfDestructPattern>();
+        if (bomb != null) bomb.damagePercent *= k; // deathBlastDamage는 몹만 맞는다
+    }
+
     public static void ApplyToEnemy(EnemyAI ai)
     {
         if (!Active || ai == null) return;
@@ -42,33 +58,31 @@ public static class NormalDifficulty
         if (h != null) h.SetMaxHealth(boss ? BossHealth : h.maxHealth * EnemyHealthScale);
 
         const float dmg = EliteBossDamageScale;
-        if (ai.isElite) ai.attackDamage *= dmg; // 정예 근접 (보스는 0이고 근접은 BossMeleeAttack이 따로 친다)
+        ScaleEliteDamage(ai, dmg);
 
         EliteChargePattern charge = ai.GetComponent<EliteChargePattern>();
-        if (charge != null) { charge.cooldown *= ElitePatternCooldownScale; charge.damagePercent *= dmg; } // mobDamagePercent(몹이 맞는 피해)는 그대로
+        if (charge != null) charge.cooldown *= ElitePatternCooldownScale;
 
         EliteGrabPattern grab = ai.GetComponent<EliteGrabPattern>();
         if (grab != null) grab.cooldown *= ElitePatternCooldownScale;
 
         EliteKnockbackPattern knock = ai.GetComponent<EliteKnockbackPattern>();
-        if (knock != null) { knock.cooldown *= ElitePatternCooldownScale; knock.stunDuration = StunDuration; knock.damagePercent *= dmg; knock.impactDamagePercent *= dmg; }
+        if (knock != null) { knock.cooldown *= ElitePatternCooldownScale; knock.stunDuration = StunDuration; }
 
         EliteRangedAttack ranged = ai.GetComponent<EliteRangedAttack>();
         if (ranged != null)
         {
             ranged.attackInterval *= ElitePatternCooldownScale;
-            ranged.damagePercent *= dmg;
             ranged.specialEveryNShots = 0; // 실명탄(하드: 4발마다)을 쏘지 않는다
         }
 
         EliteEruptionPattern erupt = ai.GetComponent<EliteEruptionPattern>();
-        if (erupt != null) { erupt.cooldown *= ElitePatternCooldownScale; erupt.weakenDuration = WeakenDuration; erupt.damagePercent *= dmg; }
+        if (erupt != null) { erupt.cooldown *= ElitePatternCooldownScale; erupt.weakenDuration = WeakenDuration; }
 
         EliteSelfDestructPattern bomb = ai.GetComponent<EliteSelfDestructPattern>();
         if (bomb != null)
         {
             bomb.confusionDuration = ConfusionDuration; bomb.tauntDuration = TauntDuration;
-            bomb.damagePercent *= dmg;          // deathBlastDamage는 몹만 맞는다
             bomb.explodeWhenKilledLit = false;  // 점화돼도 터지기 전에 잡으면 자폭하지 않는다
         }
 

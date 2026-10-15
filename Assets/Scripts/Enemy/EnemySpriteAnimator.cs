@@ -25,6 +25,8 @@ public class EnemySpriteAnimator : MonoBehaviour
     public float flipDeadzone = 0.15f;
 
     public EnemySpriteSet Set { get { return set; } }
+    // 이 개체만 크게 (구획 미니보스). 부모 스케일은 Apply에서 나눠 지우므로 그림은 이 값으로 키운다
+    [System.NonSerialized] public float sizeMultiplier = 1f;
 
     EnemySpriteSet set;
     EnemyAI ai;
@@ -333,7 +335,7 @@ public class EnemySpriteAnimator : MonoBehaviour
         float texW = f.texture.width;
         float texH = f.texture.height;
         float charPx = Mathf.Max(1f, f.charHeightPx);
-        float quadH = set.characterHeight * Mathf.Max(0.01f, f.sizeScale) * texH / charPx;
+        float quadH = set.characterHeight * sizeMultiplier * Mathf.Max(0.01f, f.sizeScale) * texH / charPx;
         float quadW = quadH * texW / texH;
 
         // 숨쉬기: 세로로 늘면 가로는 그 절반만큼 줄어든다. 발 높이는 아래 localY가 다시 맞춘다
@@ -344,7 +346,7 @@ public class EnemySpriteAnimator : MonoBehaviour
             quadW *= 1f - b * 0.5f;
         }
 
-        float localY = quadH * 0.5f - (f.charBottomPx / texH) * quadH + pivotYOffset;
+        float localY = quadH * 0.5f - (f.charBottomPx / texH) * quadH + pivotYOffset * sizeMultiplier; // 몸(캡슐)도 같이 커져 발이 그만큼 내려간다
         float offsetX = -((f.footCenterPx - texW * 0.5f) / texW) * quadW;
 
         // 스케일 x를 음수로 두면 좌우가 뒤집힌다. 머티리얼이 양면(_Cull Off)이라 그대로 보인다.

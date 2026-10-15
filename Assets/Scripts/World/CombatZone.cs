@@ -34,7 +34,17 @@ public class CombatZone : MonoBehaviour, IChargePad
     public float spawnInset = 3f;          // 결계에서 이만큼 안쪽에만 나온다
     public float spawnMinDistance = 8f;    // 플레이어 코앞에는 안 나온다
 
+    [Header("미니보스 (마지막 웨이브와 함께 나온다)")]
+    public float miniBossHealthMultiplier = 1f;
+    public float miniBossDamageMultiplier = 1f;
+    public float miniBossScale = 1f;
+
     public static CombatZone Current { get; private set; } // 지금 갇혀 있는 구획
+
+    // 정예 종류는 구획마다 안 겹치게 뽑는다. 마지막 구획에서는 남은 종류가 전부 나온다
+    static readonly List<int> usedElites = new List<int>();
+    static int clearedZones;
+    int miniBossCount;
 
     readonly List<GameObject> waveMobs = new List<GameObject>();
     int wave;          // 나온 웨이브 수
@@ -53,6 +63,14 @@ public class CombatZone : MonoBehaviour, IChargePad
     public float Progress { get { return holdTime > 0f ? Mathf.Clamp01(holdProgress / holdTime) : 0f; } }
     public Color BarColor { get { return barColor; } }
     public string Prompt { get { return CanEnter() ? ChargeCastBarUI.HoldPrompt("구획 진입") : null; } }
+
+    void Awake()
+    {
+        // static이라 씬을 다시 불러도 남는다. 구획마다 한 번씩 불려도 결과는 같다
+        usedElites.Clear();
+        clearedZones = 0;
+        Current = null;
+    }
 
     void Start()
     {
@@ -111,6 +129,10 @@ public class CombatZone : MonoBehaviour, IChargePad
         wave = 0;
         spawned = 0;
         keys.Clear();
+        EliteSpawner es = FindFirstObjectByType<EliteSpawner>();
+        int left = es != null ? es.elitePrefabs.Length - usedElites.Count : 0;
+        bool lastZone = clearedZones >= FindObjectsByType<CombatZone>(FindObjectsSortMode.None).Length - 1;
+        miniBossCount = lastZone ? left : Mathf.Min(1, left);
         nextWaveTime = Time.time + (barrier != null ? barrier.RaiseDuration : 0f) + firstWaveDelay;
         HoldOutsideMobs(true);
     }
@@ -118,6 +140,7 @@ public class CombatZone : MonoBehaviour, IChargePad
     void Clear()
     {
         Status = State.Cleared;
+        clearedZones++;
         if (Current == this) Current = null;
         ZoneBarrier barrier = GetComponent<ZoneBarrier>();
         if (barrier != null) barrier.SetRaised(false);
@@ -176,7 +199,7 @@ public class CombatZone : MonoBehaviour, IChargePad
         }
         waveMobs.RemoveAll(m => m == null);
         foreach (GameObject m in waveMobs) lastMobPos = m.transform.position; // 하나 남으면 그 몹 자리
-        int total = 0;
+        int total = miniBossCount;
         for (int i = 0; i < waveCounts.Length; i++) total += WaveSize(i);
         if (KillGauge.Instance != null) KillGauge.Instance.ShowZoneProgress(spawned - waveMobs.Count, total);
 
@@ -186,6 +209,7 @@ public class CombatZone : MonoBehaviour, IChargePad
             nextWaveTime = -1f;
             SpawnWave(WaveSize(wave));
             wave++;
+            if (wave == waveCounts.Length) SpawnMiniBosses();
             return;
         }
         if (waveMobs.Count > 0) return;
@@ -206,6 +230,39 @@ public class CombatZone : MonoBehaviour, IChargePad
             if (ai == null) continue;
             ai.SetWanderArea(area);
             ai.alwaysHunt = true; // 구획 안 웨이브는 나오자마자 끝까지 쫓는다
+            ai.ForceAttack();
+        }
+    }
+
+    // 아직 안 나온 정예 종류 중 무작위로 miniBossCount만큼, 강화해서 낸다. 웨이브 몹과 같이 잡아야 끝난다
+    void SpawnMiniBosses()
+    {
+        EliteSpawner es = FindFirstObjectByType<EliteSpawner>();
+        if (es == null) return;
+        Bounds area = new Bounds(transform.position, new Vector3(size.x - spawnInset * 2f, 10f, size.y - spawnInset * 2f));
+        for (int n = 0; n < miniBossCount; n++)
+        {
+            List<int> left = new List<int>();
+            for (int i = 0; i < es.elitePrefabs.Length; i++) if (!usedElites.Contains(i)) left.Add(i);
+            if (left.Count == 0) return;
+            int type = left[Random.Range(0, left.Count)];
+            usedElites.Add(type);
+
+            GameObject e = Instantiate(es.elitePrefabs[type], SpawnPoint(area), Quaternion.identity);
+            e.name = es.elitePrefabs[type].name + " (MiniBoss)";
+            waveMobs.Add(e);
+            spawned++;
+
+            Health h = e.GetComponent<Health>();
+            if (h != null) h.SetMaxHealth(h.maxHealth * miniBossHealthMultiplier);
+            e.transform.localScale *= miniBossScale;
+            EnemySpriteAnimator anim = e.GetComponentInChildren<EnemySpriteAnimator>();
+            if (anim != null) anim.sizeMultiplier = miniBossScale;
+            EnemyAI ai = e.GetComponent<EnemyAI>();
+            if (ai == null) continue;
+            NormalDifficulty.ScaleEliteDamage(ai, miniBossDamageMultiplier);
+            ai.SetWanderArea(area);
+            ai.alwaysHunt = true;
             ai.ForceAttack();
         }
     }
