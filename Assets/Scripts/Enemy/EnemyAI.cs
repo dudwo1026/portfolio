@@ -66,6 +66,7 @@ public class EnemyAI : MonoBehaviour
     // special patterns live in their own components (e.g. EliteChargePattern) and drive the enemy through the hooks below
     [System.NonSerialized] public bool patternDriving;
     [System.NonSerialized] public bool roofSpawned; // 옥상 스포너가 낸 몹만 보급키트를 떨군다
+    [System.NonSerialized] public bool alwaysHunt;  // 구획 웨이브 몹: 시야와 상관없이 플레이어를 끝까지 쫓는다
     [System.NonSerialized] public bool forcedAggro; // 도발: chase the player no matter the distance or sight
     public System.Action onPlayerDetected;
     public System.Action onMeleeHit; // raised when the player's melee connects (bullets don't raise it)
@@ -468,7 +469,7 @@ void FixedUpdate()
 
     void UpdateAttack()
     {
-        bool sensed = CanSensePlayer();
+        bool sensed = (alwaysHunt && player != null) || CanSensePlayer();
         if (sensed)
         {
             lastKnownPosition = player.position;

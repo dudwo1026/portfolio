@@ -205,7 +205,8 @@ public class CombatZone : MonoBehaviour, IChargePad
             EnemyAI ai = e.GetComponent<EnemyAI>();
             if (ai == null) continue;
             ai.SetWanderArea(area);
-            ai.ForceAttack(); // 구획 안 웨이브는 바로 덤빈다
+            ai.alwaysHunt = true; // 구획 안 웨이브는 나오자마자 끝까지 쫓는다
+            ai.ForceAttack();
         }
     }
 
