@@ -24,7 +24,8 @@ public class ZoneBarrier : MonoBehaviour
     public float pillarStagger = 0.12f;  // 기둥끼리 떨어지는 간격
     public GameObject dustPrefab;        // 기둥이 꽂힌 자리
     public float dustScale = 1f;
-    public float fadeTime = 0.6f;        // 기둥이 다 꽂힌 뒤 벽이 나타나는 시간 (사라질 때도)
+    public float fadeDelay = 1f;         // 마지막 기둥이 꽂히고 벽이 나타나기 시작할 때까지
+    public float fadeTime = 0.6f;        // 벽이 나타나는 시간 (사라질 때도)
 
     static readonly int BaseMapSt = Shader.PropertyToID("_BaseMap_ST");
     static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
@@ -39,7 +40,7 @@ public class ZoneBarrier : MonoBehaviour
 
     public bool Raised { get; private set; }
     // 기둥이 다 꽂히고 벽이 다 나타나기까지 걸리는 시간
-    public float RaiseDuration { get { return pillarDropTime + pillarStagger * 3f + fadeTime; } }
+    public float RaiseDuration { get { return pillarStagger * Mathf.Max(0, pillars.Count - 1) + pillarDropTime + fadeDelay + fadeTime; } }
 
     public void SetRaised(bool on)
     {
@@ -65,9 +66,9 @@ public class ZoneBarrier : MonoBehaviour
         for (int i = 0; i < pillars.Count; i++)
         {
             StartCoroutine(Drop(pillars[i], ends[i]));
-            yield return new WaitForSeconds(pillarStagger);
+            if (i < pillars.Count - 1) yield return new WaitForSeconds(pillarStagger);
         }
-        yield return new WaitForSeconds(pillarDropTime);
+        yield return new WaitForSeconds(pillarDropTime + fadeDelay); // 마지막 기둥이 꽂히고 fadeDelay 뒤
         for (float t = 0f; t < fadeTime; t += Time.deltaTime)
         {
             alpha = t / fadeTime;
@@ -91,6 +92,11 @@ public class ZoneBarrier : MonoBehaviour
         {
             GameObject fx = Instantiate(dustPrefab, pillar.position, dustPrefab.transform.rotation);
             fx.transform.localScale = Vector3.one * dustScale;
+            foreach (ParticleSystem ps in fx.GetComponentsInChildren<ParticleSystem>())
+            {
+                ParticleSystem.MainModule m = ps.main;
+                m.loop = false; // Dust puff는 반복 재생이라 그냥 두면 2초 뒤에 한 번 더 인다
+            }
             Destroy(fx, 3f);
         }
     }
