@@ -14,6 +14,8 @@ public class ZoneBarrier : MonoBehaviour
     public float runeRowHeight = 1.2f;
     public float runeScrollSpeed = 0.12f;
     public float colliderThickness = 1f;
+    // 맵 테두리 (x 최소·최대, z 최소·최대). 이 위에 놓인 변은 맵 벽이 이미 막으니 결계를 세우지 않는다
+    public Vector4 mapEdges = new Vector4(-90f, 80f, 20f, 180f);
 
     static readonly int BaseMapSt = Shader.PropertyToID("_BaseMap_ST");
 
@@ -57,13 +59,18 @@ public class ZoneBarrier : MonoBehaviour
         root = new GameObject("Barrier");
         root.transform.SetParent(transform, false);
 
-        // 기둥을 먼저 세운다 (바닥을 찾는 광선이 벽 충돌에 걸리지 않게)
+        bool[] wall = new bool[4]; // 변 e = corners[e] → corners[e+1]
+        for (int e = 0; e < 4; e++) wall[e] = !OnMapEdge(corners[e], corners[(e + 1) % 4]);
+
+        // 기둥은 결계 변이 닿는 꼭짓점에만. 벽 충돌보다 먼저 세운다 (바닥을 찾는 광선이 걸리지 않게)
         if (pillarPrefab != null)
-            foreach (Vector3 p in corners)
-                Instantiate(pillarPrefab, new Vector3(p.x, GroundY(p), p.z), Quaternion.identity, root.transform);
+            for (int i = 0; i < 4; i++)
+                if (wall[i] || wall[(i + 3) % 4])
+                    Instantiate(pillarPrefab, new Vector3(corners[i].x, GroundY(corners[i]), corners[i].z), Quaternion.identity, root.transform);
 
         for (int e = 0; e < 4; e++)
         {
+            if (!wall[e]) continue;
             Vector3 a = corners[e], b = corners[(e + 1) % 4];
             Vector3 dir = (b - a).normalized;
             float len = Vector3.Distance(a, b);
@@ -96,6 +103,13 @@ public class ZoneBarrier : MonoBehaviour
         r.sharedMaterial = mat;
         r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         return r;
+    }
+
+    bool OnMapEdge(Vector3 a, Vector3 b)
+    {
+        const float eps = 0.5f;
+        if (Mathf.Abs(a.x - b.x) < eps) return Mathf.Abs(a.x - mapEdges.x) < eps || Mathf.Abs(a.x - mapEdges.y) < eps;
+        return Mathf.Abs(a.z - mapEdges.z) < eps || Mathf.Abs(a.z - mapEdges.w) < eps;
     }
 
     // 꼭짓점 바닥 높이. 못 찾으면 구획 높이
