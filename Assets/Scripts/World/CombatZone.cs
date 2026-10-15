@@ -230,9 +230,20 @@ public class CombatZone : MonoBehaviour, IChargePad
         for (int i = 0; i < count; i++) Spawn(enemyPrefab, area);
 
         EliteSpawner es = FindFirstObjectByType<EliteSpawner>();
-        if (es == null) return;
+        if (es == null || caughtElites.Count == 0) return;
+        // 한 웨이브 안에서는 같은 종류가 겹치지 않게 섞어서 앞에서부터 뽑는다.
+        // 잡은 종류보다 많이 나와야 할 때(잡은 게 1종뿐인 두 번째 구획)만 같은 종류가 다시 나온다
+        List<int> bag = new List<int>();
         for (int i = 0; i < ElitesInWave(waveIndex); i++)
-            Spawn(es.elitePrefabs[caughtElites[Random.Range(0, caughtElites.Count)]], area);
+        {
+            if (bag.Count == 0)
+            {
+                bag.AddRange(caughtElites);
+                for (int j = bag.Count - 1; j > 0; j--) { int k = Random.Range(0, j + 1); int t = bag[j]; bag[j] = bag[k]; bag[k] = t; }
+            }
+            Spawn(es.elitePrefabs[bag[0]], area);
+            bag.RemoveAt(0);
+        }
     }
 
     void Spawn(GameObject prefab, Bounds area)
