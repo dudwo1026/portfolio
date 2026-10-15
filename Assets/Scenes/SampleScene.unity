@@ -4892,6 +4892,13 @@ MonoBehaviour:
   size: {x: 80, y: 52}
   keyReward: 1
   portalPosition: {x: 42.4, y: 1.20115, z: 133.7}
+  portalPrefab: {fileID: 4752457369876416285, guid: 5ad33d58a66ab154a89c9e88255601e5, type: 3}
+  portalScale: 2.4
+  interactRadius: 2.5
+  holdTime: 0.5
+  enterDepth: 4
+  barColor: {r: 1, g: 0.6, b: 0.15, a: 1}
+  debugKeys: 1
 --- !u!114 &261992218
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4914,6 +4921,7 @@ MonoBehaviour:
   runeRowHeight: 1.2
   runeScrollSpeed: 0.12
   colliderThickness: 1
+  mapEdges: {x: -90, y: 80, z: 20, w: 180}
 --- !u!1001 &263481360
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12019,6 +12027,13 @@ MonoBehaviour:
   size: {x: 80, y: 47}
   keyReward: 1
   portalPosition: {x: 42.4, y: 1.20115, z: 62.7}
+  portalPrefab: {fileID: 4752457369876416285, guid: 5ad33d58a66ab154a89c9e88255601e5, type: 3}
+  portalScale: 2.4
+  interactRadius: 2.5
+  holdTime: 0.5
+  enterDepth: 4
+  barColor: {r: 1, g: 0.6, b: 0.15, a: 1}
+  debugKeys: 1
 --- !u!114 &685023992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12041,6 +12056,7 @@ MonoBehaviour:
   runeRowHeight: 1.2
   runeScrollSpeed: 0.12
   colliderThickness: 1
+  mapEdges: {x: -90, y: 80, z: 20, w: 180}
 --- !u!1 &685374818
 GameObject:
   m_ObjectHideFlags: 0
@@ -14889,6 +14905,13 @@ MonoBehaviour:
   size: {x: 80, y: 61}
   keyReward: 1
   portalPosition: {x: 42.4, y: 1.20115, z: 119.85}
+  portalPrefab: {fileID: 4752457369876416285, guid: 5ad33d58a66ab154a89c9e88255601e5, type: 3}
+  portalScale: 2.4
+  interactRadius: 2.5
+  holdTime: 0.5
+  enterDepth: 4
+  barColor: {r: 1, g: 0.6, b: 0.15, a: 1}
+  debugKeys: 1
 --- !u!114 &848248723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14911,6 +14934,7 @@ MonoBehaviour:
   runeRowHeight: 1.2
   runeScrollSpeed: 0.12
   colliderThickness: 1
+  mapEdges: {x: -90, y: 80, z: 20, w: 180}
 --- !u!1001 &849490379
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30101,6 +30125,13 @@ MonoBehaviour:
   size: {x: 90, y: 52}
   keyReward: 2
   portalPosition: {x: -39.72, y: 1.20115, z: 136.5}
+  portalPrefab: {fileID: 4752457369876416285, guid: 5ad33d58a66ab154a89c9e88255601e5, type: 3}
+  portalScale: 2.4
+  interactRadius: 2.5
+  holdTime: 0.5
+  enterDepth: 4
+  barColor: {r: 1, g: 0.6, b: 0.15, a: 1}
+  debugKeys: 1
 --- !u!114 &1659709823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30123,6 +30154,7 @@ MonoBehaviour:
   runeRowHeight: 1.2
   runeScrollSpeed: 0.12
   colliderThickness: 1
+  mapEdges: {x: -90, y: 80, z: 20, w: 180}
 --- !u!1 &1660459315
 GameObject:
   m_ObjectHideFlags: 0
@@ -33045,6 +33077,13 @@ MonoBehaviour:
   size: {x: 90, y: 47}
   keyReward: 2
   portalPosition: {x: -6.81, y: 1.20115, z: 62.12}
+  portalPrefab: {fileID: 4752457369876416285, guid: 5ad33d58a66ab154a89c9e88255601e5, type: 3}
+  portalScale: 2.4
+  interactRadius: 2.5
+  holdTime: 0.5
+  enterDepth: 4
+  barColor: {r: 1, g: 0.6, b: 0.15, a: 1}
+  debugKeys: 1
 --- !u!114 &1873018234
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -33067,6 +33106,7 @@ MonoBehaviour:
   runeRowHeight: 1.2
   runeScrollSpeed: 0.12
   colliderThickness: 1
+  mapEdges: {x: -90, y: 80, z: 20, w: 180}
 --- !u!1001 &1875559407
 PrefabInstance:
   m_ObjectHideFlags: 0
