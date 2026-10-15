@@ -35,7 +35,8 @@ public class CombatZone : MonoBehaviour, IChargePad
     public float spawnMinDistance = 8f;    // 플레이어 코앞에는 안 나온다
 
     [Header("미니보스 (마지막 웨이브와 함께 나온다)")]
-    public float miniBossHealthMultiplier = 1f;
+    public float miniBossHealthMultiplier = 5f; // 정예 기본 체력 대비 (노말은 0.8배가 먼저 걸린다)
+    public bool miniBossMatchPlayerSpeed = true; // 이동속도를 플레이어 기본 이동속도와 같게
     public float miniBossDamageMultiplier = 1f;
     public float miniBossScale = 1f;
 
@@ -261,6 +262,8 @@ public class CombatZone : MonoBehaviour, IChargePad
             EnemyAI ai = e.GetComponent<EnemyAI>();
             if (ai == null) continue;
             NormalDifficulty.ScaleEliteDamage(ai, miniBossDamageMultiplier);
+            TopDownMove pm = player != null ? player.GetComponent<TopDownMove>() : null;
+            if (miniBossMatchPlayerSpeed && pm != null) ai.attackSpeed = ai.wanderSpeed = pm.moveSpeed;
             ai.SetWanderArea(area);
             ai.alwaysHunt = true;
             ai.ForceAttack();
