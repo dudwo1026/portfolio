@@ -4854,6 +4854,7 @@ GameObject:
   m_Component:
   - component: {fileID: 261992216}
   - component: {fileID: 261992217}
+  - component: {fileID: 261992218}
   m_Layer: 0
   m_Name: Zone_NE
   m_TagString: Untagged
@@ -4891,6 +4892,28 @@ MonoBehaviour:
   size: {x: 80, y: 52}
   keyReward: 1
   portalPosition: {x: 42.4, y: 1.20115, z: 133.7}
+--- !u!114 &261992218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 261992215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca317d46cd7535a43a37dddb696824dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZoneBarrier
+  glowMaterial: {fileID: 2100000, guid: 14ec30a95a166834985164a1c626b6ec, type: 2}
+  runeMaterial: {fileID: 2100000, guid: f7415a5781641eb47b33a10369088782, type: 2}
+  pillarPrefab: {fileID: 8220057600329899595, guid: d5dec1ad1ca41874fa2803ac257a1915, type: 3}
+  height: 6
+  runeRows:
+  - 2.4
+  - 4.4
+  runeRowHeight: 1.2
+  runeScrollSpeed: 0.12
+  colliderThickness: 1
 --- !u!1001 &263481360
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11958,6 +11981,7 @@ GameObject:
   m_Component:
   - component: {fileID: 685023990}
   - component: {fileID: 685023991}
+  - component: {fileID: 685023992}
   m_Layer: 0
   m_Name: Zone_SE
   m_TagString: Untagged
@@ -11995,6 +12019,28 @@ MonoBehaviour:
   size: {x: 80, y: 47}
   keyReward: 1
   portalPosition: {x: 42.4, y: 1.20115, z: 62.7}
+--- !u!114 &685023992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 685023989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca317d46cd7535a43a37dddb696824dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZoneBarrier
+  glowMaterial: {fileID: 2100000, guid: 14ec30a95a166834985164a1c626b6ec, type: 2}
+  runeMaterial: {fileID: 2100000, guid: f7415a5781641eb47b33a10369088782, type: 2}
+  pillarPrefab: {fileID: 8220057600329899595, guid: d5dec1ad1ca41874fa2803ac257a1915, type: 3}
+  height: 6
+  runeRows:
+  - 2.4
+  - 4.4
+  runeRowHeight: 1.2
+  runeScrollSpeed: 0.12
+  colliderThickness: 1
 --- !u!1 &685374818
 GameObject:
   m_ObjectHideFlags: 0
@@ -14805,6 +14851,7 @@ GameObject:
   m_Component:
   - component: {fileID: 848248721}
   - component: {fileID: 848248722}
+  - component: {fileID: 848248723}
   m_Layer: 0
   m_Name: Zone_E
   m_TagString: Untagged
@@ -14842,6 +14889,28 @@ MonoBehaviour:
   size: {x: 80, y: 61}
   keyReward: 1
   portalPosition: {x: 42.4, y: 1.20115, z: 119.85}
+--- !u!114 &848248723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 848248720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca317d46cd7535a43a37dddb696824dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZoneBarrier
+  glowMaterial: {fileID: 2100000, guid: 14ec30a95a166834985164a1c626b6ec, type: 2}
+  runeMaterial: {fileID: 2100000, guid: f7415a5781641eb47b33a10369088782, type: 2}
+  pillarPrefab: {fileID: 8220057600329899595, guid: d5dec1ad1ca41874fa2803ac257a1915, type: 3}
+  height: 6
+  runeRows:
+  - 2.4
+  - 4.4
+  runeRowHeight: 1.2
+  runeScrollSpeed: 0.12
+  colliderThickness: 1
 --- !u!1001 &849490379
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29994,6 +30063,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1659709821}
   - component: {fileID: 1659709822}
+  - component: {fileID: 1659709823}
   m_Layer: 0
   m_Name: Zone_NW
   m_TagString: Untagged
@@ -30030,6 +30100,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatZone
   size: {x: 90, y: 52}
   keyReward: 2
+  portalPosition: {x: -39.72, y: 1.20115, z: 136.5}
+--- !u!114 &1659709823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1659709820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca317d46cd7535a43a37dddb696824dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZoneBarrier
+  glowMaterial: {fileID: 2100000, guid: 14ec30a95a166834985164a1c626b6ec, type: 2}
+  runeMaterial: {fileID: 2100000, guid: f7415a5781641eb47b33a10369088782, type: 2}
+  pillarPrefab: {fileID: 8220057600329899595, guid: d5dec1ad1ca41874fa2803ac257a1915, type: 3}
+  height: 6
+  runeRows:
+  - 2.4
+  - 4.4
+  runeRowHeight: 1.2
+  runeScrollSpeed: 0.12
+  colliderThickness: 1
 --- !u!1 &1660459315
 GameObject:
   m_ObjectHideFlags: 0
@@ -30070,7 +30163,6 @@ BoxCollider:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  portalPosition: {x: -39.72, y: 1.20115, z: 136.5}
   m_GameObject: {fileID: 1660459315}
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -32915,6 +33007,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1873018232}
   - component: {fileID: 1873018233}
+  - component: {fileID: 1873018234}
   m_Layer: 0
   m_Name: Zone_SW
   m_TagString: Untagged
@@ -32951,6 +33044,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatZone
   size: {x: 90, y: 47}
   keyReward: 2
+  portalPosition: {x: -6.81, y: 1.20115, z: 62.12}
+--- !u!114 &1873018234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1873018231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca317d46cd7535a43a37dddb696824dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZoneBarrier
+  glowMaterial: {fileID: 2100000, guid: 14ec30a95a166834985164a1c626b6ec, type: 2}
+  runeMaterial: {fileID: 2100000, guid: f7415a5781641eb47b33a10369088782, type: 2}
+  pillarPrefab: {fileID: 8220057600329899595, guid: d5dec1ad1ca41874fa2803ac257a1915, type: 3}
+  height: 6
+  runeRows:
+  - 2.4
+  - 4.4
+  runeRowHeight: 1.2
+  runeScrollSpeed: 0.12
+  colliderThickness: 1
 --- !u!1001 &1875559407
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -32991,7 +33107,6 @@ PrefabInstance:
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
-  portalPosition: {x: -6.81, y: 1.20115, z: 62.12}
     - target: {fileID: 4588435873696250, guid: effb1b31d7e11a54e9b051312c1a2ee4, type: 3}
       propertyPath: m_LocalRotation.x
       value: -0
