@@ -37,8 +37,12 @@ public class CombatZone : MonoBehaviour, IChargePad
 
     [Header("미니보스 (마지막 웨이브와 함께 나온다)")]
     public float miniBossHealthMultiplier = 5f; // 정예 기본 체력 대비 (노말은 0.8배가 먼저 걸린다)
-    public bool miniBossMatchPlayerSpeed = true; // 이동속도를 플레이어 기본 이동속도와 같게
-    public float miniBossDamageMultiplier = 1f;
+    // 이동속도 = 플레이어 기본 이동속도 x 이 값. 돌진(A)·자폭(F) 정예는 원래 속도 그대로
+    public float miniBossSpeedVsPlayer = 1.1f;
+    public float grabMiniBossSpeedVsPlayer = 1.15f;   // 잡기(B)
+    public float miniBossDamageMultiplier = 2f;       // 정예 때보다 (하드 기준. 노말은 0.7배가 먼저 걸린다)
+    public float grabHoldDamagePercent = 5f;          // 잡기(B): 잡혀 있는 동안 0.5초마다 플레이어 최대 체력 %
+    public float selfDestructDamagePercent = 50f;     // 자폭(F): 자폭 피해 플레이어 최대 체력 %
     public float miniBossScale = 1f;
 
     public static CombatZone Current { get; private set; } // 지금 갇혀 있는 구획
@@ -277,8 +281,16 @@ public class CombatZone : MonoBehaviour, IChargePad
             EnemyAI ai = e.GetComponent<EnemyAI>();
             if (ai == null) continue;
             NormalDifficulty.ScaleEliteDamage(ai, miniBossDamageMultiplier);
+            float diff = NormalDifficulty.Active ? NormalDifficulty.EliteBossDamageScale : 1f; // 고정 %도 노말이면 같은 비율로 낮춘다
+            EliteGrabPattern grab = e.GetComponent<EliteGrabPattern>();
+            if (grab != null) grab.holdDamagePercent = grabHoldDamagePercent * diff;
+            EliteSelfDestructPattern bomb = e.GetComponent<EliteSelfDestructPattern>();
+            if (bomb != null) bomb.damagePercent = selfDestructDamagePercent * diff;
+
             TopDownMove pm = player != null ? player.GetComponent<TopDownMove>() : null;
-            if (miniBossMatchPlayerSpeed && pm != null) ai.attackSpeed = ai.wanderSpeed = pm.moveSpeed;
+            bool keepSpeed = e.GetComponent<EliteChargePattern>() != null || bomb != null;
+            if (pm != null && !keepSpeed)
+                ai.attackSpeed = ai.wanderSpeed = pm.moveSpeed * (grab != null ? grabMiniBossSpeedVsPlayer : miniBossSpeedVsPlayer);
             ai.SetWanderArea(area);
             ai.alwaysHunt = true;
             ai.ForceAttack();
