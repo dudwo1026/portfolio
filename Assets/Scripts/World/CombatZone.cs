@@ -131,10 +131,7 @@ public class CombatZone : MonoBehaviour, IChargePad
         wave = 0;
         spawned = 0;
         keys.Clear();
-        EliteSpawner es = FindFirstObjectByType<EliteSpawner>();
-        int left = es != null ? es.elitePrefabs.Length - usedElites.Count : 0;
-        bool lastZone = clearedZones >= FindObjectsByType<CombatZone>(FindObjectsSortMode.None).Length - 1;
-        miniBossCount = lastZone ? left : Mathf.Min(1, left);
+        PickMiniBosses();
         nextWaveTime = Time.time + (barrier != null ? barrier.RaiseDuration : 0f) + firstWaveDelay;
         HoldOutsideMobs(true);
     }
@@ -236,20 +233,37 @@ public class CombatZone : MonoBehaviour, IChargePad
         }
     }
 
-    // 아직 안 나온 정예 종류 중 무작위로 miniBossCount만큼, 강화해서 낸다. 웨이브 몹과 같이 잡아야 끝난다
+    // 들어갈 때 이번 구획 미니보스 종류를 정한다: 아직 안 나온 정예 중 무작위 1종, 마지막 구획은 남은 종류 전부.
+    // 자폭 정예(F)는 항상 두 마리가 짝으로 나온다. 게이지 전체 수에 처음부터 맞게 들어가도록 여기서 센다
+    readonly List<int> miniBossTypes = new List<int>();
+    void PickMiniBosses()
+    {
+        miniBossTypes.Clear();
+        EliteSpawner es = FindFirstObjectByType<EliteSpawner>();
+        if (es == null) { miniBossCount = 0; return; }
+        List<int> left = new List<int>();
+        for (int i = 0; i < es.elitePrefabs.Length; i++) if (!usedElites.Contains(i)) left.Add(i);
+        bool lastZone = clearedZones >= FindObjectsByType<CombatZone>(FindObjectsSortMode.None).Length - 1;
+        int kinds = lastZone ? left.Count : Mathf.Min(1, left.Count);
+        for (int n = 0; n < kinds; n++)
+        {
+            int type = left[Random.Range(0, left.Count)];
+            left.Remove(type);
+            usedElites.Add(type);
+            int copies = es.elitePrefabs[type].GetComponent<EliteSelfDestructPattern>() != null ? 2 : 1;
+            for (int c = 0; c < copies; c++) miniBossTypes.Add(type);
+        }
+        miniBossCount = miniBossTypes.Count;
+    }
+
+    // 정해 둔 미니보스를 강화해서 낸다. 웨이브 몹과 같이 잡아야 끝난다
     void SpawnMiniBosses()
     {
         EliteSpawner es = FindFirstObjectByType<EliteSpawner>();
         if (es == null) return;
         Bounds area = new Bounds(transform.position, new Vector3(size.x - spawnInset * 2f, 10f, size.y - spawnInset * 2f));
-        for (int n = 0; n < miniBossCount; n++)
+        foreach (int type in miniBossTypes)
         {
-            List<int> left = new List<int>();
-            for (int i = 0; i < es.elitePrefabs.Length; i++) if (!usedElites.Contains(i)) left.Add(i);
-            if (left.Count == 0) return;
-            int type = left[Random.Range(0, left.Count)];
-            usedElites.Add(type);
-
             GameObject e = Instantiate(es.elitePrefabs[type], SpawnPoint(area), Quaternion.identity);
             e.name = es.elitePrefabs[type].name + " (MiniBoss)";
             waveMobs.Add(e);
