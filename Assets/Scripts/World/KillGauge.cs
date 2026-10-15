@@ -120,8 +120,24 @@ public class KillGauge : MonoBehaviour
         if (eliteSpawner != null) eliteSpawner.SetActiveSlots(want);
     }
 
+    // 구획 안에서는 게이지 바에 잡은 수 / 전체 수를 대신 보여 준다. total 0이면 원래대로
+    int zoneKilled, zoneTotal;
+    public void ShowZoneProgress(int killed, int total)
+    {
+        if (killed == zoneKilled && total == zoneTotal) return;
+        zoneKilled = killed;
+        zoneTotal = total;
+        Refresh();
+    }
+
     void Refresh()
     {
+        if (zoneTotal > 0)
+        {
+            if (fill != null) fill.fillAmount = (float)zoneKilled / zoneTotal;
+            if (label != null) label.text = zoneKilled + "/" + zoneTotal;
+            return;
+        }
         if (fill != null) fill.fillAmount = maxValue > 0f ? Value / maxValue : 0f;
         if (label != null) label.text = Mathf.FloorToInt(Value) + "/" + Mathf.FloorToInt(maxValue);
     }

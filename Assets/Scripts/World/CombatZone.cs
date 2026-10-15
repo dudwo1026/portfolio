@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 // 결계로 잠기는 전투 구획 하나. 범위는 이 오브젝트 위치를 중심으로 가로(x) size.x, 세로(z) size.y.
@@ -21,7 +23,21 @@ public class CombatZone : MonoBehaviour, IChargePad
     public Color barColor = new Color(1f, 0.6f, 0.15f, 1f);
     public bool debugKeys = true; // \ : 들어가 있는 구획을 클리어 처리 (테스트용)
 
+    [Header("웨이브")]
+    public int[] waveCounts = { 8, 10, 12 };
+    public float bigZoneMultiplier = 1.5f; // 열쇠 2개 구획은 웨이브마다 이만큼 더 나온다
+    public float waveRest = 3f;            // 한 웨이브를 다 잡고 다음 웨이브까지
+    public float firstWaveDelay = 1f;
+    public GameObject enemyPrefab;         // 비워 두면 맵 스포너의 것을 쓴다
+    public float spawnInset = 3f;          // 결계에서 이만큼 안쪽에만 나온다
+    public float spawnMinDistance = 8f;    // 플레이어 코앞에는 안 나온다
+
     public static CombatZone Current { get; private set; } // 지금 갇혀 있는 구획
+
+    readonly List<GameObject> waveMobs = new List<GameObject>();
+    int wave;          // 나온 웨이브 수
+    int spawned;       // 이 구획에서 지금까지 낸 몹 수
+    float nextWaveTime = -1f;
 
     public State Status { get; private set; }
 
@@ -38,6 +54,11 @@ public class CombatZone : MonoBehaviour, IChargePad
         GameObject p = GameObject.Find("Player");
         if (p != null) player = p.transform;
         if (portalPrefab != null) portal = SpawnPortal();
+        if (enemyPrefab == null)
+        {
+            EnemySpawner s = FindFirstObjectByType<EnemySpawner>();
+            if (s != null) enemyPrefab = s.enemyPrefab;
+        }
     }
 
     void Update()
@@ -45,6 +66,11 @@ public class CombatZone : MonoBehaviour, IChargePad
         if (debugKeys && Current == this && Keyboard.current != null && Keyboard.current.backslashKey.wasPressedThisFrame)
         {
             Clear();
+            return;
+        }
+        if (Status == State.Active)
+        {
+            UpdateWaves();
             return;
         }
 
@@ -75,6 +101,9 @@ public class CombatZone : MonoBehaviour, IChargePad
         if (portal != null) portal.SetActive(false);
         ZoneBarrier barrier = GetComponent<ZoneBarrier>();
         if (barrier != null) barrier.SetRaised(true);
+        wave = 0;
+        spawned = 0;
+        nextWaveTime = Time.time + firstWaveDelay;
     }
 
     public void Clear()
@@ -83,6 +112,67 @@ public class CombatZone : MonoBehaviour, IChargePad
         if (Current == this) Current = null;
         ZoneBarrier barrier = GetComponent<ZoneBarrier>();
         if (barrier != null) barrier.SetRaised(false);
+        foreach (GameObject m in waveMobs) if (m != null) Destroy(m); // 테스트 키로 넘겼을 때 남은 몹
+        waveMobs.Clear();
+        if (KillGauge.Instance != null) KillGauge.Instance.ShowZoneProgress(0, 0);
+    }
+
+    int WaveSize(int i)
+    {
+        return Mathf.RoundToInt(waveCounts[i] * (keyReward >= 2 ? bigZoneMultiplier : 1f));
+    }
+
+    // 전멸하면 waveRest 뒤 다음 웨이브, 마지막 웨이브까지 다 잡으면 클리어
+    void UpdateWaves()
+    {
+        waveMobs.RemoveAll(m => m == null);
+        int total = 0;
+        for (int i = 0; i < waveCounts.Length; i++) total += WaveSize(i);
+        if (KillGauge.Instance != null) KillGauge.Instance.ShowZoneProgress(spawned - waveMobs.Count, total);
+
+        if (nextWaveTime >= 0f)
+        {
+            if (Time.time < nextWaveTime) return;
+            nextWaveTime = -1f;
+            SpawnWave(WaveSize(wave));
+            wave++;
+            return;
+        }
+        if (waveMobs.Count > 0) return;
+        if (wave < waveCounts.Length) nextWaveTime = Time.time + waveRest;
+        else Clear();
+    }
+
+    void SpawnWave(int count)
+    {
+        if (enemyPrefab == null) return;
+        Bounds area = new Bounds(transform.position, new Vector3(size.x - spawnInset * 2f, 10f, size.y - spawnInset * 2f));
+        for (int i = 0; i < count; i++)
+        {
+            GameObject e = Instantiate(enemyPrefab, SpawnPoint(area), Quaternion.identity);
+            waveMobs.Add(e);
+            spawned++;
+            EnemyAI ai = e.GetComponent<EnemyAI>();
+            if (ai == null) continue;
+            ai.SetWanderArea(area);
+            ai.ForceAttack(); // 구획 안 웨이브는 바로 덤빈다
+        }
+    }
+
+    // 구획 안 내비메시 위, 플레이어에서 떨어진 빈자리. 건물 지붕(높이 3 이상)은 안 쓴다
+    Vector3 SpawnPoint(Bounds area)
+    {
+        for (int i = 0; i < 30; i++)
+        {
+            Vector3 p = new Vector3(Random.Range(area.min.x, area.max.x), transform.position.y, Random.Range(area.min.z, area.max.z));
+            NavMeshHit hit;
+            if (!NavMesh.SamplePosition(p, out hit, 3f, NavMesh.AllAreas) || hit.position.y > 3f) continue;
+            if (player != null && (hit.position - player.position).sqrMagnitude < spawnMinDistance * spawnMinDistance) continue;
+            Vector3 at = hit.position + Vector3.up;
+            if (Physics.CheckSphere(at, 0.6f, ~0, QueryTriggerInteraction.Ignore)) continue;
+            return at;
+        }
+        return transform.position + Vector3.up;
     }
 
     void OnDestroy()
