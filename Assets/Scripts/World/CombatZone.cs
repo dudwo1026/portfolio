@@ -5,7 +5,8 @@ using UnityEngine.InputSystem;
 
 // 결계로 잠기는 전투 구획 하나. 범위는 이 오브젝트 위치를 중심으로 가로(x) size.x, 세로(z) size.y.
 // portalPosition의 포탈에서 E를 holdTime 동안 누르고 있으면 구획 안쪽으로 들어가고 결계(ZoneBarrier)가 선다.
-// 클리어하면 결계가 풀리고 포탈은 다시 열리지 않는다
+// 들어가 있는 동안 구획 밖 몹은 없다(치우고 스포너를 멈춘다). 웨이브를 다 잡으면 마지막 몹 자리에 열쇠가 떨어지고,
+// 그 열쇠를 다 주워야 결계가 풀린다. 클리어한 구획의 포탈은 다시 열리지 않는다
 public class CombatZone : MonoBehaviour, IChargePad
 {
     public enum State { Idle, Active, Cleared }
@@ -27,7 +28,8 @@ public class CombatZone : MonoBehaviour, IChargePad
     public int[] waveCounts = { 8, 10, 12 };
     public float bigZoneMultiplier = 1.5f; // 열쇠 2개 구획은 웨이브마다 이만큼 더 나온다
     public float waveRest = 3f;            // 한 웨이브를 다 잡고 다음 웨이브까지
-    public float firstWaveDelay = 1f;
+    public float firstWaveDelay = 0.5f;    // 결계가 다 선 뒤 첫 웨이브까지
+    public float keySpacing = 1.5f;        // 열쇠 2개 구획에서 열쇠끼리 간격
     public GameObject enemyPrefab;         // 비워 두면 맵 스포너의 것을 쓴다
     public float spawnInset = 3f;          // 결계에서 이만큼 안쪽에만 나온다
     public float spawnMinDistance = 8f;    // 플레이어 코앞에는 안 나온다
@@ -38,6 +40,9 @@ public class CombatZone : MonoBehaviour, IChargePad
     int wave;          // 나온 웨이브 수
     int spawned;       // 이 구획에서 지금까지 낸 몹 수
     float nextWaveTime = -1f;
+    Vector3 lastMobPos;                     // 마지막으로 남았던 몹 자리 (열쇠가 떨어지는 곳)
+    readonly List<GameObject> keys = new List<GameObject>();
+    readonly List<MonoBehaviour> pausedByZone = new List<MonoBehaviour>();
 
     public State Status { get; private set; }
 
@@ -65,7 +70,9 @@ public class CombatZone : MonoBehaviour, IChargePad
     {
         if (debugKeys && Current == this && Keyboard.current != null && Keyboard.current.backslashKey.wasPressedThisFrame)
         {
-            Clear();
+            // 테스트: 웨이브를 건너뛰고 열쇠를 바로 주운 것으로 처리
+            if (keys.Count == 0) DropKeys(player.position);
+            foreach (GameObject k in keys) if (k.activeSelf) KeyItemSpawner.Instance.Collect(k);
             return;
         }
         if (Status == State.Active)
@@ -103,10 +110,12 @@ public class CombatZone : MonoBehaviour, IChargePad
         if (barrier != null) barrier.SetRaised(true);
         wave = 0;
         spawned = 0;
-        nextWaveTime = Time.time + firstWaveDelay;
+        keys.Clear();
+        nextWaveTime = Time.time + (barrier != null ? barrier.RaiseDuration : 0f) + firstWaveDelay;
+        HoldOutsideMobs(true);
     }
 
-    public void Clear()
+    void Clear()
     {
         Status = State.Cleared;
         if (Current == this) Current = null;
@@ -115,6 +124,41 @@ public class CombatZone : MonoBehaviour, IChargePad
         foreach (GameObject m in waveMobs) if (m != null) Destroy(m); // 테스트 키로 넘겼을 때 남은 몹
         waveMobs.Clear();
         if (KillGauge.Instance != null) KillGauge.Instance.ShowZoneProgress(0, 0);
+        HoldOutsideMobs(false);
+    }
+
+    // 들어가 있는 동안 맵 몹을 치우고 맵 스포너·정예 스포너를 멈춘다. 나오면 내가 멈춘 것만 되돌린다
+    // (옥상/지상에 따라 AreaManager가 따로 재워 둔 스포너는 건드리지 않는다)
+    void HoldOutsideMobs(bool hold)
+    {
+        if (!hold)
+        {
+            foreach (MonoBehaviour s in pausedByZone)
+            {
+                if (s is EnemySpawner) ((EnemySpawner)s).paused = false;
+                else if (s is EliteSpawner) ((EliteSpawner)s).paused = false;
+            }
+            pausedByZone.Clear();
+            return;
+        }
+        foreach (EnemySpawner s in FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None))
+            if (!s.paused) { s.paused = true; pausedByZone.Add(s); }
+        foreach (EliteSpawner s in FindObjectsByType<EliteSpawner>(FindObjectsSortMode.None))
+            if (!s.paused) { s.paused = true; pausedByZone.Add(s); }
+        foreach (EnemyAI e in FindObjectsByType<EnemyAI>(FindObjectsSortMode.None))
+            if (e.GetComponent<BossDefeat>() == null) Destroy(e.gameObject);
+    }
+
+    // 마지막 몹이 쓰러진 자리에 열쇠를 떨군다. 여러 개면 옆으로 나란히
+    void DropKeys(Vector3 at)
+    {
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(at, out hit, 3f, NavMesh.AllAreas)) at = hit.position;
+        for (int i = 0; i < keyReward; i++)
+        {
+            Vector3 p = at + Vector3.right * (i - (keyReward - 1) * 0.5f) * keySpacing + Vector3.up * 0.8f;
+            keys.Add(KeyItemSpawner.Instance.SpawnKeyAt(p));
+        }
     }
 
     int WaveSize(int i)
@@ -122,10 +166,16 @@ public class CombatZone : MonoBehaviour, IChargePad
         return Mathf.RoundToInt(waveCounts[i] * (keyReward >= 2 ? bigZoneMultiplier : 1f));
     }
 
-    // 전멸하면 waveRest 뒤 다음 웨이브, 마지막 웨이브까지 다 잡으면 클리어
+    // 전멸하면 waveRest 뒤 다음 웨이브. 마지막 웨이브까지 다 잡으면 열쇠가 떨어지고, 다 주우면 클리어
     void UpdateWaves()
     {
+        if (keys.Count > 0)
+        {
+            if (keys.TrueForAll(k => k == null || !k.activeSelf)) Clear();
+            return;
+        }
         waveMobs.RemoveAll(m => m == null);
+        foreach (GameObject m in waveMobs) lastMobPos = m.transform.position; // 하나 남으면 그 몹 자리
         int total = 0;
         for (int i = 0; i < waveCounts.Length; i++) total += WaveSize(i);
         if (KillGauge.Instance != null) KillGauge.Instance.ShowZoneProgress(spawned - waveMobs.Count, total);
@@ -140,7 +190,7 @@ public class CombatZone : MonoBehaviour, IChargePad
         }
         if (waveMobs.Count > 0) return;
         if (wave < waveCounts.Length) nextWaveTime = Time.time + waveRest;
-        else Clear();
+        else DropKeys(lastMobPos);
     }
 
     void SpawnWave(int count)

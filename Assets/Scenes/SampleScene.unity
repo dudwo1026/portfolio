@@ -4899,6 +4899,14 @@ MonoBehaviour:
   enterDepth: 4
   barColor: {r: 1, g: 0.6, b: 0.15, a: 1}
   debugKeys: 1
+  waveCounts: 080000000a0000000c000000
+  bigZoneMultiplier: 1.5
+  waveRest: 3
+  firstWaveDelay: 0.5
+  keySpacing: 1.5
+  enemyPrefab: {fileID: 0}
+  spawnInset: 3
+  spawnMinDistance: 8
 --- !u!114 &261992218
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4922,6 +4930,12 @@ MonoBehaviour:
   runeScrollSpeed: 0.12
   colliderThickness: 1
   mapEdges: {x: -90, y: 80, z: 20, w: 180}
+  pillarDropHeight: 14
+  pillarDropTime: 0.3
+  pillarStagger: 0.12
+  dustPrefab: {fileID: 5610010966355794069, guid: 803ecf87f61d9fb4f84ba6319ba95c9c, type: 3}
+  dustScale: 1
+  fadeTime: 0.6
 --- !u!1001 &263481360
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12034,6 +12048,14 @@ MonoBehaviour:
   enterDepth: 4
   barColor: {r: 1, g: 0.6, b: 0.15, a: 1}
   debugKeys: 1
+  waveCounts: 080000000a0000000c000000
+  bigZoneMultiplier: 1.5
+  waveRest: 3
+  firstWaveDelay: 0.5
+  keySpacing: 1.5
+  enemyPrefab: {fileID: 0}
+  spawnInset: 3
+  spawnMinDistance: 8
 --- !u!114 &685023992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12057,6 +12079,12 @@ MonoBehaviour:
   runeScrollSpeed: 0.12
   colliderThickness: 1
   mapEdges: {x: -90, y: 80, z: 20, w: 180}
+  pillarDropHeight: 14
+  pillarDropTime: 0.3
+  pillarStagger: 0.12
+  dustPrefab: {fileID: 5610010966355794069, guid: 803ecf87f61d9fb4f84ba6319ba95c9c, type: 3}
+  dustScale: 1
+  fadeTime: 0.6
 --- !u!1 &685374818
 GameObject:
   m_ObjectHideFlags: 0
@@ -14912,6 +14940,14 @@ MonoBehaviour:
   enterDepth: 4
   barColor: {r: 1, g: 0.6, b: 0.15, a: 1}
   debugKeys: 1
+  waveCounts: 080000000a0000000c000000
+  bigZoneMultiplier: 1.5
+  waveRest: 3
+  firstWaveDelay: 0.5
+  keySpacing: 1.5
+  enemyPrefab: {fileID: 0}
+  spawnInset: 3
+  spawnMinDistance: 8
 --- !u!114 &848248723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14935,6 +14971,12 @@ MonoBehaviour:
   runeScrollSpeed: 0.12
   colliderThickness: 1
   mapEdges: {x: -90, y: 80, z: 20, w: 180}
+  pillarDropHeight: 14
+  pillarDropTime: 0.3
+  pillarStagger: 0.12
+  dustPrefab: {fileID: 5610010966355794069, guid: 803ecf87f61d9fb4f84ba6319ba95c9c, type: 3}
+  dustScale: 1
+  fadeTime: 0.6
 --- !u!1001 &849490379
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30132,6 +30174,14 @@ MonoBehaviour:
   enterDepth: 4
   barColor: {r: 1, g: 0.6, b: 0.15, a: 1}
   debugKeys: 1
+  waveCounts: 080000000a0000000c000000
+  bigZoneMultiplier: 1.5
+  waveRest: 3
+  firstWaveDelay: 0.5
+  keySpacing: 1.5
+  enemyPrefab: {fileID: 0}
+  spawnInset: 3
+  spawnMinDistance: 8
 --- !u!114 &1659709823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30155,6 +30205,12 @@ MonoBehaviour:
   runeScrollSpeed: 0.12
   colliderThickness: 1
   mapEdges: {x: -90, y: 80, z: 20, w: 180}
+  pillarDropHeight: 14
+  pillarDropTime: 0.3
+  pillarStagger: 0.12
+  dustPrefab: {fileID: 5610010966355794069, guid: 803ecf87f61d9fb4f84ba6319ba95c9c, type: 3}
+  dustScale: 1
+  fadeTime: 0.6
 --- !u!1 &1660459315
 GameObject:
   m_ObjectHideFlags: 0
@@ -33084,6 +33140,14 @@ MonoBehaviour:
   enterDepth: 4
   barColor: {r: 1, g: 0.6, b: 0.15, a: 1}
   debugKeys: 1
+  waveCounts: 080000000a0000000c000000
+  bigZoneMultiplier: 1.5
+  waveRest: 3
+  firstWaveDelay: 0.5
+  keySpacing: 1.5
+  enemyPrefab: {fileID: 0}
+  spawnInset: 3
+  spawnMinDistance: 8
 --- !u!114 &1873018234
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -33107,6 +33171,12 @@ MonoBehaviour:
   runeScrollSpeed: 0.12
   colliderThickness: 1
   mapEdges: {x: -90, y: 80, z: 20, w: 180}
+  pillarDropHeight: 14
+  pillarDropTime: 0.3
+  pillarStagger: 0.12
+  dustPrefab: {fileID: 5610010966355794069, guid: 803ecf87f61d9fb4f84ba6319ba95c9c, type: 3}
+  dustScale: 1
+  fadeTime: 0.6
 --- !u!1001 &1875559407
 PrefabInstance:
   m_ObjectHideFlags: 0

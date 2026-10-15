@@ -32,10 +32,25 @@ public class KeyItemSpawner : MonoBehaviour
         Instance = this;
     }
 
+    Material keyMat;
+
+    // 구획 클리어 보상처럼 원하는 자리에 열쇠 하나를 바로 세운다. 줍는 처리는 맵 열쇠와 같다
+    public GameObject SpawnKeyAt(Vector3 pos)
+    {
+        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        go.name = "ZoneKey";
+        go.transform.position = pos;
+        go.GetComponent<Collider>().isTrigger = true;
+        go.GetComponent<Renderer>().sharedMaterial = keyMat;
+        go.AddComponent<KeyItem>();
+        return go;
+    }
+
     void Start()
     {
         Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
         mat.color = keyColor;
+        keyMat = mat;
         foreach (Transform p in spawnPoints)
         {
             if (p == null) continue;

@@ -1,8 +1,9 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 구획 결계. 켜면 구획 테두리를 따라 주황 반투명 벽(룬 두 줄이 서로 반대로 흐른다)과
-// 꼭짓점 수정 기둥을 세우고, 벽마다 높은 상자 충돌로 밖으로 못 나가게 막는다
+// 구획 결계. 켜면 꼭짓점 수정 기둥이 하늘에서 하나씩 떨어져 꽂히고(먼지), 그다음 구획 테두리를 따라
+// 주황 반투명 벽(룬 두 줄이 서로 반대로 흐른다)이 서서히 나타난다. 막는 충돌 벽은 켜는 순간부터 있다
 [RequireComponent(typeof(CombatZone))]
 public class ZoneBarrier : MonoBehaviour
 {
@@ -17,30 +18,104 @@ public class ZoneBarrier : MonoBehaviour
     // 맵 테두리 (x 최소·최대, z 최소·최대). 이 위에 놓인 변은 맵 벽이 이미 막으니 결계를 세우지 않는다
     public Vector4 mapEdges = new Vector4(-90f, 80f, 20f, 180f);
 
+    [Header("등장 연출")]
+    public float pillarDropHeight = 14f;
+    public float pillarDropTime = 0.3f;
+    public float pillarStagger = 0.12f;  // 기둥끼리 떨어지는 간격
+    public GameObject dustPrefab;        // 기둥이 꽂힌 자리
+    public float dustScale = 1f;
+    public float fadeTime = 0.6f;        // 기둥이 다 꽂힌 뒤 벽이 나타나는 시간 (사라질 때도)
+
     static readonly int BaseMapSt = Shader.PropertyToID("_BaseMap_ST");
+    static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
 
     GameObject root;
-    readonly List<Renderer> runes = new List<Renderer>();
-    readonly List<Vector2> runeTiling = new List<Vector2>(); // x = 가로 반복 수, y = 흐르는 방향(±1)
+    readonly List<Renderer> quads = new List<Renderer>();
+    readonly List<Vector2> quadTiling = new List<Vector2>(); // x = 가로 반복 수, y = 흐르는 방향(±1, 0 = 안 흐름)
+    readonly List<Transform> pillars = new List<Transform>();
+    readonly List<Collider> walls = new List<Collider>();
     MaterialPropertyBlock block;
+    float alpha;
 
-    public bool Raised { get { return root != null && root.activeSelf; } }
+    public bool Raised { get; private set; }
+    // 기둥이 다 꽂히고 벽이 다 나타나기까지 걸리는 시간
+    public float RaiseDuration { get { return pillarDropTime + pillarStagger * 3f + fadeTime; } }
 
     public void SetRaised(bool on)
     {
+        if (on == Raised) return;
+        Raised = on;
         if (on && root == null) Build();
-        if (root != null) root.SetActive(on);
+        if (root == null) return;
+        StopAllCoroutines();
+        foreach (Collider c in walls) c.enabled = on; // 막는 건 바로
+        StartCoroutine(on ? RaiseRoutine() : LowerRoutine());
+    }
+
+    IEnumerator RaiseRoutine()
+    {
+        root.SetActive(true);
+        alpha = 0f;
+        Vector3[] ends = new Vector3[pillars.Count];
+        for (int i = 0; i < pillars.Count; i++)
+        {
+            ends[i] = pillars[i].localPosition;
+            pillars[i].gameObject.SetActive(false);
+        }
+        for (int i = 0; i < pillars.Count; i++)
+        {
+            StartCoroutine(Drop(pillars[i], ends[i]));
+            yield return new WaitForSeconds(pillarStagger);
+        }
+        yield return new WaitForSeconds(pillarDropTime);
+        for (float t = 0f; t < fadeTime; t += Time.deltaTime)
+        {
+            alpha = t / fadeTime;
+            yield return null;
+        }
+        alpha = 1f;
+    }
+
+    IEnumerator Drop(Transform pillar, Vector3 end)
+    {
+        pillar.gameObject.SetActive(true);
+        Vector3 start = end + Vector3.up * pillarDropHeight;
+        for (float t = 0f; t < pillarDropTime; t += Time.deltaTime)
+        {
+            float k = t / pillarDropTime;
+            pillar.localPosition = Vector3.Lerp(start, end, k * k); // 가속하며 떨어진다
+            yield return null;
+        }
+        pillar.localPosition = end;
+        if (dustPrefab != null)
+        {
+            GameObject fx = Instantiate(dustPrefab, pillar.position, dustPrefab.transform.rotation);
+            fx.transform.localScale = Vector3.one * dustScale;
+            Destroy(fx, 3f);
+        }
+    }
+
+    IEnumerator LowerRoutine()
+    {
+        for (float t = 0f; t < fadeTime; t += Time.deltaTime)
+        {
+            alpha = Mathf.Min(alpha, 1f - t / fadeTime);
+            yield return null;
+        }
+        root.SetActive(false);
     }
 
     void Update()
     {
-        if (!Raised) return;
+        if (root == null || !root.activeSelf) return;
         float t = Time.time * runeScrollSpeed;
-        for (int i = 0; i < runes.Count; i++)
+        Color c = new Color(1.6f, 1.6f, 1.6f, alpha);
+        for (int i = 0; i < quads.Count; i++)
         {
-            runes[i].GetPropertyBlock(block);
-            block.SetVector(BaseMapSt, new Vector4(runeTiling[i].x, 1f, t * runeTiling[i].y, 0f));
-            runes[i].SetPropertyBlock(block);
+            quads[i].GetPropertyBlock(block);
+            block.SetVector(BaseMapSt, new Vector4(quadTiling[i].x, 1f, t * quadTiling[i].y, 0f));
+            block.SetColor(BaseColor, c);
+            quads[i].SetPropertyBlock(block);
         }
     }
 
@@ -66,7 +141,7 @@ public class ZoneBarrier : MonoBehaviour
         if (pillarPrefab != null)
             for (int i = 0; i < 4; i++)
                 if (wall[i] || wall[(i + 3) % 4])
-                    Instantiate(pillarPrefab, new Vector3(corners[i].x, GroundY(corners[i]), corners[i].z), Quaternion.identity, root.transform);
+                    pillars.Add(Instantiate(pillarPrefab, new Vector3(corners[i].x, GroundY(corners[i]), corners[i].z), Quaternion.identity, root.transform).transform);
 
         for (int e = 0; e < 4; e++)
         {
@@ -77,22 +152,20 @@ public class ZoneBarrier : MonoBehaviour
             Quaternion rot = Quaternion.LookRotation(Vector3.Cross(dir, Vector3.up)); // 벽 면이 구획 안팎을 향한다
             Vector3 mid = (a + b) * 0.5f;
 
-            Quad(mid + Vector3.up * height * 0.5f, rot, len, height, glowMaterial);
+            Quad(mid + Vector3.up * height * 0.5f, rot, len, height, glowMaterial, new Vector2(1f, 0f));
             for (int i = 0; i < runeRows.Length; i++)
-            {
-                Renderer r = Quad(mid + Vector3.up * runeRows[i], rot, len, runeRowHeight, runeMaterial);
-                runes.Add(r);
-                runeTiling.Add(new Vector2(len / (runeRowHeight * 8f), i % 2 == 0 ? 1f : -1f));
-            }
+                Quad(mid + Vector3.up * runeRows[i], rot, len, runeRowHeight, runeMaterial,
+                     new Vector2(len / (runeRowHeight * 8f), i % 2 == 0 ? 1f : -1f));
 
             BoxCollider col = new GameObject("Wall").AddComponent<BoxCollider>();
             col.transform.SetParent(root.transform, false);
             col.transform.SetPositionAndRotation(mid + Vector3.up * 4f, rot);
             col.size = new Vector3(len + colliderThickness, 8f, colliderThickness);
+            walls.Add(col);
         }
     }
 
-    Renderer Quad(Vector3 pos, Quaternion rot, float w, float h, Material mat)
+    void Quad(Vector3 pos, Quaternion rot, float w, float h, Material mat, Vector2 tiling)
     {
         GameObject q = GameObject.CreatePrimitive(PrimitiveType.Quad);
         Destroy(q.GetComponent<Collider>());
@@ -102,7 +175,8 @@ public class ZoneBarrier : MonoBehaviour
         Renderer r = q.GetComponent<Renderer>();
         r.sharedMaterial = mat;
         r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        return r;
+        quads.Add(r);
+        quadTiling.Add(tiling);
     }
 
     bool OnMapEdge(Vector3 a, Vector3 b)
