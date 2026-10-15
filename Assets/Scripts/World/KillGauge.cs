@@ -117,7 +117,8 @@ public class KillGauge : MonoBehaviour
         if (want == UnlockedSpawners) return;
 
         UnlockedSpawners = want;
-        if (eliteSpawner != null) eliteSpawner.SetActiveSlots(want);
+        // 정예는 구획 미니보스로만 나온다. 맵(구획 밖)에는 열지 않는다
+        // (eliteSpawner는 정예 목록을 쓰는 테스트 키·구획 미니보스 때문에 남겨 둔다)
     }
 
     // 구획 안에서는 게이지 바에 잡은 수 / 전체 수를 대신 보여 준다. total 0이면 원래대로
