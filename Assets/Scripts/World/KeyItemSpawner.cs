@@ -52,6 +52,13 @@ public class KeyItemSpawner : MonoBehaviour
         RefreshLabel();
     }
 
+    // 세이브 복구
+    public void SetCollected(int n)
+    {
+        Collected = n;
+        RefreshLabel();
+    }
+
     // 테스트용 (KillGauge의 ' 키): 열쇠를 다 모은 것으로 처리한다
     public void DebugCollectAll()
     {

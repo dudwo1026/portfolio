@@ -23,6 +23,12 @@ public void TakeDamage(float amount)
     }
 
 
+// 세이브 복구처럼 현재 체력을 그대로 맞출 때 (피격 이벤트 없이)
+    public void SetCurrentHealth(float value)
+    {
+        CurrentHealth = Mathf.Clamp(value, 0f, maxHealth);
+    }
+
 // 난이도처럼 시작할 때 최대 체력을 바꿀 때. 현재 체력도 가득 채운다
     public void SetMaxHealth(float value)
     {

@@ -72,17 +72,21 @@ public class CombatZone : MonoBehaviour, IChargePad
 
     void Awake()
     {
-        // static이라 씬을 다시 불러도 남는다. 구획마다 한 번씩 불려도 결과는 같다
+        // static이라 씬을 다시 불러도 남는다. 구획마다 한 번씩 불려도 결과는 같다.
+        // 구획 재시도로 다시 불렀으면 세이브 시점의 진행 상황으로 맞춘다
+        bool restore = ZoneSave.Retrying && ZoneSave.HasSave;
         usedElites.Clear();
-        clearedZones = 0;
+        if (restore) usedElites.AddRange(ZoneSave.UsedElites);
+        clearedZones = restore ? ZoneSave.ClearedZones.Count : 0;
         Current = null;
+        if (restore && ZoneSave.ClearedZones.Contains(name)) Status = State.Cleared;
     }
 
     void Start()
     {
         GameObject p = GameObject.Find("Player");
         if (p != null) player = p.transform;
-        if (portalPrefab != null) portal = SpawnPortal();
+        if (portalPrefab != null && Status != State.Cleared) portal = SpawnPortal();
         if (enemyPrefab == null)
         {
             EnemySpawner s = FindFirstObjectByType<EnemySpawner>();
@@ -153,6 +157,12 @@ public class CombatZone : MonoBehaviour, IChargePad
         waveMobs.Clear();
         if (KillGauge.Instance != null) KillGauge.Instance.ShowZoneProgress(0, 0);
         HoldOutsideMobs(false);
+
+        // 자동 저장: 지금까지 클리어한 구획 전부와 잡은 정예 종류, 열쇠, 플레이어 상태
+        List<string> cleared = new List<string>();
+        foreach (CombatZone z in FindObjectsByType<CombatZone>(FindObjectsSortMode.None))
+            if (z.Status == State.Cleared) cleared.Add(z.name);
+        ZoneSave.Save(cleared, usedElites, KeyItemSpawner.Instance != null ? KeyItemSpawner.Instance.Collected : 0);
     }
 
     // 들어가 있는 동안 맵 몹을 치우고 맵 스포너·정예 스포너를 멈춘다. 나오면 내가 멈춘 것만 되돌린다

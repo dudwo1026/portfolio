@@ -47,6 +47,7 @@ public class TitleMenu : MonoBehaviour
 
     public void StartGame()
     {
+        ZoneSave.Clear(); // 새 게임은 구획 세이브 없이
         Time.timeScale = 1f; // 이전 판이 멈춘 상태로 끝났을 수 있다
         SceneManager.LoadScene(gameSceneName);
     }

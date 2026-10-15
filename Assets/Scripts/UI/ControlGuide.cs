@@ -52,6 +52,7 @@ public class ControlGuide : MonoBehaviour
     void Start()
     {
         if (onlyFromTitle && !GameSettings.primaryChosen) return;
+        if (ZoneSave.Retrying) return; // 구획 재시도로 다시 불러온 경우는 이미 본 가이드다
         Build();
         Show(0);
         Time.timeScale = 0f;

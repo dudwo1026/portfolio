@@ -161,6 +161,14 @@ public class PlayerCombat : MonoBehaviour
         primaryWeapon == PrimaryWeapon.Laser ? laserMaxReserve :
         primaryWeapon == PrimaryWeapon.Shotgun ? shotgunMaxReserve : primaryMaxReserveMags * primaryMagSize;
 
+    // 구획 세이브(ZoneSave)용. 주무기 종류는 GameSettings가 들고 있으므로 탄 수만 주고받는다
+    public int[] GetAmmoState() { return new[] { primaryAmmo, primaryReserve, secondaryAmmo, grenadeLoaded, grenadeReserve }; }
+    public void SetAmmoState(int[] s)
+    {
+        if (s == null || s.Length < 5) return;
+        primaryAmmo = s[0]; primaryReserve = s[1]; secondaryAmmo = s[2]; grenadeLoaded = s[3]; grenadeReserve = s[4];
+    }
+
     TopDownMove mover;
     PlayerBound bound;
     PlayerDash dash;
