@@ -188,9 +188,9 @@ public class EliteThreatIndicator : MonoBehaviour
         }
         if (trackKeys)
         {
-            // 아직 안 나온 열쇠도 넣어 둔다. 꺼져 있는 동안은 LateUpdate에서 걸러진다
+            // 주운 열쇠는 꺼져 있어서 LateUpdate에서 걸러진다
             if (KeyItemSpawner.Instance != null)
-                foreach (Transform k in KeyItemSpawner.Instance.spawnPoints) targets.Add(k);
+                foreach (Transform k in KeyItemSpawner.Instance.Keys) targets.Add(k);
             return;
         }
         EnemyAI[] all = FindObjectsByType<EnemyAI>(FindObjectsSortMode.None);
