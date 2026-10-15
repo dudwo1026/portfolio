@@ -4890,6 +4890,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatZone
   size: {x: 80, y: 52}
   keyReward: 1
+  portalPosition: {x: 42.4, y: 1.20115, z: 133.7}
 --- !u!1001 &263481360
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11993,6 +11994,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatZone
   size: {x: 80, y: 47}
   keyReward: 1
+  portalPosition: {x: 42.4, y: 1.20115, z: 62.7}
 --- !u!1 &685374818
 GameObject:
   m_ObjectHideFlags: 0
@@ -14839,6 +14841,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatZone
   size: {x: 80, y: 61}
   keyReward: 1
+  portalPosition: {x: 42.4, y: 1.20115, z: 119.85}
 --- !u!1001 &849490379
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30067,6 +30070,7 @@ BoxCollider:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+  portalPosition: {x: -39.72, y: 1.20115, z: 136.5}
   m_GameObject: {fileID: 1660459315}
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -32987,6 +32991,7 @@ PrefabInstance:
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
+  portalPosition: {x: -6.81, y: 1.20115, z: 62.12}
     - target: {fileID: 4588435873696250, guid: effb1b31d7e11a54e9b051312c1a2ee4, type: 3}
       propertyPath: m_LocalRotation.x
       value: -0

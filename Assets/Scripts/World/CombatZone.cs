@@ -5,10 +5,12 @@ public class CombatZone : MonoBehaviour
 {
     public Vector2 size = new Vector2(80f, 50f);
     public int keyReward = 1; // 클리어하면 떨어지는 열쇠 수
+    public Vector3 portalPosition; // 이 구획으로 들어가는 포탈 자리 (월드)
 
     void OnDrawGizmos()
     {
         Gizmos.color = new Color(1f, 0.5f, 0.1f, 0.9f);
         Gizmos.DrawWireCube(transform.position, new Vector3(size.x, 0.2f, size.y));
+        Gizmos.DrawWireSphere(portalPosition, 1.5f);
     }
 }
