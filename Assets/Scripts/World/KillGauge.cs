@@ -1,27 +1,16 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// 처치 게이지. 일반몹 1, 정예몹 5씩 오르고, 일정 구간마다 정예 스포너가 열린다.
-// 가득 차면 게이지바가 빛난다 (가득 찼을 때의 이벤트는 추후 구현).
+// 우상단 게이지 바. 구획(CombatZone)에 들어가 있는 동안만 보이고, 그 구획에서 잡은 수 / 전체 수를 그린다.
+// 테스트용 키도 여기 모여 있다
 public class KillGauge : MonoBehaviour
 {
     public static KillGauge Instance;
 
-    [Header("게이지")]
-    public float maxValue = 200f;
-    public float normalKillValue = 1f;
-    public float eliteKillValue = 5f;
-
-    [Header("정예 스포너 개방")]
-    public float[] unlockAt = { 35f, 70f, 135f }; // 게이지가 각 값에 닿을 때마다
-    public int spawnersPerStep = 2;     // 이만큼씩 열린다 (35 → 2, 70 → 4, 135 → 6)
-    public int maxSpawners = 6;
-    public EliteSpawner eliteSpawner;
-
     // ───── 테스트용. 출시 빌드에서는 debugKeys를 꺼서 통째로 죽인다 ─────
     [Header("테스트용 키")]
     public bool debugKeys = true;
-    public float debugAddAmount = 100f;  // / 키로 한 번에 차오르는 양
+    public EliteSpawner eliteSpawner;      // 숫자패드 1~6 정예 목록
     public float debugSpawnDistance = 10f; // 숫자패드 1~6 소환 거리 (플레이어 남쪽)
     public float debugSpawnSpread = 2f;    // 연타했을 때 겹치지 않게 좌우로 흩는 폭
     public float debugSpawnLift = 1.2f;    // 바닥에서 띄우는 높이. 지면에 박힌 채 생기지 않도록
@@ -31,98 +20,30 @@ public class KillGauge : MonoBehaviour
     [Header("UI")]
     public Image fill;
     public Text label;
-    public Image glow;                  // 가득 찼을 때만 보이는 발광 테두리
+    public Image glow;                  // 구획을 다 잡았을 때만 보이는 발광 테두리
     public Color glowColor = new Color(1f, 0.95f, 0.4f, 1f);
     public float glowMinAlpha = 0.25f;
     public float glowMaxAlpha = 0.85f;
     public float glowPulseSpeed = 3f;
 
-    [Header("공세 경보")]
-    public float[] warnAt = { 35f, 70f, 135f, 170f }; // 게이지가 각 값을 넘는 순간 경보
-    public string warnMessage = "적들의 공세가 더욱 거세집니다";
-    public HudMessage warn;              // 화면 중상단, 빨간 글씨
-
-    public float Value { get; private set; }
-    public bool IsFull { get { return Value >= maxValue; } }
-    public int UnlockedSpawners { get; private set; }
-
-    public System.Action onFull; // 추후 이벤트 연결 지점
-
-    // 이 값부터 정예는 발견 절차 없이 생성되자마자 추격한다 (넘는 순간 살아 있는 정예도 전부)
-    public float eliteHuntAt = 170f;
-    public bool EliteHunt { get { return Value >= eliteHuntAt; } }
-
-    bool wasFull;
     bool spawnsPaused;   // [ 키 상태
     float clearTimer;
     readonly System.Collections.Generic.List<EnemySpawner> pausedByMe = new System.Collections.Generic.List<EnemySpawner>();
 
+    int zoneKilled, zoneTotal;
+    bool Full { get { return zoneTotal > 0 && zoneKilled >= zoneTotal; } }
+
     void Awake()
     {
         Instance = this;
-
-        // 노말: 추격 모드를 게이지가 가득 찰 때로 미룬다. 그 순간 뜨던 마지막 공세 경보도 같이 옮긴다
-        if (NormalDifficulty.Active)
-        {
-            for (int i = 0; i < warnAt.Length; i++)
-                if (Mathf.Approximately(warnAt[i], eliteHuntAt)) warnAt[i] = NormalDifficulty.EliteHuntAt;
-            eliteHuntAt = NormalDifficulty.EliteHuntAt;
-        }
     }
 
     void Start()
     {
-        UnlockedSpawners = 0;
-        if (eliteSpawner != null) eliteSpawner.SetActiveSlots(0); // 게이지가 차기 전에는 정예가 나오지 않는다
         Refresh();
     }
 
-    // 적이 죽을 때 EnemyAI가 호출한다
-    public static void ReportKill(bool isElite)
-    {
-        if (Instance == null) return;
-        Instance.Add(isElite ? Instance.eliteKillValue : Instance.normalKillValue);
-    }
-
-    public void Add(float amount)
-    {
-        if (amount <= 0f) return;
-
-        float before = Value;
-        Value = Mathf.Clamp(Value + amount, 0f, maxValue);
-        foreach (float at in warnAt)
-            if (before < at && Value >= at && warn != null) warn.Show(warnMessage); // 여러 개를 한 번에 넘어도 같은 문구라 한 번 뜬 것과 같다
-        if (before < eliteHuntAt && EliteHunt)
-            foreach (EnemyAI e in FindObjectsByType<EnemyAI>(FindObjectsSortMode.None))
-                if (e.isElite) e.ForceAttack();
-        UpdateUnlocks();
-        Refresh();
-
-        if (IsFull && !wasFull)
-        {
-            wasFull = true;
-            if (onFull != null) onFull();
-        }
-        else if (!IsFull)
-        {
-            wasFull = false;
-        }
-    }
-
-    void UpdateUnlocks()
-    {
-        int steps = 0;
-        foreach (float at in unlockAt) if (Value >= at) steps++;
-        int want = Mathf.Clamp(steps * spawnersPerStep, 0, maxSpawners);
-        if (want == UnlockedSpawners) return;
-
-        UnlockedSpawners = want;
-        // 정예는 구획 미니보스로만 나온다. 맵(구획 밖)에는 열지 않는다
-        // (eliteSpawner는 정예 목록을 쓰는 테스트 키·구획 미니보스 때문에 남겨 둔다)
-    }
-
-    // 구획 안에서는 게이지 바에 잡은 수 / 전체 수를 대신 보여 준다. total 0이면 원래대로
-    int zoneKilled, zoneTotal;
+    // 구획이 매 프레임 알려 준다. total 0이면 구획 밖 → 바를 숨긴다
     public void ShowZoneProgress(int killed, int total)
     {
         if (killed == zoneKilled && total == zoneTotal) return;
@@ -133,23 +54,21 @@ public class KillGauge : MonoBehaviour
 
     void Refresh()
     {
-        if (zoneTotal > 0)
-        {
-            if (fill != null) fill.fillAmount = (float)zoneKilled / zoneTotal;
-            if (label != null) label.text = zoneKilled + "/" + zoneTotal;
-            return;
-        }
-        if (fill != null) fill.fillAmount = maxValue > 0f ? Value / maxValue : 0f;
-        if (label != null) label.text = Mathf.FloorToInt(Value) + "/" + Mathf.FloorToInt(maxValue);
+        bool show = zoneTotal > 0;
+        GameObject bar = fill != null && fill.transform.parent != null ? fill.transform.parent.gameObject : null;
+        if (bar != null && bar.activeSelf != show) bar.SetActive(show);
+        if (!show) return;
+        if (fill != null) fill.fillAmount = (float)zoneKilled / zoneTotal;
+        if (label != null) label.text = zoneKilled + "/" + zoneTotal;
     }
 
     // 테스트용 키. 게임 로직이 아니므로 Update 본문과 섞지 않고 여기에 모아 둔다
     //   0 : 플레이어 무적 + 무한탄창 켜기/끄기
-    //   / : 게이지를 debugAddAmount(기본 100)만큼 올린다 (숫자패드 / 도 동일)
     //   [ : 스폰을 멈추고 살아있는 몹을 지운다 / 다시 누르면 재개 (맵을 둘러볼 때)
     //   ] : 주무기 돌격소총 → 레이저 → 산탄총 순환 (임시)
     //   숫자패드 1~6 : 정예 a~f를 플레이어 남쪽 10유닛에 소환 (패턴을 하나씩 확인할 때)
-    //   ' : 게이지를 채우고 열쇠를 전부 모은 것으로 처리해 포탈을 바로 연다
+    //   ' : 열쇠를 전부 모은 것으로 처리해 옥상 포탈을 바로 연다
+    //   (\ : 들어가 있는 구획을 클리어 처리 — CombatZone)
     void HandleDebugKeys()
     {
         if (!debugKeys) return;
@@ -169,7 +88,6 @@ public class KillGauge : MonoBehaviour
                 Debug.Log("[Debug] 무적 + 무한탄창: " + (on ? "ON" : "OFF"));
             }
         }
-        if (kb.slashKey.wasPressedThisFrame || kb.numpadDivideKey.wasPressedThisFrame) Add(debugAddAmount);
         if (kb.leftBracketKey.wasPressedThisFrame) ToggleSpawns();
         if (kb.rightBracketKey.wasPressedThisFrame)
         {
@@ -181,11 +99,7 @@ public class KillGauge : MonoBehaviour
                 Debug.Log("[Debug] 주무기: " + pc.primaryWeapon);
             }
         }
-        if (kb.quoteKey.wasPressedThisFrame)
-        {
-            Add(maxValue); // 포탈은 게이지 가득 + 열쇠 전부가 조건이다
-            if (KeyItemSpawner.Instance != null) KeyItemSpawner.Instance.DebugCollectAll();
-        }
+        if (kb.quoteKey.wasPressedThisFrame && KeyItemSpawner.Instance != null) KeyItemSpawner.Instance.DebugCollectAll();
 
         if (kb.numpad1Key.wasPressedThisFrame) DebugSpawnElite(0);
         if (kb.numpad2Key.wasPressedThisFrame) DebugSpawnElite(1);
@@ -243,12 +157,10 @@ public class KillGauge : MonoBehaviour
 
         if (!spawnsPaused)
         {
-            // 내가 멈춘 것만 되돌린다. AreaManager가 옥상/지상에 따라 따로 재우는 스포너가 있어서
-            // 전부 깨우면 그 설정이 망가진다
+            // 내가 멈춘 것만 되돌린다. AreaManager·구획이 따로 재우는 스포너가 있어서 전부 깨우면 그 설정이 망가진다
             for (int i = 0; i < pausedByMe.Count; i++)
                 if (pausedByMe[i] != null) pausedByMe[i].paused = false;
             pausedByMe.Clear();
-            if (eliteSpawner != null) eliteSpawner.paused = false;
             return;
         }
 
@@ -259,7 +171,6 @@ public class KillGauge : MonoBehaviour
             s.paused = true;
             pausedByMe.Add(s);
         }
-        if (eliteSpawner != null) eliteSpawner.paused = true;
         ClearMobs();
     }
 
@@ -277,7 +188,7 @@ public class KillGauge : MonoBehaviour
 
         if (glow == null) return;
 
-        if (!IsFull)
+        if (!Full)
         {
             if (glow.enabled) glow.enabled = false;
             return;

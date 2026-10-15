@@ -20,7 +20,6 @@ public class Portal : MonoBehaviour, IChargePad
     public float cooldown = 0.5f;
 
     [Header("개방 조건")]
-    public bool requireGaugeFull = false;   // 처치 게이지가 가득 차야 열린다
     public bool requireKeys = false;        // 열쇠(KeyItemSpawner)를 다 모아야 열린다
     public Renderer visual;                 // 열림/닫힘을 색으로 보여줄 렌더러
     public GameObject openEffect;           // 넣어 두면 열렸을 때 이걸 켜고 visual 판은 숨긴다 (포탈 이펙트)
@@ -48,7 +47,6 @@ public class Portal : MonoBehaviour, IChargePad
     {
         get
         {
-            if (requireGaugeFull && !(KillGauge.Instance != null && KillGauge.Instance.IsFull)) return false;
             if (requireKeys && !(KeyItemSpawner.Instance != null && KeyItemSpawner.Instance.HasAllKeys)) return false;
             return true;
         }

@@ -105,7 +105,6 @@ public class EliteSpawner : MonoBehaviour
         // 발견 전에는 배회한다. 생성 구역 밖(담장 너머)으로 흘러가지 않게 같은 구역에 묶는다
         EnemyAI ai = current[slot].GetComponent<EnemyAI>();
         if (ai != null) ai.SetWanderArea(new Bounds(areaCenter, new Vector3(areaSize.x, 100f, areaSize.y)));
-        if (ai != null && KillGauge.Instance != null && KillGauge.Instance.EliteHunt) ai.ForceAttack(); // 게이지 eliteHuntAt(170) 이후: 바로 추격
         currentType[slot] = type;
         timers[slot] = 0f;
     }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 // 노말 난이도 수치를 한곳에 모은다.
 // 하드는 씬·프리팹에 저장된 값 그대로이고, 노말일 때만 각 오브젝트가 시작하면서 아래 값으로 덮어쓴다
-// (몹·정예·보스: EnemyAI.Awake / 처치 게이지: KillGauge.Awake / 정예 재등장: EliteSpawner.Start)
+// (몹·정예·보스: EnemyAI.Awake / 정예 재등장: EliteSpawner.Start)
 public static class NormalDifficulty
 {
     public static bool Active { get { return GameSettings.difficulty == Difficulty.Normal; } }
@@ -12,7 +12,6 @@ public static class NormalDifficulty
     // 정예·보스가 플레이어에게 주는 피해 (일반 몹은 그대로). 몹끼리 주는 피해는 건드리지 않는다
     public const float EliteBossDamageScale = 0.7f;
 
-    public const float EliteHuntAt = 200f;        // 추격 모드 시작 (하드 170). 게이지가 가득 찰 때
     public const float EliteRespawnDelay = 45f;   // 정예 재등장 (하드 30초)
     public const float ElitePatternCooldownScale = 1.25f; // 정예 특수패턴 쿨타임 (A 20→25, B·C 15→19, D 4→5, E 13→16)
 

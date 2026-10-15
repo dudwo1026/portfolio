@@ -4910,7 +4910,6 @@ MonoBehaviour:
   spawnMinDistance: 8
   miniBossHealthMultiplier: 5
   miniBossSpeedVsPlayer: 1.1
-  grabMiniBossSpeedVsPlayer: 1.15
   miniBossDamageMultiplier: 2
   grabHoldDamagePercent: 5
   selfDestructDamagePercent: 50
@@ -12068,7 +12067,6 @@ MonoBehaviour:
   spawnMinDistance: 8
   miniBossHealthMultiplier: 5
   miniBossSpeedVsPlayer: 1.1
-  grabMiniBossSpeedVsPlayer: 1.15
   miniBossDamageMultiplier: 2
   grabHoldDamagePercent: 5
   selfDestructDamagePercent: 50
@@ -14745,7 +14743,6 @@ MonoBehaviour:
   spawnMinDistance: 8
   miniBossHealthMultiplier: 5
   miniBossSpeedVsPlayer: 1.1
-  grabMiniBossSpeedVsPlayer: 1.15
   miniBossDamageMultiplier: 2
   grabHoldDamagePercent: 5
   selfDestructDamagePercent: 50
@@ -21001,18 +20998,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edcfb4f012c32734d8436bd3d9d476b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KillGauge
-  maxValue: 200
-  normalKillValue: 1
-  eliteKillValue: 5
-  unlockAt:
-  - 35
-  - 70
-  - 135
-  spawnersPerStep: 2
-  maxSpawners: 6
-  eliteSpawner: {fileID: 2142319068}
   debugKeys: 1
-  debugAddAmount: 100
+  eliteSpawner: {fileID: 2142319068}
   debugSpawnDistance: 10
   debugSpawnSpread: 2
   debugSpawnLift: 1.2
@@ -21023,14 +21010,6 @@ MonoBehaviour:
   glowMinAlpha: 0.25
   glowMaxAlpha: 0.85
   glowPulseSpeed: 3
-  warnAt:
-  - 35
-  - 70
-  - 135
-  - 170
-  warnMessage: "\uC801\uB4E4\uC758 \uACF5\uC138\uAC00 \uB354\uC6B1 \uAC70\uC138\uC9D1\uB2C8\uB2E4"
-  warn: {fileID: 709672956}
-  eliteHuntAt: 170
 --- !u!114 &1176907072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29640,7 +29619,6 @@ MonoBehaviour:
   spawnMinDistance: 8
   miniBossHealthMultiplier: 5
   miniBossSpeedVsPlayer: 1.1
-  grabMiniBossSpeedVsPlayer: 1.15
   miniBossDamageMultiplier: 2
   grabHoldDamagePercent: 5
   selfDestructDamagePercent: 50
@@ -32503,7 +32481,6 @@ MonoBehaviour:
   spawnMinDistance: 8
   miniBossHealthMultiplier: 5
   miniBossSpeedVsPlayer: 1.1
-  grabMiniBossSpeedVsPlayer: 1.15
   miniBossDamageMultiplier: 2
   grabHoldDamagePercent: 5
   selfDestructDamagePercent: 50
@@ -34911,7 +34888,6 @@ MonoBehaviour:
   destinationPortal: {fileID: 0}
   exitDirection: {x: -1, y: 0, z: 0}
   cooldown: 0.5
-  requireGaugeFull: 1
   requireKeys: 1
   visual: {fileID: 2002803341}
   openEffect: {fileID: 364220921}

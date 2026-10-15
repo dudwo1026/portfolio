@@ -159,7 +159,6 @@ void OnDamaged()
     {
         if (selfHealth != null && selfHealth.CurrentHealth <= 0f)
         {
-            KillGauge.ReportKill(isElite); // 처치 게이지 가산 (자폭 소멸은 체력 0을 거치지 않으므로 제외)
             if (roofSpawned) SupplyKit.TryDrop(transform.position);
             Destroy(gameObject);
             return;
