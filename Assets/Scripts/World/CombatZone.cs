@@ -50,6 +50,7 @@ public class CombatZone : MonoBehaviour, IChargePad
     static readonly List<int> usedElites = new List<int>();
     static int clearedZones;
     int miniBossCount;
+    readonly List<int> caughtElites = new List<int>(); // 웨이브에 섞을 정예 종류
 
     readonly List<GameObject> waveMobs = new List<GameObject>();
     int wave;          // 나온 웨이브 수
@@ -134,6 +135,8 @@ public class CombatZone : MonoBehaviour, IChargePad
         wave = 0;
         spawned = 0;
         keys.Clear();
+        caughtElites.Clear();
+        caughtElites.AddRange(usedElites); // 이전 구획들에서 잡은 미니보스 종류 (이번 구획 것을 뽑기 전에)
         PickMiniBosses();
         nextWaveTime = Time.time + (barrier != null ? barrier.RaiseDuration : 0f) + firstWaveDelay;
         HoldOutsideMobs(true);
@@ -202,14 +205,14 @@ public class CombatZone : MonoBehaviour, IChargePad
         waveMobs.RemoveAll(m => m == null);
         foreach (GameObject m in waveMobs) lastMobPos = m.transform.position; // 하나 남으면 그 몹 자리
         int total = miniBossCount;
-        for (int i = 0; i < waveCounts.Length; i++) total += WaveSize(i);
+        for (int i = 0; i < waveCounts.Length; i++) total += WaveSize(i) + ElitesInWave(i);
         if (KillGauge.Instance != null) KillGauge.Instance.ShowZoneProgress(spawned - waveMobs.Count, total);
 
         if (nextWaveTime >= 0f)
         {
             if (Time.time < nextWaveTime) return;
             nextWaveTime = -1f;
-            SpawnWave(WaveSize(wave));
+            SpawnWave(WaveSize(wave), wave);
             wave++;
             if (wave == waveCounts.Length) SpawnMiniBosses();
             return;
@@ -219,21 +222,38 @@ public class CombatZone : MonoBehaviour, IChargePad
         else DropKeys(lastMobPos);
     }
 
-    void SpawnWave(int count)
+    // 일반몹 count마리 + 이미 잡은 미니보스 종류 중 무작위로 섞는 정예 (일반 정예 스펙)
+    void SpawnWave(int count, int waveIndex)
     {
         if (enemyPrefab == null) return;
         Bounds area = new Bounds(transform.position, new Vector3(size.x - spawnInset * 2f, 10f, size.y - spawnInset * 2f));
-        for (int i = 0; i < count; i++)
-        {
-            GameObject e = Instantiate(enemyPrefab, SpawnPoint(area), Quaternion.identity);
-            waveMobs.Add(e);
-            spawned++;
-            EnemyAI ai = e.GetComponent<EnemyAI>();
-            if (ai == null) continue;
-            ai.SetWanderArea(area);
-            ai.alwaysHunt = true; // 구획 안 웨이브는 나오자마자 끝까지 쫓는다
-            ai.ForceAttack();
-        }
+        for (int i = 0; i < count; i++) Spawn(enemyPrefab, area);
+
+        EliteSpawner es = FindFirstObjectByType<EliteSpawner>();
+        if (es == null) return;
+        for (int i = 0; i < ElitesInWave(waveIndex); i++)
+            Spawn(es.elitePrefabs[caughtElites[Random.Range(0, caughtElites.Count)]], area);
+    }
+
+    void Spawn(GameObject prefab, Bounds area)
+    {
+        GameObject e = Instantiate(prefab, SpawnPoint(area), Quaternion.identity);
+        waveMobs.Add(e);
+        spawned++;
+        EnemyAI ai = e.GetComponent<EnemyAI>();
+        if (ai == null) return;
+        ai.SetWanderArea(area);
+        ai.alwaysHunt = true; // 구획 안 몹은 나오자마자 끝까지 쫓는다
+        ai.ForceAttack();
+    }
+
+    // n번째 웨이브(1부터)에 정예 n마리. 잡은 종류가 적은 앞 구획은 줄인다:
+    // 1종 = 0·1·2, 2종 = 1·2·2, 3종 이상 = 1·2·3. 잡은 종류가 없으면(첫 구획) 0
+    static readonly int[][] elitesByCaught = { new[] { 0, 0, 0 }, new[] { 0, 1, 2 }, new[] { 1, 2, 2 }, new[] { 1, 2, 3 } };
+    int ElitesInWave(int waveIndex)
+    {
+        int[] row = elitesByCaught[Mathf.Min(caughtElites.Count, elitesByCaught.Length - 1)];
+        return waveIndex < row.Length ? row[waveIndex] : row[row.Length - 1];
     }
 
     // 들어갈 때 이번 구획 미니보스 종류를 정한다: 아직 안 나온 정예 중 무작위 1종, 마지막 구획은 남은 종류 전부(2종).
