@@ -31,7 +31,8 @@ public class CombatZone : MonoBehaviour, IChargePad
     public float firstWaveDelay = 0.5f;    // 결계가 다 선 뒤 첫 웨이브까지
     public float keySpacing = 1.5f;        // 열쇠 2개 구획에서 열쇠끼리 간격
     public GameObject enemyPrefab;         // 비워 두면 맵 스포너의 것을 쓴다
-    public float spawnInset = 3f;          // 결계에서 이만큼 안쪽에만 나온다
+    public float spawnInset = 3f;          // 결계에서 이만큼 안쪽부터
+    public float spawnBand = 4f;           // 거기서 다시 이만큼 폭의 외곽 띠에서만 나온다
     public float spawnMinDistance = 8f;    // 플레이어 코앞에는 안 나온다
 
     [Header("미니보스 (마지막 웨이브와 함께 나온다)")]
@@ -270,20 +271,35 @@ public class CombatZone : MonoBehaviour, IChargePad
         }
     }
 
-    // 구획 안 내비메시 위, 플레이어에서 떨어진 빈자리. 건물 지붕(높이 3 이상)은 안 쓴다
+    // 구획 외곽 띠(area 테두리에서 안쪽으로 spawnBand) 위, 플레이어에서 떨어진 빈자리.
+    // 건물 안에 따로 떨어진 내비메시 섬에 나오면 갇히므로, 플레이어까지 길이 이어진 자리만 쓴다
     Vector3 SpawnPoint(Bounds area)
     {
-        for (int i = 0; i < 30; i++)
+        NavMeshHit pHit = new NavMeshHit();
+        bool hasPlayer = player != null && NavMesh.SamplePosition(player.position, out pHit, 3f, NavMesh.AllAreas);
+        Vector3 playerNav = pHit.position;
+        NavMeshPath path = new NavMeshPath();
+        float w = area.size.x, d = area.size.z;
+        for (int i = 0; i < 40; i++)
         {
-            Vector3 p = new Vector3(Random.Range(area.min.x, area.max.x), transform.position.y, Random.Range(area.min.z, area.max.z));
+            // 둘레 위 한 점을 고르고 안쪽으로 0~spawnBand 들인다
+            float t = Random.Range(0f, 2f * (w + d)), inset = Random.Range(0f, spawnBand);
+            Vector3 p;
+            if (t < w) p = new Vector3(area.min.x + t, 0f, area.min.z + inset);
+            else if (t < w + d) p = new Vector3(area.max.x - inset, 0f, area.min.z + (t - w));
+            else if (t < 2f * w + d) p = new Vector3(area.max.x - (t - w - d), 0f, area.max.z - inset);
+            else p = new Vector3(area.min.x + inset, 0f, area.max.z - (t - 2f * w - d));
+            p.y = transform.position.y;
+
             NavMeshHit hit;
-            if (!NavMesh.SamplePosition(p, out hit, 3f, NavMesh.AllAreas) || hit.position.y > 3f) continue;
-            if (player != null && (hit.position - player.position).sqrMagnitude < spawnMinDistance * spawnMinDistance) continue;
+            if (!NavMesh.SamplePosition(p, out hit, 1.5f, NavMesh.AllAreas) || hit.position.y > 3f) continue;
+            if (hasPlayer && (hit.position - player.position).sqrMagnitude < spawnMinDistance * spawnMinDistance) continue;
+            if (hasPlayer && (!NavMesh.CalculatePath(hit.position, playerNav, NavMesh.AllAreas, path) || path.status != NavMeshPathStatus.PathComplete)) continue;
             Vector3 at = hit.position + Vector3.up;
             if (Physics.CheckSphere(at, 0.6f, ~0, QueryTriggerInteraction.Ignore)) continue;
             return at;
         }
-        return transform.position + Vector3.up;
+        return portalPosition + Inward() * enterDepth + Vector3.up; // 플레이어가 들어온 자리는 확실히 이어져 있다
     }
 
     void OnDestroy()
