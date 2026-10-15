@@ -233,8 +233,8 @@ public class CombatZone : MonoBehaviour, IChargePad
         }
     }
 
-    // 들어갈 때 이번 구획 미니보스 종류를 정한다: 아직 안 나온 정예 중 무작위 1종, 마지막 구획은 남은 종류 전부.
-    // 자폭 정예(F)는 항상 두 마리가 짝으로 나온다. 게이지 전체 수에 처음부터 맞게 들어가도록 여기서 센다
+    // 들어갈 때 이번 구획 미니보스 종류를 정한다: 아직 안 나온 정예 중 무작위 1종, 마지막 구획은 남은 종류 전부(2종).
+    // 자폭 정예(F)는 다른 미니보스와 짝을 이루도록 마지막 구획에만 나온다
     readonly List<int> miniBossTypes = new List<int>();
     void PickMiniBosses()
     {
@@ -244,14 +244,14 @@ public class CombatZone : MonoBehaviour, IChargePad
         List<int> left = new List<int>();
         for (int i = 0; i < es.elitePrefabs.Length; i++) if (!usedElites.Contains(i)) left.Add(i);
         bool lastZone = clearedZones >= FindObjectsByType<CombatZone>(FindObjectsSortMode.None).Length - 1;
+        if (!lastZone) left.RemoveAll(i => es.elitePrefabs[i].GetComponent<EliteSelfDestructPattern>() != null);
         int kinds = lastZone ? left.Count : Mathf.Min(1, left.Count);
         for (int n = 0; n < kinds; n++)
         {
             int type = left[Random.Range(0, left.Count)];
             left.Remove(type);
             usedElites.Add(type);
-            int copies = es.elitePrefabs[type].GetComponent<EliteSelfDestructPattern>() != null ? 2 : 1;
-            for (int c = 0; c < copies; c++) miniBossTypes.Add(type);
+            miniBossTypes.Add(type);
         }
         miniBossCount = miniBossTypes.Count;
     }
