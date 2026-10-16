@@ -15,9 +15,9 @@ public class BossDefeat : MonoBehaviour, IBossMotion
     float deathStart;
 
     [Header("처치 연출: 잠깐 멈췄다가 느린 화면에서 서서히 원래 속도로 (실제 시간 기준)")]
-    public float hitStopTime = 0.12f;
+    public float hitStopTime = 0.24f;
     public float slowStartScale = 0.2f;
-    public float slowRecoverTime = 1f;
+    public float slowRecoverTime = 2f;
     bool slowing;
     float baseFixedDelta;
 
