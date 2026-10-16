@@ -9,7 +9,7 @@ public class BossDefeat : MonoBehaviour, IBossMotion
     public string MotionName { get { return "Death"; } }
     public bool MotionActive { get { return dying; } }
     public float MotionProgress { get { return Mathf.Clamp01((Time.time - deathStart) / Mathf.Max(0.01f, deathMotionTime)); } }
-    public float deathMotionTime = 1.6f; // 8장
+    public float deathMotionTime = 3.1f; // 8장. 처치 연출(정지 0.24 + 슬로 2초)과 합쳐 8장째가 약 4초에 나온다
     public float deathHoldTime = 1f;     // 마지막 장(웅덩이)을 이만큼 더 보여 준 뒤 사라진다
     bool dying;
     float deathStart;
