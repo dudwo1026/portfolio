@@ -26,7 +26,7 @@ public class BossClonePattern : MonoBehaviour
     public int fakeUnlockStages = 2;    // 장애물이 이만큼 깔린 뒤부터 등장
     public float fakeChance = 0.4f;     // 해금 후 페이크가 뽑힐 확률
     public float swingDuration = 0.3f;  // 조준을 홱 트는 시간
-    public float fakeLockDelay = 0.8f;  // 확정 후 발사까지
+    public float fakeLockDelay = 0.6f;  // 확정 후 발사까지
     public float missDistance = 4f;     // 플레이어 오른쪽으로 비껴가는 거리
 
     [Header("페이크형 후속타 (두더지)")]
