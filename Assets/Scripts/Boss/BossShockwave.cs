@@ -9,10 +9,18 @@ public class BossShockwave : MonoBehaviour
     public float endX;
     public Vector3 size; // 판정 상자 크기. 0이면 localScale (상자 그대로 쓸 때)
 
+    // 앞에서 계속 터뜨리는 이펙트(물보라). 칸 폭 안 아무 데서나
+    public GameObject splashEffect;
+    public float splashEffectScale = 4f;
+    public float splashInterval = 0.07f;
+    public float splashForward = 2.5f;
+    public float trailLinger = 2f; // 끝에 닿은 뒤 달고 다니던 먼지가 잦아드는 시간
+
     Transform target;
     Health targetHealth;
     PlayerWeaken targetWeaken;
     bool hit;
+    float nextSplash;
 
     public void Init(Transform player, float dmg, float spd, float finishX)
     {
@@ -43,6 +51,34 @@ public class BossShockwave : MonoBehaviour
             }
         }
 
-        if (transform.position.x >= endX) Destroy(gameObject);
+        if (splashEffect != null && Time.time >= nextSplash)
+        {
+            nextSplash = Time.time + splashInterval;
+            Vector3 half = size * 0.5f;
+            Vector3 p = transform.position + new Vector3(splashForward, -half.y + 0.2f, Random.Range(-half.z, half.z));
+            GameObject fx = Instantiate(splashEffect, p, Quaternion.identity);
+            fx.transform.localScale = Vector3.one * splashEffectScale;
+            foreach (ParticleSystem ps in fx.GetComponentsInChildren<ParticleSystem>())
+            {
+                ParticleSystem.MainModule m = ps.main;
+                m.scalingMode = ParticleSystemScalingMode.Hierarchy;
+            }
+            Destroy(fx, 3f);
+        }
+
+        if (transform.position.x >= endX) End();
+    }
+
+    // 달고 다니던 먼지는 떼어 내 새로 뿜지 않고 남은 입자만 잦아들게 한다. 같이 지우면 뚝 끊긴다
+    void End()
+    {
+        foreach (ParticleSystem ps in GetComponentsInChildren<ParticleSystem>())
+        {
+            if (ps.transform.parent != transform) continue; // 이펙트 루트만
+            ps.transform.SetParent(null, true);
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            Destroy(ps.gameObject, trailLinger);
+        }
+        Destroy(gameObject);
     }
 }

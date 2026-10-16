@@ -38,6 +38,17 @@ public class BossShockwavePattern : MonoBehaviour
     public float waveGlow = 0.2f;           // 그림자 속에서도 어둡지 않게 텍스처 그대로 빛낸다. 0이면 없음
     Material waveMat;
 
+    [Header("충격파 이펙트 (비워 두면 없음)")]
+    public GameObject trailEffect;              // 파도마다 하나씩 발밑에 달아 뒤로 남긴다 (먼지)
+    public float trailEffectScale = 1f;
+    public Color trailEffectColor = new Color(0.75f, 0.62f, 1f, 0.6f);
+    public float trailLifetime = 0.8f;          // 먼지 입자 수명. 원본(2초)이면 파도 3개가 지나간 뒤 화면을 덮는다
+    public float trailEmission = 0.5f;          // 먼지 뿜는 양 배율
+    public GameObject splashEffect;             // 파도 앞에서 계속 터뜨린다 (물보라)
+    public float splashEffectScale = 4f;
+    public float splashInterval = 0.12f;
+    public float splashForward = 2.5f;          // 파도 중심에서 이만큼 앞
+
     [Header("구역")]
     public string areaObjectName = "Building_4";
     public int lanes = 3;
@@ -173,9 +184,15 @@ public class BossShockwavePattern : MonoBehaviour
             go.GetComponent<Renderer>().sharedMaterial = m;
         }
 
+        AttachTrails(go.transform, size);
+
         BossShockwave w = go.AddComponent<BossShockwave>();
         w.size = size;
         w.weakenDuration = waveWeakenDuration;
+        w.splashEffect = splashEffect;
+        w.splashEffectScale = splashEffectScale;
+        w.splashInterval = splashInterval;
+        w.splashForward = splashForward;
         w.Init(ai.PlayerTransform, waveDamage, waveSpeed, area.max.x + waveThickness);
     }
 
@@ -208,6 +225,32 @@ public class BossShockwavePattern : MonoBehaviour
             Bounds b = r.bounds;
             holder.position += new Vector3(want.x - b.center.x, groundY - b.min.y, want.z - b.center.z);
             r.sharedMaterial = WaveMaterial(r.sharedMaterial);
+        }
+    }
+
+    // 파도 칸마다 발밑에 먼지를 단다. 입자는 월드에 남아야 뒤로 꼬리가 생긴다
+    void AttachTrails(Transform root, Vector3 size)
+    {
+        if (trailEffect == null) return;
+        int n = Mathf.Max(1, Mathf.RoundToInt(size.z / wavePieceWidth));
+        float cell = size.z / n;
+        for (int i = 0; i < n; i++)
+        {
+            GameObject e = Instantiate(trailEffect, root);
+            e.transform.localPosition = new Vector3(0f, -size.y * 0.5f + 0.2f, (i + 0.5f) * cell - size.z * 0.5f);
+            e.transform.localRotation = Quaternion.identity;
+            e.transform.localScale = Vector3.one * trailEffectScale;
+            foreach (ParticleSystem ps in e.GetComponentsInChildren<ParticleSystem>())
+            {
+                ParticleSystem.MainModule m = ps.main;
+                m.scalingMode = ParticleSystemScalingMode.Hierarchy;
+                m.simulationSpace = ParticleSystemSimulationSpace.World;
+                m.startColor = trailEffectColor;
+                if (trailLifetime > 0f) m.startLifetime = trailLifetime;
+                ParticleSystem.EmissionModule em = ps.emission;
+                em.rateOverTimeMultiplier *= trailEmission;
+                ps.Play();
+            }
         }
     }
 

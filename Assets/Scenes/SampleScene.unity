@@ -372,8 +372,8 @@ Transform:
   m_GameObject: {fileID: 14298232}
   serializedVersion: 2
   m_LocalRotation: {x: 0.34202012, y: -0.000000029802319, z: -0.0000000074505797, w: 0.9396926}
-  m_LocalPosition: {x: -0.13529277, y: 0.6523111, z: -0.000002026558}
-  m_LocalScale: {x: 2.3581781, y: 3.3786454, z: 1}
+  m_LocalPosition: {x: 0.33405402, y: 0.024077892, z: -0.0000026524067}
+  m_LocalScale: {x: 2.2789338, y: 2.0943112, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1878695940}
@@ -2689,6 +2689,15 @@ MonoBehaviour:
   waveYaw: -60
   waveBrightness: 1.15
   waveGlow: 0.2
+  trailEffect: {fileID: 8230022441722461589, guid: 41494896fc96c9748b81d3356632794e, type: 3}
+  trailEffectScale: 1
+  trailEffectColor: {r: 0.75, g: 0.62, b: 1, a: 0.6}
+  trailLifetime: 0.8
+  trailEmission: 0.5
+  splashEffect: {fileID: 8205706795460263314, guid: 326e86d5729c54e479798cacab220bb2, type: 3}
+  splashEffectScale: 4
+  splashInterval: 0.12
+  splashForward: 2.5
   areaObjectName: BossArea
   lanes: 3
 --- !u!114 &146723435
