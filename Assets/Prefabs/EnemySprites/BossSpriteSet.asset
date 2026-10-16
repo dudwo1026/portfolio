@@ -212,6 +212,45 @@ MonoBehaviour:
       sizeScale: 1
     hitFrame: 9
     holdFrame: 0
+  - name: Totem
+    frames:
+    - texture: {fileID: 2800000, guid: 7869a3eb649c4df48ba02f5a7073b6ba, type: 3}
+      charHeightPx: 371
+      charBottomPx: 12
+      footCenterPx: 162.3
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: d161ab7c7d9c88642905cf9b8e82cce2, type: 3}
+      charHeightPx: 369
+      charBottomPx: 8
+      footCenterPx: 166.6
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: a8cf75acf95b67d4b9e26d5804369160, type: 3}
+      charHeightPx: 363
+      charBottomPx: 11
+      footCenterPx: 166.7
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 5206725844e1ef54e9d7578720dfc6d3, type: 3}
+      charHeightPx: 372
+      charBottomPx: 8
+      footCenterPx: 142.4
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: aa58b81b8e920f0419e89454f5e799f0, type: 3}
+      charHeightPx: 345
+      charBottomPx: 13
+      footCenterPx: 150.1
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 3c83d8d277559394bb66216795589f03, type: 3}
+      charHeightPx: 363
+      charBottomPx: 11
+      footCenterPx: 166.7
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: eaf1703e3d053714b86ac64e104cc05e, type: 3}
+      charHeightPx: 373
+      charBottomPx: 5
+      footCenterPx: 149.6
+      sizeScale: 1
+    hitFrame: 3
+    holdFrame: 0
   characterHeight: 9
   anchorFeetToIdle: 1
   moveFramesPerSecond: 6

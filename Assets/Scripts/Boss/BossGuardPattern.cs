@@ -5,7 +5,7 @@ using UnityEngine;
 // 시점부터 recastCooldown이 지날 때마다 다시 발동한다.
 // 보스 기준 동쪽에 토템이 서고, 그동안 보스는 피해를 아예 입지 않는다 — 깎인 만큼 되돌린 뒤
 // '맞은 양 x healMultiplier' 를 덤으로 회복한다. 즉 때릴수록 체력이 는다.
-// 토템을 전부 부수면 해제된다.
+// 토템을 전부 부수면 해제된다. 발동하면 castTime 동안 시전 모션(Totem)을 한 뒤 토템이 떨어진다.
 //
 // 강화판(토템 2개)은 특정 체력이 아니라 '마지막 페이즈'에서 나온다.
 // 페이즈는 BossObstaclePattern이 체력 20%마다 한 단계씩 올리고, 마지막 단계에 닿으면
@@ -14,8 +14,27 @@ using UnityEngine;
 // 토템에는 Health를 달지 않는다. 총알(Bullet)과 유탄은 Health를 찾아서 피해를 주므로,
 // 없으면 그대로 통과한다 — 근접만 통하게 하는 데 추가 코드가 필요 없다.
 [RequireComponent(typeof(Health))]
-public class BossGuardPattern : MonoBehaviour
+public class BossGuardPattern : MonoBehaviour, IBossMotion
 {
+    // 스프라이트 모션: 시전 동안 0→1(1~3장을 천천히), 토템이 떨어지는 순간부터 castRecoveryTime 동안 1→2(4~7장)
+    public string MotionName { get { return "Totem"; } }
+    public bool MotionActive { get { return casting || Time.time - summonTime < castRecoveryTime; } }
+    public float MotionProgress
+    {
+        get
+        {
+            if (casting) return Mathf.Clamp01((Time.time - castStartTime) / castTime);
+            return 1f + Mathf.Clamp01((Time.time - summonTime) / Mathf.Max(0.01f, castRecoveryTime));
+        }
+    }
+    public float castTime = 1.2f;          // 이 시간이 지나는 순간 토템이 떨어진다
+    public float castRecoveryTime = 0.6f;
+    bool casting;
+    int castCount;                         // 시전이 끝나면 세울 토템 수 (0이면 대기 중인 시전 없음)
+    float castStartTime;
+    float summonTime = -999f;
+    BossActionLock actionLock;
+
     public float firstTriggerPercent = 50f; // 첫 발동: 남은 체력 %
     public float recastCooldown = 30f;      // 재발동: 토템이 부서진 시점부터 잰다
     public int normalTotemCount = 1;        // 평소
@@ -98,6 +117,8 @@ public class BossGuardPattern : MonoBehaviour
         ai = GetComponent<EnemyAI>();
         obstacles = GetComponent<BossObstaclePattern>();
         rend = GetComponent<Renderer>();
+        actionLock = GetComponent<BossActionLock>();
+        if (actionLock == null) actionLock = gameObject.AddComponent<BossActionLock>();
         block = new MaterialPropertyBlock();
         if (rend != null && rend.sharedMaterial != null && rend.sharedMaterial.HasProperty(BaseColorId))
             normalColor = rend.sharedMaterial.GetColor(BaseColorId);
@@ -106,9 +127,33 @@ public class BossGuardPattern : MonoBehaviour
     // 재발동은 체력과 무관하므로 피격 이벤트가 아니라 시간으로 본다
     void Update()
     {
+        if (casting)
+        {
+            if (Time.time - castStartTime < castTime) return;
+            casting = false;
+            summonTime = Time.time;
+            Begin(castCount);
+            castCount = 0;
+            return;
+        }
+        if (castCount > 0)
+        {
+            if (actionLock.IsLocked) return; // 다른 패턴이 끝나길 기다렸다가 시전
+            actionLock.LockFor(castTime);
+            casting = true;
+            castStartTime = Time.time;
+            return;
+        }
+
         if (Guarding || !firstDone) return;
         if (Time.time < nextCastTime) return;
-        Begin(LastPhase ? enhancedTotemCount : normalTotemCount);
+        RequestCast();
+    }
+
+    void RequestCast()
+    {
+        castCount = LastPhase ? enhancedTotemCount : normalTotemCount;
+        nextCastTime = float.PositiveInfinity;
     }
 
     void OnEnable()
@@ -120,6 +165,8 @@ public class BossGuardPattern : MonoBehaviour
     void OnDisable()
     {
         health.Damaged -= OnDamaged;
+        casting = false;
+        castCount = 0;
         ClearTotems();
     }
 
@@ -142,7 +189,7 @@ public class BossGuardPattern : MonoBehaviour
         float pct = health.CurrentHealth / health.maxHealth * 100f;
         if (pct > firstTriggerPercent) return;
         firstDone = true;
-        Begin(LastPhase ? enhancedTotemCount : normalTotemCount);
+        RequestCast();
     }
 
     // 토템을 세우는 기준 방향. 보스가 보는 쪽이 아니라 항상 월드 동쪽(+X)이다.
