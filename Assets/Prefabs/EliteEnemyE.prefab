@@ -198,7 +198,7 @@ MonoBehaviour:
   attackDamage: 15
   attackCooldown: 2
   attackWindup: 0.5
-  attackRange: 1.8
+  attackRange: 2.1
   keepMinDistance: 0
   keepMaxDistance: 0
   loseTargetGraceTime: 5
