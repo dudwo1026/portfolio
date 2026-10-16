@@ -22,7 +22,7 @@ public class BossShockwavePattern : MonoBehaviour
     public float waveDamage = 50f;
     public float waveWeakenDuration = 5f;  // 피격 시 허약 지속시간
     public float waveSpeed = 17.5f;
-    public float waveThickness = 2f;
+    public float waveThickness = 5f;
     public float waveHeight = 2f;
     public Color waveColor = new Color(1f, 0.5f, 0.1f);
 

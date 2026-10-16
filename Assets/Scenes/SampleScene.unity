@@ -2677,7 +2677,7 @@ MonoBehaviour:
   waveDamage: 50
   waveWeakenDuration: 5
   waveSpeed: 17.5
-  waveThickness: 2
+  waveThickness: 5
   waveHeight: 2
   waveColor: {r: 1, g: 0.5, b: 0.1, a: 1}
   wavePrefab: {fileID: 4591390525303480948, guid: aa32235453352ee41a5415872ad1d172, type: 3}
