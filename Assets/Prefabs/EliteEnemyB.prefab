@@ -365,3 +365,5 @@ MonoBehaviour:
   pullDuration: 0.15
   castTime: 0.25
   castMaterial: {fileID: 2100000, guid: d6b23a4d399dff443b8c304cc4275340, type: 2}
+  holdDamagePercent: 1.25
+  holdTickInterval: 0.5

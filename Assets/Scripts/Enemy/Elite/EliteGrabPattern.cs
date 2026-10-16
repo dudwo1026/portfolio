@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Grab pattern (홀드): stands still for a short cast, then grabs. No damage by default (holdDamagePercent: 미니보스).
+// Grab pattern (홀드): stands still for a short cast, then grabs. While holding it ticks holdDamagePercent of the player's max HP (미니보스는 더 세게).
 // On a hit the player is 구속(bound) and this enemy is frozen until the player melees free.
 // The body turns blue from cast start until the hold ends. Attach only to elites that should have it.
 [RequireComponent(typeof(EnemyAI))]
@@ -13,8 +13,8 @@ public class EliteGrabPattern : MonoBehaviour, IElitePatternVisual
     public float pullDuration = 0.15f;
     public float castTime = 0.25f;       // rooted in place before the grab lands
     public Material castMaterial;        // blue "casting / holding" look
-    // 잡고 있는 동안 holdTickInterval마다 플레이어 최대 체력의 이 %만큼 피해. 0이면 피해 없음 (일반 정예)
-    public float holdDamagePercent = 0f;
+    // 잡고 있는 동안 holdTickInterval마다 플레이어 최대 체력의 이 %만큼 피해. 1.25 / 0.5초 = 초당 2.5% (미니보스는 CombatZone이 덮어쓴다)
+    public float holdDamagePercent = 1.25f;
     public float holdTickInterval = 0.5f;
     float holdTickTimer;
 

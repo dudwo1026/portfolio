@@ -38,6 +38,8 @@ public static class NormalDifficulty
         if (ai.isElite) ai.attackDamage *= k; // 정예 근접 (보스는 0이고 근접은 BossMeleeAttack이 따로 친다)
         EliteChargePattern charge = ai.GetComponent<EliteChargePattern>();
         if (charge != null) charge.damagePercent *= k; // mobDamagePercent(몹이 맞는 피해)는 그대로
+        EliteGrabPattern grab = ai.GetComponent<EliteGrabPattern>();
+        if (grab != null) grab.holdDamagePercent *= k;
         EliteKnockbackPattern knock = ai.GetComponent<EliteKnockbackPattern>();
         if (knock != null) { knock.damagePercent *= k; knock.impactDamagePercent *= k; }
         EliteRangedAttack ranged = ai.GetComponent<EliteRangedAttack>();
