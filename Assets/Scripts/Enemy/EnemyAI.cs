@@ -505,7 +505,8 @@ void FixedUpdate()
                 else if (dist < keepMinDistance)
                     rb.MovePosition(StepUpAdjusted(rb.position - toTarget.normalized * attackSpeed * Time.fixedDeltaTime));
             }
-            else if (dist > attackRange)
+            // 정예는 선딜 중에도 사거리 안쪽(90%)까지 따라붙는다 — 사거리 끝에 멈춰 있으면 도망치는 플레이어를 헛친다
+            else if (dist > (isElite && windupTimer > 0f ? attackRange * 0.9f : attackRange))
                 rb.MovePosition(StepUpAdjusted(rb.position + dir * attackSpeed * Time.fixedDeltaTime));
         }
 
