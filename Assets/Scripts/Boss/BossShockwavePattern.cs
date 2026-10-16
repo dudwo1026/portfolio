@@ -30,10 +30,10 @@ public class BossShockwavePattern : MonoBehaviour
     public GameObject wavePrefab;
     public float wavePieceWidth = 2.5f;      // 칸 폭을 이 정도 너비로 나눠 파도를 나란히 세운다
     public float wavePieceOverlap = 1.6f;   // 이웃 파도와 겹치는 정도 (1이면 딱 붙는다)
-    public float waveVisualThickness = 3f;  // 보이는 진행 방향 두께. 판정(waveThickness)과 따로
+    public float waveVisualThickness = 4.5f; // 보이는 진행 방향 두께. 판정(waveThickness)과 따로
     public float waveVisualHeight = 4f;     // 보이는 높이. 판정(waveHeight)과 따로
     public float waveSizeJitter = 0.15f;    // 파도마다 크기를 이 비율만큼 들쭉날쭉하게
-    public float waveYaw = -90f;            // 파도 끝이 동쪽(진행 방향)으로 말리게
+    public float waveYaw = -60f;            // -90이면 파도 끝이 정동쪽(진행 방향)으로 말린다. 여기서 시계 방향 30도
     public float waveBrightness = 1.15f;    // 색 밝기 배율
     public float waveGlow = 0.2f;           // 그림자 속에서도 어둡지 않게 텍스처 그대로 빛낸다. 0이면 없음
     Material waveMat;
@@ -180,12 +180,13 @@ public class BossShockwavePattern : MonoBehaviour
     }
 
     // 파도 모델 하나는 둥근 더미라 칸 폭만큼 늘리면 찌그러진다. 칸을 여러 칸으로 나눠 하나씩 세운다.
-    // 회전 없는 받침을 월드 축으로 늘리고, 그 안에서 모델만 돌린다 (돌린 걸 늘리면 비틀린다)
+    // 받침을 돌리고 받침의 자기 축으로 늘린다 (늘린 받침 안에서 모델만 비스듬히 돌리면 비틀린다).
+    // 모델 자기 축 기준: x = 칸을 가로지르는 폭, z = 파도가 나아가는 쪽 두께
     void BuildWaveModels(Transform root, Vector3 size, float groundY)
     {
         Quaternion yaw = Quaternion.Euler(0f, waveYaw, 0f);
-        GameObject probe = Instantiate(wavePrefab, Vector3.zero, yaw * wavePrefab.transform.rotation);
-        Vector3 unit = probe.GetComponentInChildren<Renderer>().bounds.size; // 배율 1일 때 월드 크기
+        GameObject probe = Instantiate(wavePrefab, Vector3.zero, wavePrefab.transform.rotation);
+        Vector3 unit = probe.GetComponentInChildren<Renderer>().bounds.size; // 배율 1, 회전 전 크기
         Destroy(probe);
 
         int n = Mathf.Max(1, Mathf.RoundToInt(size.z / wavePieceWidth));
@@ -195,10 +196,11 @@ public class BossShockwavePattern : MonoBehaviour
             float k = 1f + Random.Range(-waveSizeJitter, waveSizeJitter);
             Transform holder = new GameObject("Wave").transform;
             holder.SetParent(root, false);
+            holder.localRotation = yaw;
             GameObject model = Instantiate(wavePrefab, holder);
-            model.transform.localRotation = yaw * wavePrefab.transform.rotation;
+            model.transform.localRotation = wavePrefab.transform.rotation;
             foreach (Collider c in model.GetComponentsInChildren<Collider>()) Destroy(c);
-            holder.localScale = new Vector3(waveVisualThickness / unit.x, waveVisualHeight * k / unit.y, cell * wavePieceOverlap * k / unit.z);
+            holder.localScale = new Vector3(cell * wavePieceOverlap * k / unit.x, waveVisualHeight * k / unit.y, waveVisualThickness / unit.z);
 
             // 칸 가운데, 바닥에 발을 붙인다
             Renderer r = model.GetComponentInChildren<Renderer>();

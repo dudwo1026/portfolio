@@ -2683,10 +2683,10 @@ MonoBehaviour:
   wavePrefab: {fileID: 4591390525303480948, guid: aa32235453352ee41a5415872ad1d172, type: 3}
   wavePieceWidth: 2.5
   wavePieceOverlap: 1.6
-  waveVisualThickness: 3
+  waveVisualThickness: 4.5
   waveVisualHeight: 4
   waveSizeJitter: 0.15
-  waveYaw: -90
+  waveYaw: -60
   waveBrightness: 1.15
   waveGlow: 0.2
   areaObjectName: BossArea
