@@ -372,8 +372,8 @@ Transform:
   m_GameObject: {fileID: 14298232}
   serializedVersion: 2
   m_LocalRotation: {x: 0.34202012, y: -0.000000029802319, z: -0.0000000074505797, w: 0.9396926}
-  m_LocalPosition: {x: 0.52495575, y: 0.033605814, z: -0.0000011920929}
-  m_LocalScale: {x: 2.269368, y: 2.2106774, z: 1}
+  m_LocalPosition: {x: -0.13529277, y: 0.6523111, z: -0.000002026558}
+  m_LocalScale: {x: 2.3581781, y: 3.3786454, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1878695940}
@@ -2680,6 +2680,14 @@ MonoBehaviour:
   waveThickness: 2
   waveHeight: 2
   waveColor: {r: 1, g: 0.5, b: 0.1, a: 1}
+  wavePrefab: {fileID: 919132149155446097, guid: cf2cc29b9621a2d429617b5588c500ce, type: 3}
+  wavePieceWidth: 4
+  wavePieceOverlap: 1.3
+  waveVisualThickness: 3
+  waveSizeJitter: 0.15
+  waveYaw: -90
+  waveBrightness: 1.15
+  waveGlow: 0.2
   areaObjectName: BossArea
   lanes: 3
 --- !u!114 &146723435

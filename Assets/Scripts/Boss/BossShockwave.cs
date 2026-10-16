@@ -7,6 +7,7 @@ public class BossShockwave : MonoBehaviour
     public float weakenDuration = 5f; // 쇼크웨이브 허약은 다른 소스보다 길게 간다
     public float speed = 17.5f;
     public float endX;
+    public Vector3 size; // 판정 상자 크기. 0이면 localScale (상자 그대로 쓸 때)
 
     Transform target;
     Health targetHealth;
@@ -32,7 +33,7 @@ public class BossShockwave : MonoBehaviour
 
         if (!hit && target != null)
         {
-            Vector3 half = transform.localScale * 0.5f;
+            Vector3 half = (size != Vector3.zero ? size : transform.localScale) * 0.5f;
             Vector3 d = target.position - transform.position;
             if (Mathf.Abs(d.x) <= half.x && Mathf.Abs(d.z) <= half.z && Mathf.Abs(d.y) <= half.y + 1.5f)
             {
