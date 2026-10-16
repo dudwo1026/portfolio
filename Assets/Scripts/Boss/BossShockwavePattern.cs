@@ -28,9 +28,10 @@ public class BossShockwavePattern : MonoBehaviour
 
     [Header("충격파 모델 (비워 두면 상자)")]
     public GameObject wavePrefab;
-    public float wavePieceWidth = 4f;       // 칸 폭을 이 정도 너비로 나눠 파도를 나란히 세운다
-    public float wavePieceOverlap = 1.3f;   // 이웃 파도와 겹치는 정도 (1이면 딱 붙는다)
+    public float wavePieceWidth = 2.5f;      // 칸 폭을 이 정도 너비로 나눠 파도를 나란히 세운다
+    public float wavePieceOverlap = 1.6f;   // 이웃 파도와 겹치는 정도 (1이면 딱 붙는다)
     public float waveVisualThickness = 3f;  // 보이는 진행 방향 두께. 판정(waveThickness)과 따로
+    public float waveVisualHeight = 4f;     // 보이는 높이. 판정(waveHeight)과 따로
     public float waveSizeJitter = 0.15f;    // 파도마다 크기를 이 비율만큼 들쭉날쭉하게
     public float waveYaw = -90f;            // 파도 끝이 동쪽(진행 방향)으로 말리게
     public float waveBrightness = 1.15f;    // 색 밝기 배율
@@ -197,7 +198,7 @@ public class BossShockwavePattern : MonoBehaviour
             GameObject model = Instantiate(wavePrefab, holder);
             model.transform.localRotation = yaw * wavePrefab.transform.rotation;
             foreach (Collider c in model.GetComponentsInChildren<Collider>()) Destroy(c);
-            holder.localScale = new Vector3(waveVisualThickness / unit.x, size.y * k / unit.y, cell * wavePieceOverlap * k / unit.z);
+            holder.localScale = new Vector3(waveVisualThickness / unit.x, waveVisualHeight * k / unit.y, cell * wavePieceOverlap * k / unit.z);
 
             // 칸 가운데, 바닥에 발을 붙인다
             Renderer r = model.GetComponentInChildren<Renderer>();
