@@ -295,6 +295,50 @@ MonoBehaviour:
       sizeScale: 1
     hitFrame: 0
     holdFrame: 5
+  - name: Death
+    frames:
+    - texture: {fileID: 2800000, guid: 47b0ff310dc6d034587687c52a606f58, type: 3}
+      charHeightPx: 373
+      charBottomPx: 5
+      footCenterPx: 199
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 82e76caa0736632449af9036982a22af, type: 3}
+      charHeightPx: 373
+      charBottomPx: 5
+      footCenterPx: 199
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: e61b10c6d4efbe648996ede95fdf2dee, type: 3}
+      charHeightPx: 373
+      charBottomPx: 5
+      footCenterPx: 199
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 4569aafe6d632f648985344e7717d5ac, type: 3}
+      charHeightPx: 373
+      charBottomPx: 5
+      footCenterPx: 199
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 28ab4fa6b93b7f44baf315754ee06a1c, type: 3}
+      charHeightPx: 373
+      charBottomPx: 5
+      footCenterPx: 199
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: cdc636170ec72294fa2a2611582865b1, type: 3}
+      charHeightPx: 373
+      charBottomPx: 5
+      footCenterPx: 199
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 6a2ef0567325c6c438260f3bd039882c, type: 3}
+      charHeightPx: 373
+      charBottomPx: 5
+      footCenterPx: 199
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: dd2bca1396d19cb43aa9eb0a6814f68c, type: 3}
+      charHeightPx: 373
+      charBottomPx: 5
+      footCenterPx: 199
+      sizeScale: 1
+    hitFrame: 0
+    holdFrame: 0
   characterHeight: 9
   anchorFeetToIdle: 1
   moveFramesPerSecond: 6

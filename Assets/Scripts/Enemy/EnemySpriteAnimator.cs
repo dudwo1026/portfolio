@@ -129,6 +129,18 @@ public class EnemySpriteAnimator : MonoBehaviour
         float measured = dt > 0.0001f ? delta.magnitude / dt : 0f;
         speed = Mathf.Lerp(speed, measured, 0.35f); // 프레임마다 튀는 값을 눌러 준다
 
+        // 보스 사망 모션은 무엇보다 위다. 끊긴 패턴이 켜진 채 남아 있어도, 기절 중이어도 이긴다
+        if (bossMotions != null && set.motions != null)
+            for (int i = 0; i < bossMotions.Length; i++)
+            {
+                IBossMotion m = bossMotions[i];
+                if (m == null || !m.MotionActive || m.MotionName != "Death") continue;
+                EnemySpriteSet.Motion death = FindMotion(m.MotionName);
+                if (death == null) break;
+                Apply(MotionFrame(death, m.MotionProgress));
+                return;
+            }
+
         // 기절이 가장 위다. 돌진이 벽에 박힌 뒤 3~5초를 뻗어 있는 구간이라,
         // 그 사이 넉백이 들어오든 공격 타이머가 남아 있든 기절 자세가 이겨야 한다
         if (ai != null && ai.IsStunned && set.stun != null && set.stun.texture != null)

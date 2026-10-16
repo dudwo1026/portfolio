@@ -2,9 +2,18 @@ using UnityEngine;
 
 // 보스가 쓰러지면 더 이상 몹이 나오지 않고(지상·옥상 스포너 전부 정지), 남아 있던 몹도 전부 사라진다.
 // 보스가 깔아 둔 장애물·분신·경고 표시 같은 잔해도 전부 치운다.
+// 보스 본체는 모든 행동을 멈추고 사망 모션(Death)을 재생한 뒤 사라진다 (EnemyAI는 보스를 바로 지우지 않는다).
 [RequireComponent(typeof(Health))]
-public class BossDefeat : MonoBehaviour
+public class BossDefeat : MonoBehaviour, IBossMotion
 {
+    public string MotionName { get { return "Death"; } }
+    public bool MotionActive { get { return dying; } }
+    public float MotionProgress { get { return Mathf.Clamp01((Time.time - deathStart) / Mathf.Max(0.01f, deathMotionTime)); } }
+    public float deathMotionTime = 1.6f; // 8장
+    public float deathHoldTime = 1f;     // 마지막 장(웅덩이)을 이만큼 더 보여 준 뒤 사라진다
+    bool dying;
+    float deathStart;
+
     // 보스가 만들어 내는 오브젝트 이름들. 컴포넌트가 없는 순수 연출물이라 이름으로 찾는다
     static readonly string[] LeftoverNames = {
         "BossObstacle_1", "BossObstacle_2", "BossObstacle_3", "BossObstacle_4",
@@ -38,9 +47,27 @@ public class BossDefeat : MonoBehaviour
         reported = true;
         AreaManager.NotifyBossDefeated();
         ClearLeftovers();
+        StartDying();
     }
 
-    // 보스 본체는 EnemyAI가 지운다. 여기서는 본체와 별개로 살아 있는 것들을 치운다
+    // AI·패턴을 전부 끄고(돌던 코루틴까지), 맞지도 부딪히지도 않게 한 뒤 모션이 끝나면 지운다
+    void StartDying()
+    {
+        dying = true;
+        deathStart = Time.time;
+        foreach (MonoBehaviour mb in GetComponents<MonoBehaviour>())
+        {
+            if (mb == this || mb is Health) continue;
+            mb.StopAllCoroutines();
+            mb.enabled = false;
+        }
+        foreach (Collider c in GetComponents<Collider>()) c.enabled = false;
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null) { rb.linearVelocity = Vector3.zero; rb.isKinematic = true; }
+        Destroy(gameObject, deathMotionTime + deathHoldTime);
+    }
+
+    // 본체와 별개로 살아 있는 것들을 치운다
     void ClearLeftovers()
     {
         // 컴포넌트로 찾을 수 있는 것부터
@@ -56,7 +83,7 @@ public class BossDefeat : MonoBehaviour
         for (int i = 0; i < waves.Length; i++)
             if (waves[i] != null) Destroy(waves[i].gameObject);
 
-        // 남은 몹도 전부 (보스 자신은 EnemyAI가 쓰러지는 연출 뒤에 지운다)
+        // 남은 몹도 전부 (보스 자신은 사망 모션 뒤에 StartDying이 지운다)
         EnemyAI[] mobs = Object.FindObjectsByType<EnemyAI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         for (int i = 0; i < mobs.Length; i++)
             if (mobs[i] != null && mobs[i].gameObject != gameObject) Destroy(mobs[i].gameObject);

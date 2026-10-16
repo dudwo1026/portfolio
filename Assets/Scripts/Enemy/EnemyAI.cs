@@ -159,6 +159,7 @@ void OnDamaged()
     {
         if (selfHealth != null && selfHealth.CurrentHealth <= 0f)
         {
+            if (GetComponent<BossDefeat>() != null) return; // 보스는 BossDefeat가 사망 모션 뒤에 지운다
             if (roofSpawned) SupplyKit.TryDrop(transform.position);
             Destroy(gameObject);
             return;
