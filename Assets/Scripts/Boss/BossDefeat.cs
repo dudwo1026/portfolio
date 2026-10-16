@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// 보스가 쓰러지면 더 이상 몹이 나오지 않고(지상·옥상 스포너 전부 정지),
+// 보스가 쓰러지면 더 이상 몹이 나오지 않고(지상·옥상 스포너 전부 정지), 남아 있던 몹도 전부 사라진다.
 // 보스가 깔아 둔 장애물·분신·경고 표시 같은 잔해도 전부 치운다.
 [RequireComponent(typeof(Health))]
 public class BossDefeat : MonoBehaviour
@@ -55,6 +55,11 @@ public class BossDefeat : MonoBehaviour
         BossShockwave[] waves = Object.FindObjectsByType<BossShockwave>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         for (int i = 0; i < waves.Length; i++)
             if (waves[i] != null) Destroy(waves[i].gameObject);
+
+        // 남은 몹도 전부 (보스 자신은 EnemyAI가 쓰러지는 연출 뒤에 지운다)
+        EnemyAI[] mobs = Object.FindObjectsByType<EnemyAI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < mobs.Length; i++)
+            if (mobs[i] != null && mobs[i].gameObject != gameObject) Destroy(mobs[i].gameObject);
 
         // 나머지는 이름으로. 씬을 한 번만 훑고 끝낸다
         Transform[] all = Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
