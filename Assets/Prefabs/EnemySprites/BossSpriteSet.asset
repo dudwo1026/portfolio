@@ -251,6 +251,50 @@ MonoBehaviour:
       sizeScale: 1
     hitFrame: 3
     holdFrame: 0
+  - name: Shockwave
+    frames:
+    - texture: {fileID: 2800000, guid: e8c5093c544a93644ae2d24c0990b504, type: 3}
+      charHeightPx: 324
+      charBottomPx: 8
+      footCenterPx: 166.3
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: d42ae4f559d16a345a71e2452e2fe172, type: 3}
+      charHeightPx: 324
+      charBottomPx: 6
+      footCenterPx: 164
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 44d993db772eb20478d546f29a2464d9, type: 3}
+      charHeightPx: 324
+      charBottomPx: 7
+      footCenterPx: 169.3
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 5bf5dbcf16b3e6547a59183f33b90c57, type: 3}
+      charHeightPx: 324
+      charBottomPx: 7
+      footCenterPx: 169.9
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 3604a2bdf3c0f0245bd9f22696fd6656, type: 3}
+      charHeightPx: 324
+      charBottomPx: 32
+      footCenterPx: 181.1
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: fe321e8c169c6da458edb11bb3292743, type: 3}
+      charHeightPx: 324
+      charBottomPx: 28
+      footCenterPx: 178.6
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: 9553b6775a2050f469aea99568638cd2, type: 3}
+      charHeightPx: 324
+      charBottomPx: 30
+      footCenterPx: 174.3
+      sizeScale: 1
+    - texture: {fileID: 2800000, guid: bcf16f48c5569844b9af1fde4b536198, type: 3}
+      charHeightPx: 324
+      charBottomPx: 8
+      footCenterPx: 166.3
+      sizeScale: 1
+    hitFrame: 0
+    holdFrame: 5
   characterHeight: 9
   anchorFeetToIdle: 1
   moveFramesPerSecond: 6

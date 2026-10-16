@@ -1,22 +1,42 @@
 using System.Collections;
 using UnityEngine;
 
-// 보스 특수패턴 5: 제자리 점프 3회. 착지할 때마다 서쪽 울타리에서 동쪽으로 가로지르는 충격파가 하나씩 나간다.
+// 보스 특수패턴 5: 팔을 들어 바닥을 내리찍는다 (charge3 모션 한 번). 내리찍는 순간(6장) 첫 충격파가 나가고,
+// 그 자세로 버티는 동안 jumpInterval마다 하나씩 더 나간다. 충격파는 서쪽 울타리에서 동쪽으로 가로지른다.
 // 구역을 세로로 3등분해 한 칸씩 쓰고, 어느 칸이 먼저 오는지는 무작위.
 [RequireComponent(typeof(EnemyAI))]
-public class BossShockwavePattern : MonoBehaviour
+public class BossShockwavePattern : MonoBehaviour, IBossMotion
 {
+    // 스프라이트 모션(holdFrame 방식): 0→1 내리찍기 전(1~5장), 1→2 내리찍은 자세 유지(6장), 2→3 마무리(7~8장)
+    public string MotionName { get { return "Shockwave"; } }
+    public bool MotionActive { get { return running; } }
+    public float MotionProgress
+    {
+        get
+        {
+            float t = Time.time - runStartTime;
+            if (t < slamWindup) return t / Mathf.Max(0.01f, slamWindup);
+            t -= slamWindup;
+            if (t < runHold) return 1f + t / Mathf.Max(0.01f, runHold);
+            t -= runHold;
+            return 2f + Mathf.Clamp01(t / Mathf.Max(0.01f, slamRecovery));
+        }
+    }
+
     [Header("쿨타임")]
     public float cooldownMin = 18f;
     public float cooldownMax = 23f;
     public float cooldownStepPerPhase = 1f; // 페이즈마다 이만큼 짧아진다
     public float cooldownFloor = 5f;
-    public int jumpCount = 3;
-    public float jumpInterval = 1f;          // 점프 간격
+    public int jumpCount = 3;                // 충격파 개수 (예전 점프 패턴 이름 그대로 — 씬 값이 남게)
+    public float jumpInterval = 1f;          // 충격파 간격
     public float intervalStepPerPhase = 0.1f;  // 페이즈마다 이만큼 짧아진다
     public float minInterval = 0.25f;
-    public float jumpHeight = 3f;
-    public float jumpDuration = 0.35f;
+    public float slamWindup = 0.9f;          // 1~5장. 끝나는 순간 첫 충격파
+    public float slamRecovery = 0.35f;       // 7~8장
+    public float minHold = 0.2f;             // 마지막 충격파 뒤에도 6장을 이만큼 더 보여 준다 (바로 7장으로 넘어가면 마지막 충격파가 일어나는 자세에서 나간다)
+    float runStartTime;
+    float runHold;
 
     [Header("충격파")]
     public float waveDamage = 50f;
@@ -106,27 +126,28 @@ public class BossShockwavePattern : MonoBehaviour
         if (Time.time < nextCastTime) return;
         if (actionLock.IsLocked) return; // 다른 패턴이 보스를 묶고 있다
 
-        actionLock.LockFor(CurrentInterval() * jumpCount); // 점프 3회 동안 다른 패턴 금지
+        float interval = CurrentInterval();
+        runHold = interval * (jumpCount - 1) + minHold;
+        actionLock.LockFor(slamWindup + runHold + slamRecovery); // 모션 내내 다른 패턴 금지
         nextCastTime = Time.time + NextCooldown();
-        StartCoroutine(Run());
+        StartCoroutine(Run(interval));
     }
 
-    IEnumerator Run()
+    IEnumerator Run(float interval)
     {
         running = true;
+        runStartTime = Time.time;
 
         int[] order = ShuffledLanes();
-        float interval = CurrentInterval();
-
+        yield return new WaitForSeconds(slamWindup); // 6장이 나오는 순간
         for (int i = 0; i < jumpCount; i++)
         {
-            yield return Jump();                 // 뛰었다 착지
-            SpawnWave(order[i % order.Length]);  // 착지하는 순간 충격파
-
-            float wait = interval - jumpDuration;
-            if (wait > 0f) yield return new WaitForSeconds(wait);
+            if (i > 0) yield return new WaitForSeconds(interval);
+            SpawnWave(order[i % order.Length]);
         }
 
+        float left = runStartTime + slamWindup + runHold + slamRecovery - Time.time;
+        if (left > 0f) yield return new WaitForSeconds(left);
         running = false;
     }
 
@@ -140,21 +161,6 @@ public class BossShockwavePattern : MonoBehaviour
             int tmp = a[i]; a[i] = a[j]; a[j] = tmp;
         }
         return a;
-    }
-
-    IEnumerator Jump()
-    {
-        Vector3 ground = transform.position;
-        float t = 0f;
-        while (t < jumpDuration)
-        {
-            t += Time.deltaTime;
-            float n = Mathf.Clamp01(t / jumpDuration);
-            float y = jumpHeight * 4f * n * (1f - n); // 포물선: 0에서 떠서 1에서 착지
-            transform.position = ground + Vector3.up * y;
-            yield return null;
-        }
-        transform.position = ground;
     }
 
     void SpawnWave(int lane)
