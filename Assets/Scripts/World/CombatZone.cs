@@ -12,7 +12,7 @@ public class CombatZone : MonoBehaviour, IChargePad
     public enum State { Idle, Active, Cleared }
 
     public Vector2 size = new Vector2(80f, 50f);
-    public int keyReward = 1; // 클리어하면 떨어지는 열쇠 수
+    public int keyReward = 1; // 큰 구획(2) 표시. 웨이브 몹 수를 bigZoneMultiplier배로. 열쇠는 미니보스 수만큼 떨어진다
     public Vector3 portalPosition; // 이 구획으로 들어가는 포탈 자리 (월드)
 
     [Header("포탈")]
@@ -199,9 +199,10 @@ public class CombatZone : MonoBehaviour, IChargePad
     {
         NavMeshHit hit;
         if (NavMesh.SamplePosition(at, out hit, 3f, NavMesh.AllAreas)) at = hit.position;
-        for (int i = 0; i < keyReward; i++)
+        int count = Mathf.Max(1, miniBossCount); // 미니보스 한 마리당 열쇠 하나
+        for (int i = 0; i < count; i++)
         {
-            Vector3 p = at + Vector3.right * (i - (keyReward - 1) * 0.5f) * keySpacing + Vector3.up * 1.4f; // 열쇠 모델 바닥이 땅 위에 오게
+            Vector3 p = at + Vector3.right * (i - (count - 1) * 0.5f) * keySpacing + Vector3.up * 1.4f; // 열쇠 모델 바닥이 땅 위에 오게
             keys.Add(KeyItemSpawner.Instance.SpawnKeyAt(p));
         }
     }

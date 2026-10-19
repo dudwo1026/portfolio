@@ -21,12 +21,14 @@ public class ControlGuide : MonoBehaviour
     [TextArea(2, 4)]
     public string[] storyPages =
     {
-        "몬스터를 쓰러뜨리면 우상단의\n<color=#FFC83C>혼돈 게이지</color>가 누적됩니다.",
-        "게이지가 누적될 때마다\n맵 어딘가에 <color=#FFC83C>열쇠</color>가 등장합니다.",
-        "<color=#FFC83C>혼돈 게이지 최대치</color> + <color=#FFC83C>모든 열쇠 수집</color>\n시 옥상으로 향하는 문이 열립니다.",
-        "옥상에서 당신을 기다리고 있는 <color=#FF5A4A>보스</color>를 마주하고 쓰러뜨리세요.",
+        "<color=#FFC83C>열쇠</color>를 모아서\n<color=#FFC83C>옥상으로 향하는 문</color>을 열자!",
+        "맵 곳곳의 <color=#FFC83C>미니던전</color>을 클리어하면\n<color=#FFC83C>열쇠</color> 수집 가능",
+        "<color=#FFC83C>6개의 열쇠</color>를 모아서\n<color=#FF5A4A>보스</color>에게 도전!",
     };
     public Sprite[] storyImages; // storyPages와 같은 순서. 비어 있으면 글만
+    public Sprite controlImage;  // 넣어 두면 조작 가이드는 이 그림 한 장 (pages 대신)
+
+    int ControlPageCount { get { return controlImage != null ? 1 : pages.Length; } }
 
     public bool onlyFromTitle = true; // 게임 씬을 바로 플레이할 때(테스트)는 띄우지 않는다
     // 뜬 직후 이 시간(실시간) 동안은 입력을 무시한다. 무기 선택 화면에서 연타한 Enter·클릭이
@@ -73,7 +75,7 @@ public class ControlGuide : MonoBehaviour
         if (kb != null && kb.escapeKey.wasPressedThisFrame) { Close(); return; }
         // 대시도 Space지만 일시정지 중엔 입력을 안 받고, 여기서 닫는 건 그 Update 뒤라 새지 않는다
         if (kb == null || !kb.spaceKey.wasPressedThisFrame) return;
-        if (page < pages.Length) Show(page + 1); // 마지막 조작 장 다음은 진행 가이드
+        if (page < ControlPageCount) Show(page + 1); // 마지막 조작 장 다음은 진행 가이드
         else Close();
     }
 
@@ -83,7 +85,18 @@ public class ControlGuide : MonoBehaviour
         page = i;
         for (int c = body.childCount - 1; c >= 0; c--) Destroy(body.GetChild(c).gameObject);
 
-        if (i >= pages.Length) { ShowStory(); return; }
+        if (i >= ControlPageCount) { ShowStory(); return; }
+        if (controlImage != null)
+        {
+            // 그림 한 장: 진행 가이드와 같은 넓은 상자에 비율 유지로 꽉 채운다 (그림에 제목이 들어 있어 제목은 비운다)
+            box.sizeDelta = StoryBoxSize;
+            title.text = "";
+            float s = Mathf.Min((StoryBoxSize.x - 60f) / controlImage.rect.width, (StoryBoxSize.y - 150f) / controlImage.rect.height); // 아래 안내 문구 자리를 비운다
+            Image pic = NewImage("ControlImage", controlImage);
+            pic.rectTransform.sizeDelta = new Vector2(controlImage.rect.width * s, controlImage.rect.height * s);
+            pic.rectTransform.anchoredPosition = new Vector2(0f, 25f); // 아래 안내 문구와 겹치지 않게 살짝 위로
+            return;
+        }
         box.sizeDelta = ControlBoxSize;
         title.text = "조작 가이드  (" + (i + 1) + " / " + pages.Length + ")";
 
@@ -107,8 +120,10 @@ public class ControlGuide : MonoBehaviour
     {
         box.sizeDelta = StoryBoxSize;
         title.text = "게임 진행";
-        const float spacing = 530f, frameW = 460f, frameH = 220f, picY = 110f, textY = -65f, finalY = -160f;
-        int steps = storyPages.Length - 1;
+        const float spacing = 530f, frameW = 470f, frameH = 235f, picY = 60f, textY = -130f, finalY = -230f; // 액자는 스크린샷 비율(2:1), 사이에 → 자리
+        // 마지막 줄을 아래에 따로 두는 건 4줄 이상일 때만. 3줄 이하면 전부 → 로 잇는 단계
+        bool finalLine = storyPages.Length > 3;
+        int steps = finalLine ? storyPages.Length - 1 : storyPages.Length;
         float firstX = -(steps - 1) * spacing * 0.5f;
 
         for (int s = 0; s < steps; s++)
@@ -140,6 +155,7 @@ public class ControlGuide : MonoBehaviour
             if (s + 1 < steps) Arrow(new Vector2(x + spacing * 0.5f - 25f, picY), new Vector2(x + spacing * 0.5f + 25f, picY));
         }
 
+        if (!finalLine) return;
         Text fin = NewText("Final", body, 32, new Vector2(1500f, 60f), new Vector2(0f, finalY), TextAnchor.MiddleCenter);
         fin.text = storyPages[steps];
     }

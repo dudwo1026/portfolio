@@ -5,11 +5,11 @@ public class KeyItemSpawner : MonoBehaviour
 {
     public static KeyItemSpawner Instance;
 
-    public int keysRequired = 7;
+    public int keysRequired = 6;
     public GameObject keyPrefab; // 열쇠 모델 (루트에 트리거 콜라이더). 비워 두면 노란 큐브
     public Color keyColor = new Color(1f, 0.8f, 0.1f, 1f);
     public float spinSpeed = 90f;
-    public UnityEngine.UI.Text countLabel; // 우상단 게이지 아래 "열쇠 n/7"
+    public UnityEngine.UI.Text countLabel; // 우상단 게이지 아래 "열쇠 n/6"
     // 포탈 옆 열쇠 표시등. 왼쪽부터 순서대로 넣는다 — 모은 개수만큼 앞에서부터 켜진다
     public Renderer[] slotLights;
     public Material slotOff;
