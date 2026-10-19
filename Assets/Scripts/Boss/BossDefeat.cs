@@ -18,8 +18,6 @@ public class BossDefeat : MonoBehaviour, IBossMotion
     public float hitStopTime = 0.24f;
     public float slowStartScale = 0.2f;
     public float slowRecoverTime = 2f;
-    bool slowing;
-    float baseFixedDelta;
 
     // 보스가 만들어 내는 오브젝트 이름들. 컴포넌트가 없는 순수 연출물이라 이름으로 찾는다
     static readonly string[] LeftoverNames = {
@@ -44,34 +42,6 @@ public class BossDefeat : MonoBehaviour, IBossMotion
     void OnDestroy()
     {
         if (health != null) health.Damaged -= OnDamaged;
-        if (slowing) EndSlow(true); // 연출 도중에 지워져도 느린 화면으로 남지 않게
-    }
-
-    System.Collections.IEnumerator HitStop()
-    {
-        slowing = true;
-        baseFixedDelta = Time.fixedDeltaTime;
-        float set = 0f;
-        Time.timeScale = set;
-        yield return new WaitForSecondsRealtime(hitStopTime);
-        for (float t = 0f; t < slowRecoverTime; t += Time.unscaledDeltaTime)
-        {
-            // 그 사이 일시정지·게임오버·확인창이 시간을 잡았으면 손을 뗀다 (그쪽이 다시 1로 돌린다)
-            if (Time.timeScale != set) { EndSlow(false); yield break; }
-            float n = t / slowRecoverTime;
-            set = Mathf.Lerp(slowStartScale, 1f, n * n); // 처음엔 천천히, 끝에서 빠르게 풀린다
-            Time.timeScale = set;
-            Time.fixedDeltaTime = baseFixedDelta * set; // 느린 화면에서 물리가 뚝뚝 끊기지 않게
-            yield return null;
-        }
-        EndSlow(Time.timeScale == set);
-    }
-
-    void EndSlow(bool restoreScale)
-    {
-        slowing = false;
-        Time.fixedDeltaTime = baseFixedDelta;
-        if (restoreScale) Time.timeScale = 1f;
     }
 
     void OnDamaged()
@@ -100,7 +70,7 @@ public class BossDefeat : MonoBehaviour, IBossMotion
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null) { rb.linearVelocity = Vector3.zero; rb.isKinematic = true; }
         Destroy(gameObject, deathMotionTime + deathHoldTime);
-        if (Time.timeScale > 0f) StartCoroutine(HitStop()); // 이미 멈춰 있으면(동시에 게임오버 등) 건드리지 않는다
+        HitStop.Play(hitStopTime, slowStartScale, slowRecoverTime);
     }
 
     // 본체와 별개로 살아 있는 것들을 치운다

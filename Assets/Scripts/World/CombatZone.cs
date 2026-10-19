@@ -43,6 +43,11 @@ public class CombatZone : MonoBehaviour, IChargePad
     public float grabHoldDamagePercent = 5f;          // 잡기(B): 잡혀 있는 동안 0.5초마다 플레이어 최대 체력 %
     public float selfDestructDamagePercent = 50f;     // 자폭(F): 자폭 피해 플레이어 최대 체력 %
     public float miniBossScale = 1f;
+    // 미니보스를 잡으면 보스처럼 잠깐 멈췄다 느리게 풀리고, 남은 몹(다른 미니보스 제외)이 전부 쓰러진다
+    public float miniBossHitStop = 0.24f;
+    public float miniBossSlowStart = 0.2f;
+    public float miniBossSlowRecover = 2f;
+    readonly List<GameObject> miniBosses = new List<GameObject>();
 
     public static CombatZone Current { get; private set; } // 지금 갇혀 있는 구획
 
@@ -155,6 +160,7 @@ public class CombatZone : MonoBehaviour, IChargePad
         if (barrier != null) barrier.SetRaised(false);
         foreach (GameObject m in waveMobs) if (m != null) Destroy(m); // 테스트 키로 넘겼을 때 남은 몹
         waveMobs.Clear();
+        miniBosses.Clear();
         if (KillGauge.Instance != null) KillGauge.Instance.ShowZoneProgress(0, 0);
         HoldOutsideMobs(false);
 
@@ -314,7 +320,13 @@ public class CombatZone : MonoBehaviour, IChargePad
             spawned++;
 
             Health h = e.GetComponent<Health>();
-            if (h != null) h.SetMaxHealth(h.maxHealth * miniBossHealthMultiplier);
+            if (h != null)
+            {
+                h.SetMaxHealth(h.maxHealth * miniBossHealthMultiplier);
+                miniBosses.Add(e);
+                GameObject boss = e;
+                h.Damaged += () => { if (h.CurrentHealth <= 0f) OnMiniBossKilled(boss); };
+            }
             e.transform.localScale *= miniBossScale;
             EnemySpriteAnimator anim = e.GetComponentInChildren<EnemySpriteAnimator>();
             if (anim != null) anim.sizeMultiplier = miniBossScale;
@@ -333,6 +345,19 @@ public class CombatZone : MonoBehaviour, IChargePad
             ai.SetWanderArea(area);
             ai.alwaysHunt = true;
             ai.ForceAttack();
+        }
+    }
+
+    // 미니보스가 쓰러진 순간. 남은 몹은 쓰러뜨려서(사망 모션·처치 집계 그대로) 지운다 — 다른 미니보스만 남긴다
+    void OnMiniBossKilled(GameObject boss)
+    {
+        if (!miniBosses.Remove(boss)) return;
+        HitStop.Play(miniBossHitStop, miniBossSlowStart, miniBossSlowRecover);
+        foreach (GameObject m in waveMobs.ToArray())
+        {
+            if (m == null || m == boss || miniBosses.Contains(m)) continue;
+            Health mh = m.GetComponent<Health>();
+            if (mh != null && mh.CurrentHealth > 0f) mh.TakeDamage(mh.CurrentHealth);
         }
     }
 
