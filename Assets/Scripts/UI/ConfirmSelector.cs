@@ -13,6 +13,9 @@ public class ConfirmSelector : MonoBehaviour
     // 켜면 처음엔 아무것도 고르지 않은 상태로 뜨고, 방향키를 처음 누를 때 defaultIndex가 골라진다
     public bool startUnselected = false;
     public float selectedScale = 1.15f;
+    public bool selectedOutline = true;     // 고른 버튼에 흰 테두리
+    public Color outlineColor = Color.white;
+    public float outlineWidth = 3f;
 
     int index; // -1 = 아직 아무것도 안 고름
     // 켜진 프레임에는 입력을 받지 않는다. 앞 화면에서 Enter로 이 창을 열었으면
@@ -64,6 +67,19 @@ public class ConfirmSelector : MonoBehaviour
     void Apply()
     {
         for (int i = 0; i < buttons.Length; i++)
+        {
             buttons[i].transform.localScale = Vector3.one * (i == index ? selectedScale : 1f);
+            if (!selectedOutline || buttons[i].targetGraphic == null) continue;
+            // 버튼 바탕 그림에만 단다 (글자에 달면 글자가 두꺼워진다)
+            Outline o = buttons[i].targetGraphic.GetComponent<Outline>();
+            if (o == null)
+            {
+                if (i != index) continue;
+                o = buttons[i].targetGraphic.gameObject.AddComponent<Outline>();
+            }
+            o.effectColor = outlineColor;
+            o.effectDistance = new Vector2(outlineWidth, -outlineWidth);
+            o.enabled = i == index;
+        }
     }
 }
