@@ -38,6 +38,8 @@ public class Portal : MonoBehaviour, IChargePad
     public bool warpBeam = true;
     public float stretchTime = 0.45f;  // 캐릭터가 가늘고 길게 늘어나며 빛기둥으로 솟는 시간 (그 뒤 이동)
     public float landTime = 0.35f;     // 도착해서 납작했다가 원래대로 튕겨 돌아오는 시간
+    public GameObject departAura;      // 늘어나는 동안 캐릭터를 감는 이펙트 (얼음 회오리)
+    public GameObject arriveBurst;     // 착지 순간 터지는 이펙트 (파란 임팩트)
     bool warping;
 
     float readyTime = 0f;
@@ -170,6 +172,7 @@ public class Portal : MonoBehaviour, IChargePad
         if (mover != null) mover.movementLocked = true;
 
         WarpBeam.Spawn(Feet(player), stretchTime + 0.25f, 1.6f, 14f, false);
+        SpawnFx(departAura, player.position, stretchTime + 0.1f); // 반복 재생 이펙트라 떠날 때 지운다
         for (float t = 0f; t < stretchTime; t += Time.deltaTime)
         {
             float k = t / stretchTime;
@@ -182,6 +185,7 @@ public class Portal : MonoBehaviour, IChargePad
         MovePlayer(player);
         if (mover != null) mover.movementLocked = wasLocked;
         WarpBeam.Spawn(Feet(player), 0.45f, 2.2f, 14f, true);
+        SpawnFx(arriveBurst, player.position, 2f);
 
         for (float t = 0f; t < landTime; t += Time.deltaTime)
         {
@@ -192,6 +196,11 @@ public class Portal : MonoBehaviour, IChargePad
         }
         sprite.warpScale = Vector2.one;
         warping = false;
+    }
+
+    static void SpawnFx(GameObject prefab, Vector3 at, float life)
+    {
+        if (prefab != null) Destroy(Instantiate(prefab, at, Quaternion.identity), life);
     }
 
     // 플레이어 중심은 발에서 1 위다 (PlayerSpriteAnimator와 같은 기준)
