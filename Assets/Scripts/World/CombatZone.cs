@@ -74,7 +74,17 @@ public class CombatZone : MonoBehaviour, IChargePad
 
     public float Progress { get { return holdTime > 0f ? Mathf.Clamp01(holdProgress / holdTime) : 0f; } }
     public Color BarColor { get { return barColor; } }
-    public string Prompt { get { return CanEnter() ? ChargeCastBarUI.HoldPrompt("구획 진입") : null; } }
+    public string Prompt
+    {
+        get
+        {
+            if (CanEnter()) return ChargeCastBarUI.HoldPrompt("구획 진입");
+            // 잠긴 포탈 앞: 왜 못 들어가는지 알려 준다
+            if (Status == State.Idle && Current == null && !Unlocked && InReach())
+                return "<size=40>들어갈 수 없습니다.</size>\n" + requiredKeys + "개 이상의 열쇠를 습득 시 개방됩니다.";
+            return null;
+        }
+    }
 
     void Awake()
     {
@@ -169,7 +179,13 @@ public class CombatZone : MonoBehaviour, IChargePad
 
     bool CanEnter()
     {
-        if (Status != State.Idle || Current != null || player == null || !Unlocked) return false;
+        if (Status != State.Idle || Current != null || !Unlocked) return false;
+        return InReach();
+    }
+
+    bool InReach()
+    {
+        if (player == null) return false;
         Vector3 d = player.position - portalPosition;
         d.y = 0f;
         return d.sqrMagnitude <= interactRadius * interactRadius;
