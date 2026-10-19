@@ -79,6 +79,9 @@ public class PlayerSpriteAnimator : MonoBehaviour
     int index;
     Health health;
     float deathTimer;
+    PlayerAirborne airborne;
+    PlayerStun stun;
+    float stunTimer;
     int facing = 1;   // 1 = 원본, -1 = 좌우 반전. 멈춰도 마지막 방향을 유지한다
 
     static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
@@ -114,6 +117,26 @@ public class PlayerSpriteAnimator : MonoBehaviour
             return;
         }
         deathTimer = 0f;
+
+        // 행동불가(에어본·기절)는 사망 모션 그림을 빌려 쓴다: 에어본은 공중 1장 / 착지 후 2장, 기절은 1→2장
+        if (deathFrames != null && deathFrames.Length >= 2 && transform.parent != null)
+        {
+            if (airborne == null) airborne = transform.parent.GetComponent<PlayerAirborne>();
+            if (stun == null) stun = transform.parent.GetComponent<PlayerStun>();
+            if (airborne != null && airborne.IsActive)
+            {
+                Apply(deathFrames[airborne.InAir ? 0 : 1]);
+                return;
+            }
+            if (stun != null && stun.IsActive)
+            {
+                stunTimer += Time.deltaTime;
+                float sStep = deathFramesPerSecond > 0f ? 1f / deathFramesPerSecond : 1f;
+                Apply(deathFrames[Mathf.Min(Mathf.FloorToInt(stunTimer / sStep), 1)]);
+                return;
+            }
+            stunTimer = 0f;
+        }
 
         bool moving = mover != null && mover.MoveDirection.sqrMagnitude > 0.0001f;
 

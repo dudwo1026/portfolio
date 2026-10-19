@@ -7,6 +7,7 @@ public class PlayerAirborne : MonoBehaviour
     public float peakHeight = 1.5f;
 
     public bool IsActive => timer > 0f;
+    public bool InAir => timer > groundedDuration; // 뜨고 내려오는 중 (그 뒤는 착지 후 행동불가)
 
     float timer;
     float total;
