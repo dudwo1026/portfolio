@@ -46,6 +46,27 @@ public class EnemySpriteAnimator : MonoBehaviour
     int renderFlip = 1;
     // 마지막에 그린 프레임. 일시정지 중 크기를 바꿨을 때 같은 자세로 다시 그리는 데 쓴다
     EnemySpriteSet.Frame lastFrame;
+    float deathStart = -1f; // 0 이상이면 몸에서 떨어져 나와 사망 모션을 재생 중
+
+    // 몸(부모)이 지워지기 직전에 EnemyAI가 부른다. 그림만 떼어 그 자리에 남기고 사망 모션을 한 번 재생한 뒤 사라진다.
+    // 몸은 그대로 바로 지워지므로 처치 처리·드랍·판정은 예전과 같다
+    public void PlayDeathDetached()
+    {
+        if (set == null || set.deathFrames == null || set.deathFrames.Length == 0 || transform.parent == null) return;
+        Transform body = transform.parent;
+        Transform corpse = new GameObject(body.name + " (Death)").transform;
+        corpse.SetPositionAndRotation(body.position, body.rotation);
+        corpse.localScale = body.lossyScale; // Apply가 부모 크기로 나눠 계산하므로 같은 크기를 둔다
+        transform.SetParent(corpse, true);
+        ai = null; pattern = null; bossMotions = null;
+        deathStart = Time.time;
+        // 몸에 붙은 HitFlash가 함께 지워져 번쩍임이 남은 채로 굳지 않게 끈다
+        if (mpb == null) mpb = new MaterialPropertyBlock();
+        rend.GetPropertyBlock(mpb);
+        mpb.SetFloat("_FlashAmount", 0f);
+        rend.SetPropertyBlock(mpb);
+        Destroy(corpse.gameObject, set.deathFrames.Length / Mathf.Max(0.01f, set.deathFramesPerSecond) + set.deathHoldTime);
+    }
 
     static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
     static readonly int BaseMapStId = Shader.PropertyToID("_BaseMap_ST");
@@ -117,6 +138,13 @@ public class EnemySpriteAnimator : MonoBehaviour
     void LateUpdate()
     {
         if (set == null || rend == null) return;
+
+        if (deathStart >= 0f)
+        {
+            int di = Mathf.FloorToInt((Time.time - deathStart) * set.deathFramesPerSecond);
+            Apply(set.deathFrames[Mathf.Min(di, set.deathFrames.Length - 1)]);
+            return;
+        }
 
         // 이동량 측정. Apply가 이 트랜스폼을 직접 옮기므로 반드시 부모를 봐야 한다
         Vector3 now = ParentPos();

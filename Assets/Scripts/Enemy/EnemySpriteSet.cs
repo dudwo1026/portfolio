@@ -50,6 +50,13 @@ public class EnemySpriteSet : ScriptableObject
     [Tooltip("기절 자세. 돌진이 벽에 박힌 뒤 3~5초 동안 쓰인다")]
     public Frame stun;
 
+    [Header("사망 모션 (없으면 비워 둔다)")]
+    [Tooltip("죽으면 몸은 바로 사라지고, 그 자리에 떼어 낸 그림이 이 장들을 한 번 재생한 뒤 사라진다")]
+    public Frame[] deathFrames;
+    public float deathFramesPerSecond = 8f;
+    [Tooltip("마지막 장을 이만큼 더 보여 준 뒤 사라진다")]
+    public float deathHoldTime = 0.6f;
+
     [System.Serializable]
     public class Motion
     {

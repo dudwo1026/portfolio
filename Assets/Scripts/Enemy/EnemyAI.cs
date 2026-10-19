@@ -161,6 +161,8 @@ void OnDamaged()
         {
             if (GetComponent<BossDefeat>() != null) return; // 보스는 BossDefeat가 사망 모션 뒤에 지운다
             if (roofSpawned) SupplyKit.TryDrop(transform.position);
+            EnemySpriteAnimator anim = GetComponentInChildren<EnemySpriteAnimator>();
+            if (anim != null) anim.PlayDeathDetached(); // 사망 모션이 있는 몹만 그림이 남는다
             Destroy(gameObject);
             return;
         }
