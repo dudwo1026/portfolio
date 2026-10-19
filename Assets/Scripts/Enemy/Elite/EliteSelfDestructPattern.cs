@@ -29,6 +29,8 @@ public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
     public float confusionDuration = 8f;  // 혼란: 폭발 대미지를 입었을 때만 추가로 부여
     // 점화된 뒤 폭발 전에 죽으면 그 자리에서 자폭한다. 끄면 점화 전과 똑같이 처치 폭발만 난다 (노말)
     public bool explodeWhenKilledLit = true;
+    // 0보다 크면 자폭해도 죽지 않고 이 시간 동안 기절한 뒤 다시 점화할 수 있다 (구획 미니보스)
+    public float stunAfterBlast = 0f;
 
     [Header("처치 폭발")]
     // 도화선이 붙기 전(lit == false)에 죽었을 때만 터진다.
@@ -113,6 +115,7 @@ public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
     void FixedUpdate()
     {
         if (lit) { UpdateFuse(); return; }
+        if (ai.IsStunned) return; // 자폭 뒤 기절 중에는 다시 점화하지 않는다
 
         Transform p = ai.PlayerTransform;
         if (p == null) return;
@@ -184,6 +187,16 @@ public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
         SpawnBlastMarker(blastRadius, blastColor);
 
         if (rend != null && normalMaterial != null) rend.sharedMaterial = normalMaterial;
+        if (stunAfterBlast > 0f && selfHealth != null && selfHealth.CurrentHealth > 0f)
+        {
+            // 살아남아 기절. 끝나면 FixedUpdate가 다시 점화를 노린다
+            lit = false;
+            exploded = false;
+            enabled = true;
+            ai.attackSpeed = baseSpeed;
+            ai.ApplyStun(stunAfterBlast);
+            return;
+        }
         Destroy(gameObject); // 자폭
     }
 

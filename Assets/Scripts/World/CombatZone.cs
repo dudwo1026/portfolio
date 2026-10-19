@@ -42,6 +42,7 @@ public class CombatZone : MonoBehaviour, IChargePad
     public float miniBossDamageMultiplier = 2f;       // 정예 때보다 (하드 기준. 노말은 0.7배가 먼저 걸린다)
     public float grabHoldDamagePercent = 5f;          // 잡기(B): 잡혀 있는 동안 0.5초마다 플레이어 최대 체력 %
     public float selfDestructDamagePercent = 50f;     // 자폭(F): 자폭 피해 플레이어 최대 체력 %
+    public float selfDestructStun = 15f;              // 자폭(F): 터져도 죽지 않고 이만큼 기절한 뒤 다시 터질 수 있다
     public float miniBossScale = 1f;
     // 미니보스를 잡으면 보스처럼 잠깐 멈췄다 느리게 풀리고, 남은 몹(다른 미니보스 제외)이 전부 쓰러진다
     public float miniBossHitStop = 0.24f;
@@ -337,7 +338,7 @@ public class CombatZone : MonoBehaviour, IChargePad
             EliteGrabPattern grab = e.GetComponent<EliteGrabPattern>();
             if (grab != null) grab.holdDamagePercent = grabHoldDamagePercent * diff;
             EliteSelfDestructPattern bomb = e.GetComponent<EliteSelfDestructPattern>();
-            if (bomb != null) bomb.damagePercent = selfDestructDamagePercent * diff;
+            if (bomb != null) { bomb.damagePercent = selfDestructDamagePercent * diff; bomb.stunAfterBlast = selfDestructStun; }
 
             TopDownMove pm = player != null ? player.GetComponent<TopDownMove>() : null;
             bool keepSpeed = e.GetComponent<EliteChargePattern>() != null || grab != null || bomb != null;
@@ -345,6 +346,30 @@ public class CombatZone : MonoBehaviour, IChargePad
             ai.SetWanderArea(area);
             ai.alwaysHunt = true;
             ai.ForceAttack();
+        }
+        if (miniBosses.Count >= 2) ShareHealth();
+    }
+
+    // 미니보스가 둘 이상이면 체력을 하나로 쓴다: 둘의 최대 체력을 합친 값을 둘 다 갖고,
+    // 한쪽이 맞으면 다른 쪽을 같은 체력까지 깎는다 (그래서 같이 줄고 같이 쓰러진다)
+    bool sharingHealth; // 서로 깎아 주는 중에 되돌아오는 이벤트를 막는다
+    void ShareHealth()
+    {
+        List<Health> pool = miniBosses.ConvertAll(m => m.GetComponent<Health>());
+        float total = 0f;
+        foreach (Health h in pool) total += h.maxHealth;
+        foreach (Health h in pool) h.SetMaxHealth(total);
+        foreach (Health h in pool)
+        {
+            Health self = h;
+            self.Damaged += () =>
+            {
+                if (sharingHealth) return;
+                sharingHealth = true;
+                foreach (Health o in pool)
+                    if (o != null && o != self && o.CurrentHealth > self.CurrentHealth) o.TakeDamage(o.CurrentHealth - self.CurrentHealth);
+                sharingHealth = false;
+            };
         }
     }
 
