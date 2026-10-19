@@ -115,7 +115,7 @@ public class CombatZone : MonoBehaviour, IChargePad
             return;
         }
 
-        if (portal != null && Status == State.Idle && portal.activeSelf != Unlocked) portal.SetActive(Unlocked);
+        if (portal != null && Status == State.Idle && portalLocked != !Unlocked) SetPortalLocked(!Unlocked);
 
         bool held = Keyboard.current != null && Keyboard.current.eKey.isPressed;
         if (!held || !CanEnter())
@@ -129,6 +129,38 @@ public class CombatZone : MonoBehaviour, IChargePad
 
     // 열쇠를 이만큼 모아야 포탈이 나타나고 들어갈 수 있다 (0이면 처음부터)
     public int requiredKeys = 0;
+    public Color lockedPortalColor = new Color(0.28f, 0.28f, 0.3f); // 잠긴 포탈 (보이는 밝기 기준)
+    bool portalLocked;
+    ParticleSystem[] portalParts;
+    Color[] portalColors;
+
+    // 잠긴 동안은 같은 포탈을 진회색으로. 재질 색이 2~6배(HDR)라 그만큼 나눠 보이는 밝기를 맞춘다
+    void SetPortalLocked(bool locked)
+    {
+        portalLocked = locked;
+        if (portalParts == null)
+        {
+            portalParts = portal.GetComponentsInChildren<ParticleSystem>(true);
+            portalColors = System.Array.ConvertAll(portalParts, p => p.main.startColor.color);
+        }
+        for (int i = 0; i < portalParts.Length; i++)
+        {
+            ParticleSystem ps = portalParts[i];
+            if (ps.name == "Distortion") continue; // 굴절만 하는 판이라 색이 없다
+            ParticleSystem.MainModule m = ps.main;
+            Color c = portalColors[i];
+            if (locked)
+            {
+                Material mat = ps.GetComponent<ParticleSystemRenderer>().sharedMaterial;
+                float boost = mat != null && mat.HasProperty("_Color") ? Mathf.Max(1f, mat.GetColor("_Color").r) : 1f;
+                c = new Color(lockedPortalColor.r / boost, lockedPortalColor.g / boost, lockedPortalColor.b / boost, c.a);
+            }
+            m.startColor = c;
+            ps.Clear(true);
+            ps.Play(true);
+        }
+    }
+
     bool Unlocked { get { return requiredKeys <= 0 || (KeyItemSpawner.Instance != null && KeyItemSpawner.Instance.Collected >= requiredKeys); } }
 
     bool CanEnter()
