@@ -33,6 +33,7 @@ public class KeyItemSpawner : MonoBehaviour
     public float fadeTime = 0.4f;
     public float fallTime = 0.55f;     // 포탈 앞에서 하늘의 구체가 열쇠 자리로 떨어지는 시간
     public float fallHeight = 16f;
+    public float fallStagger = 0.5f;   // 열쇠가 여러 개면 이 간격으로 차례로 떨어진다
     public float revealHold = 1.1f;    // 열쇠가 밝혀진 뒤 보여 주는 시간
     public float portalZoom = 0.8f;    // 포탈 앞을 비출 때 카메라 거리 배율
     public float orbSize = 2.2f;
@@ -183,33 +184,35 @@ public class KeyItemSpawner : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.15f);
         yield return Fade(fade, 1f, 0f);
 
-        // 3) 떨어진다: 가속하며 칸에 동시에 꽂힌다
-        for (int i = 0; i < n; i++) orbs[i] = LightOrb.Spawn(targets[i] + Vector3.up * fallHeight, orbSize);
-        for (float t = 0f; t < fallTime; t += Time.unscaledDeltaTime)
+        // 3) 떨어진다: 칸마다 fallStagger 간격으로 차례로, 가속하며 꽂힌다.
+        // 4) 꽂힐 때마다 번쩍: 화면이 하얗게 튀고, 빛이 크게 번지며 그 칸의 열쇠가 켜진다
+        orbs = new LightOrb[n]; // 솟을 때 쓴 구체는 이미 지웠다
+        bool[] landed = new bool[n];
+        int landedCount = 0;
+        UnityEngine.UI.Image flash = WarpBeam.ScreenOverlay(Color.white);
+        float lastLand = -99f;
+        for (float t = 0f; landedCount < n || t - lastLand < 0.35f; t += Time.unscaledDeltaTime)
         {
-            float k = t / fallTime;
-            for (int i = 0; i < n; i++) orbs[i].transform.position = targets[i] + Vector3.up * fallHeight * (1f - k * k);
+            for (int i = 0; i < n; i++)
+            {
+                if (landed[i]) continue;
+                float k = (t - i * fallStagger) / fallTime;
+                if (k < 0f) continue;
+                if (orbs[i] == null) orbs[i] = LightOrb.Spawn(targets[i] + Vector3.up * fallHeight, orbSize);
+                if (k < 1f) { orbs[i].transform.position = targets[i] + Vector3.up * fallHeight * (1f - k * k); continue; }
+
+                Destroy(orbs[i].gameObject);
+                landed[i] = true;
+                landedCount++;
+                lastLand = t;
+                lit = Collected - n + landedCount;
+                RefreshLabel();
+                LightSlotGlow(slots[i]);
+                LightOrb.Burst(targets[i], orbSize, burstSize, 0.7f);
+            }
+            flash.color = new Color(1f, 1f, 1f, 0.8f * Mathf.Clamp01(1f - (t - lastLand) / 0.35f));
             yield return null;
         }
-        foreach (LightOrb o in orbs) Destroy(o.gameObject);
-
-        // 4) 번쩍: 화면이 하얗게 튀고, 빛이 크게 번지며 칸의 열쇠가 켜진다
-        lit = Collected;
-        RefreshLabel();
-        for (int i = 0; i < n; i++)
-        {
-            int s = slots[i];
-            if (slotGlows != null && s < slotGlows.Length && slotGlows[s] != null)
-                foreach (ParticleSystem ps in slotGlows[s].GetComponentsInChildren<ParticleSystem>())
-                {
-                    ParticleSystem.MainModule m = ps.main;
-                    m.useUnscaledTime = true; // 멈춘 동안에도 빛 번짐이 보이게
-                    ps.Play();
-                }
-            LightOrb.Burst(targets[i], orbSize, burstSize, 0.7f);
-        }
-        UnityEngine.UI.Image flash = WarpBeam.ScreenOverlay(Color.white);
-        for (float t = 0f; t < 0.35f; t += Time.unscaledDeltaTime) { flash.color = new Color(1f, 1f, 1f, 0.8f * (1f - t / 0.35f)); yield return null; }
         Destroy(flash.canvas.gameObject);
         yield return new WaitForSecondsRealtime(revealHold);
 
@@ -224,6 +227,17 @@ public class KeyItemSpawner : MonoBehaviour
         Time.timeScale = prevScale > 0f ? prevScale : 1f;
         cutsceneRunning = false;
         if (lit < Collected) { lit = Collected; RefreshLabel(); } // 연출 중에 하나 더 주운 경우
+    }
+
+    void LightSlotGlow(int s)
+    {
+        if (slotGlows == null || s >= slotGlows.Length || slotGlows[s] == null) return;
+        foreach (ParticleSystem ps in slotGlows[s].GetComponentsInChildren<ParticleSystem>())
+        {
+            ParticleSystem.MainModule m = ps.main;
+            m.useUnscaledTime = true; // 멈춘 동안에도 빛 번짐이 보이게
+            ps.Play();
+        }
     }
 
     System.Collections.IEnumerator Fade(UnityEngine.UI.Image img, float a, float b)
