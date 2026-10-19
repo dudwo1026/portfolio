@@ -22,7 +22,11 @@ public class Portal : MonoBehaviour, IChargePad
     [Header("개방 조건")]
     public bool requireKeys = false;        // 열쇠(KeyItemSpawner)를 다 모아야 열린다
     public Renderer visual;                 // 열림/닫힘을 색으로 보여줄 렌더러
-    public GameObject openEffect;           // 넣어 두면 열렸을 때 이걸 켜고 visual 판은 숨긴다 (포탈 이펙트)
+    public GameObject openEffect;           // 넣어 두면 visual 판 대신 이 포탈 이펙트를 쓴다 (잠기면 진회색)
+    public Color lockedEffectColor = new Color(0.28f, 0.28f, 0.3f); // CombatZone.lockedPortalColor와 같은 진회색
+    ParticleSystem[] effectParts;
+    Color[] effectColors;
+    bool tintedLocked;
     public Color closedColor = new Color(0.25f, 0.25f, 0.3f, 1f);
     public Color openColor = new Color(0.3f, 0.85f, 1f, 1f);
     public float openPulseSpeed = 2.5f;
@@ -72,10 +76,23 @@ public class Portal : MonoBehaviour, IChargePad
         wasOpen = open;
         UpdateHold(open);
 
-        if (openEffect != null && openEffect.activeSelf != open)
+        if (openEffect != null)
         {
-            openEffect.SetActive(open);
-            if (visual != null) visual.enabled = !open;
+            // 구획 포탈과 같은 모양: 잠겨 있어도 이펙트는 보이고 진회색, 열리면 원래 색 (판은 숨긴다)
+            if (!openEffect.activeSelf) openEffect.SetActive(true);
+            if (visual != null && visual.enabled) visual.enabled = false;
+            if (effectParts == null)
+            {
+                effectParts = openEffect.GetComponentsInChildren<ParticleSystem>(true);
+                effectColors = System.Array.ConvertAll(effectParts, p => p.main.startColor.color);
+                tintedLocked = open; // 아래에서 한 번은 반드시 칠한다
+            }
+            if (tintedLocked != !open)
+            {
+                tintedLocked = !open;
+                CombatZone.TintPortal(effectParts, effectColors, tintedLocked, lockedEffectColor);
+            }
+            return;
         }
 
         if (visual == null) return;

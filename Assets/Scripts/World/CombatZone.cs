@@ -144,7 +144,6 @@ public class CombatZone : MonoBehaviour, IChargePad
     ParticleSystem[] portalParts;
     Color[] portalColors;
 
-    // 잠긴 동안은 같은 포탈을 진회색으로. 재질 색이 2~6배(HDR)라 그만큼 나눠 보이는 밝기를 맞춘다
     void SetPortalLocked(bool locked)
     {
         portalLocked = locked;
@@ -153,17 +152,24 @@ public class CombatZone : MonoBehaviour, IChargePad
             portalParts = portal.GetComponentsInChildren<ParticleSystem>(true);
             portalColors = System.Array.ConvertAll(portalParts, p => p.main.startColor.color);
         }
-        for (int i = 0; i < portalParts.Length; i++)
+        TintPortal(portalParts, portalColors, locked, lockedPortalColor);
+    }
+
+    // 잠긴 동안은 같은 포탈을 진회색으로. 재질 색이 2~6배(HDR)라 그만큼 나눠 보이는 밝기를 맞춘다.
+    // 옥상 포탈(Portal)도 같은 모양이라 함께 쓴다. colors는 처음 색(풀 때 되돌릴 색)
+    public static void TintPortal(ParticleSystem[] parts, Color[] colors, bool locked, Color lockedColor)
+    {
+        for (int i = 0; i < parts.Length; i++)
         {
-            ParticleSystem ps = portalParts[i];
+            ParticleSystem ps = parts[i];
             if (ps.name == "Distortion") continue; // 굴절만 하는 판이라 색이 없다
             ParticleSystem.MainModule m = ps.main;
-            Color c = portalColors[i];
+            Color c = colors[i];
             if (locked)
             {
                 Material mat = ps.GetComponent<ParticleSystemRenderer>().sharedMaterial;
                 float boost = mat != null && mat.HasProperty("_Color") ? Mathf.Max(1f, mat.GetColor("_Color").r) : 1f;
-                c = new Color(lockedPortalColor.r / boost, lockedPortalColor.g / boost, lockedPortalColor.b / boost, c.a);
+                c = new Color(lockedColor.r / boost, lockedColor.g / boost, lockedColor.b / boost, c.a);
             }
             m.startColor = c;
             ps.Clear(true);
