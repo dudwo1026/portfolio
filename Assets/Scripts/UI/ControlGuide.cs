@@ -89,11 +89,11 @@ public class ControlGuide : MonoBehaviour
         if (controlImage != null)
         {
             // 그림 한 장: 진행 가이드와 같은 넓은 상자에 비율 유지로 꽉 채운다 (그림에 제목이 들어 있어 제목은 비운다)
-            box.sizeDelta = StoryBoxSize;
             title.text = "";
             float s = Mathf.Min((StoryBoxSize.x - 60f) / controlImage.rect.width, (StoryBoxSize.y - 150f) / controlImage.rect.height); // 아래 안내 문구 자리를 비운다
             Image pic = NewImage("ControlImage", controlImage);
             pic.rectTransform.sizeDelta = new Vector2(controlImage.rect.width * s, controlImage.rect.height * s);
+            box.sizeDelta = new Vector2(Mathf.Min(StoryBoxSize.x, controlImage.rect.width * s + 60f), StoryBoxSize.y); // 양옆 빈 공간 없이 그림 폭에 맞춘다
             pic.rectTransform.anchoredPosition = new Vector2(0f, 25f); // 아래 안내 문구와 겹치지 않게 살짝 위로
             return;
         }
