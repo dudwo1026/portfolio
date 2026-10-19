@@ -19,6 +19,7 @@ public class KeyItemSpawner : MonoBehaviour
     public float slotKeyHeight = 1.7f; // 표시등 열쇠 높이(월드)
     public float slotKeySpinSpeed = 30f; // 모은 칸 열쇠가 천천히 돈다 (도/초)
     Transform[] slotKeys;
+    GameObject[] slotGlows; // 모은 칸만 빛 번짐을 켠다
     Renderer[][] slotParts;
     Material[][] slotPartMats;
 
@@ -46,6 +47,7 @@ public class KeyItemSpawner : MonoBehaviour
     {
         if (slotLights == null) return;
         slotKeys = new Transform[slotLights.Length];
+        slotGlows = new GameObject[slotLights.Length];
         slotParts = new Renderer[slotLights.Length][];
         slotPartMats = new Material[slotLights.Length][];
         for (int i = 0; i < slotLights.Length; i++)
@@ -57,7 +59,9 @@ public class KeyItemSpawner : MonoBehaviour
             k.name = "SlotKey" + (i + 1);
             foreach (Collider c in k.GetComponentsInChildren<Collider>()) Destroy(c);
             Bounds kb = new Bounds(k.transform.position, Vector3.zero);
-            Renderer[] parts = k.GetComponentsInChildren<Renderer>();
+            Renderer[] parts = k.GetComponentsInChildren<MeshRenderer>(); // 빛 번짐(파티클)은 크기·색 바꾸기에서 뺀다
+            Transform glow = k.transform.Find("Glow");
+            if (glow != null) slotGlows[i] = glow.gameObject;
             foreach (Renderer r in parts) kb.Encapsulate(r.bounds);
             float s = slotKeyHeight / Mathf.Max(0.01f, kb.size.y);
             k.transform.localScale *= s;
@@ -126,6 +130,7 @@ public class KeyItemSpawner : MonoBehaviour
             {
                 for (int j = 0; j < slotParts[i].Length; j++)
                     slotParts[i][j].sharedMaterial = i < Collected ? slotPartMats[i][j] : slotOff;
+                if (slotGlows[i] != null) slotGlows[i].SetActive(i < Collected);
                 continue;
             }
             if (slotLights[i] != null) slotLights[i].sharedMaterial = i < Collected ? slotOn : slotOff;
