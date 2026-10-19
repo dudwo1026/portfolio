@@ -9,6 +9,7 @@ public class WarpBeam : MonoBehaviour
     static Material mat;
 
     float time, duration, maxWidth, height;
+    const float behind = 0.7f;
     bool shrinkOnly;
     Transform quad;
 
@@ -76,7 +77,8 @@ public class WarpBeam : MonoBehaviour
             if (toCam.sqrMagnitude > 0.0001f) transform.rotation = Quaternion.LookRotation(-toCam);
         }
         quad.localScale = new Vector3(maxWidth * w, height, 1f);
-        quad.localPosition = new Vector3(0f, height * 0.5f, 0f);
+        // 카메라 반대쪽으로 조금 물려 캐릭터 뒤에 그려지게 한다 (반투명끼리는 먼 것부터 그린다)
+        quad.localPosition = new Vector3(0f, height * 0.5f - 1f, behind); // 밑동은 바닥 아래로 묻어 땅에서 솟는 것처럼
 
         if (t >= 1f) Destroy(gameObject);
     }
