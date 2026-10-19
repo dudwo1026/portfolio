@@ -21,6 +21,8 @@ public class ConfirmSelector : MonoBehaviour
     public float framePadding = 8f;         // 버튼 바깥으로 튀어나오는 정도
     public float frameScale = 1f;           // 테두리 굵기 배율 (큰 카드는 2쯤)
     public bool pressPulse = false;         // 누르면 버튼 잔상이 퍼지며 사라진다 (UIPulse)
+    public bool pressFlash = false;         // 누르면 버튼이 한 번 하얗게 깜빡인다
+    public float flashTime = 0.2f;
 
     int index; // -1 = 아직 아무것도 안 고름
     // 켜진 프레임에는 입력을 받지 않는다. 앞 화면에서 Enter로 이 창을 열었으면
@@ -29,14 +31,32 @@ public class ConfirmSelector : MonoBehaviour
 
     void Awake()
     {
-        if (!pressPulse) return;
         Canvas canvas = GetComponentInParent<Canvas>(true).rootCanvas;
         // 마우스 클릭도 Enter도 결국 onClick으로 오므로 여기 하나로 둘 다 잡힌다
         foreach (Button b in buttons)
         {
             Button button = b;
-            button.onClick.AddListener(() => UIPulse.Play((RectTransform)button.transform, canvas));
+            if (pressPulse) button.onClick.AddListener(() => UIPulse.Play((RectTransform)button.transform, canvas));
+            if (pressFlash) button.onClick.AddListener(() => StartCoroutine(Flash(button)));
         }
+    }
+
+    System.Collections.IEnumerator Flash(Button b)
+    {
+        GameObject go = new GameObject("Flash", typeof(RectTransform));
+        RectTransform rt = (RectTransform)go.transform;
+        rt.SetParent(b.transform, false);
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
+        Image img = go.AddComponent<Image>();
+        img.raycastTarget = false;
+        go.AddComponent<LayoutElement>().ignoreLayout = true;
+        for (float t = 0f; t < flashTime; t += Time.unscaledDeltaTime)
+        {
+            img.color = new Color(1f, 1f, 1f, 0.8f * (1f - t / flashTime));
+            yield return null;
+        }
+        Destroy(go);
     }
 
     void OnEnable()

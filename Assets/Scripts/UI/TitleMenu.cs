@@ -13,12 +13,13 @@ public class TitleMenu : MonoBehaviour
     public GameObject weaponSelectPanel;      // 비워 두면 예전처럼 바로 시작
     public Graphic background;                // 새 게임을 누르면 이 배경을 검게 바꾼 뒤 난이도 선택을 띄운다
     public float fadeToBlackTime = 2f;
+    public float weaponStartDelay = 0.25f;    // 무기 카드가 한 번 깜빡이고 넘어갈 시간
 
-    bool starting;
+    bool starting, launching;
 
     public void NewGame()
     {
-        // 메뉴는 화면이 검게 바뀌는 동안 그대로 두고, 난이도 선택이 뜰 때 숨긴다
+        // 메뉴는 배경과 같이 어두워지다가, 난이도 선택이 뜰 때 숨긴다
         if (starting) return;
         starting = true;
         // 이 스크립트는 곧 숨길 메뉴에 붙어 있어 코루틴을 못 돌린다. 켜져 있는 배경에서 돌린다
@@ -29,9 +30,16 @@ public class TitleMenu : MonoBehaviour
     IEnumerator FadeThenChoose()
     {
         Color from = background.color;
+        CanvasGroup menuGroup = null;
+        if (menu != null)
+        {
+            menuGroup = menu.GetComponent<CanvasGroup>();
+            if (menuGroup == null) menuGroup = menu.AddComponent<CanvasGroup>();
+        }
         for (float t = 0f; t < fadeToBlackTime; t += Time.unscaledDeltaTime)
         {
             background.color = Color.Lerp(from, Color.black, t / fadeToBlackTime);
+            if (menuGroup != null) menuGroup.alpha = 1f - t / fadeToBlackTime;
             yield return null;
         }
         background.color = Color.black;
@@ -68,8 +76,18 @@ public class TitleMenu : MonoBehaviour
 
     void StartWith(PrimaryWeapon weapon)
     {
+        if (launching) return; // 깜빡이는 동안 또 눌러도 무시
+        launching = true;
         GameSettings.primary = weapon;
         GameSettings.primaryChosen = true;
+        // 카드 깜빡임(ConfirmSelector.pressFlash)이 보이게 잠깐 기다렸다 넘어간다
+        if (background != null) background.StartCoroutine(StartAfter(weaponStartDelay));
+        else StartGame();
+    }
+
+    IEnumerator StartAfter(float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay);
         StartGame();
     }
 
