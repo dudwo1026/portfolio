@@ -9,7 +9,7 @@ public class UIPulse : MonoBehaviour
     Vector3 startScale;
     CanvasGroup group;
 
-    public static void Play(RectTransform source, Canvas canvas, float duration = 0.45f, float endScale = 1.6f, float startAlpha = 0.5f)
+    public static void Play(RectTransform source, Canvas canvas, float duration = 0.9f, float endScale = 1.6f, float startAlpha = 0.5f)
     {
         // 캔버스는 부르는 쪽이 넘긴다. 메뉴가 방금 숨겨졌으면 source에서 캔버스를 못 찾을 수 있다
         if (canvas == null) return;
