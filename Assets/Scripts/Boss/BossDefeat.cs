@@ -19,6 +19,9 @@ public class BossDefeat : MonoBehaviour, IBossMotion
     public float slowStartScale = 0.2f;
     public float slowRecoverTime = 2f;
 
+    [Header("결과창: 사망 모션이 끝나면 VictoryScreen")]
+    public float victoryExtraDelay = 0.3f;
+
     // 보스가 만들어 내는 오브젝트 이름들. 컴포넌트가 없는 순수 연출물이라 이름으로 찾는다
     static readonly string[] LeftoverNames = {
         "BossObstacle_1", "BossObstacle_2", "BossObstacle_3", "BossObstacle_4",
@@ -53,6 +56,7 @@ public class BossDefeat : MonoBehaviour, IBossMotion
         AreaManager.NotifyBossDefeated();
         ClearLeftovers();
         StartDying();
+        VictoryScreen.Show(deathMotionTime + deathHoldTime + victoryExtraDelay, Time.timeSinceLevelLoad);
     }
 
     // AI·패턴을 전부 끄고(돌던 코루틴까지), 맞지도 부딪히지도 않게 한 뒤 모션이 끝나면 지운다

@@ -65,6 +65,10 @@ public class EnemyAI : MonoBehaviour
 
     // special patterns live in their own components (e.g. EliteChargePattern) and drive the enemy through the hooks below
     [System.NonSerialized] public bool patternDriving;
+
+    // 승리 결과창용 처치 수. 씬이 시작할 때 AreaManager가 0으로 되돌린다
+    public static int Kills, EliteKills;
+    bool counted;
     [System.NonSerialized] public bool roofSpawned; // 옥상 스포너가 낸 몹만 보급키트를 떨군다
     [System.NonSerialized] public bool alwaysHunt;  // 구획 웨이브 몹: 시야와 상관없이 플레이어를 끝까지 쫓는다
     [System.NonSerialized] public bool forcedAggro; // 도발: chase the player no matter the distance or sight
@@ -160,6 +164,7 @@ void OnDamaged()
         if (selfHealth != null && selfHealth.CurrentHealth <= 0f)
         {
             if (GetComponent<BossDefeat>() != null) return; // 보스는 BossDefeat가 사망 모션 뒤에 지운다
+            if (!counted) { counted = true; Kills++; if (isElite) EliteKills++; } // 같은 프레임에 두 번 맞아도 한 번만 센다
             if (roofSpawned) SupplyKit.TryDrop(transform.position);
             EnemySpriteAnimator anim = GetComponentInChildren<EnemySpriteAnimator>();
             if (anim != null) anim.PlayDeathDetached(); // 사망 모션이 있는 몹만 그림이 남는다

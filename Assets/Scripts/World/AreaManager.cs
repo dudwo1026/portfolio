@@ -23,6 +23,8 @@ public class AreaManager : MonoBehaviour
     void Start()
     {
         BossDefeated = false; // static이라 플레이 세션 사이에 남을 수 있다
+        EnemyAI.Kills = 0;
+        EnemyAI.EliteKills = 0;
 
         if (player == null)
         {
