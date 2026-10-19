@@ -82,6 +82,7 @@ public class PlayerSpriteAnimator : MonoBehaviour
     PlayerAirborne airborne;
     PlayerStun stun;
     float stunTimer;
+    public float stunFirstFrameTime = 0.3f; // 기절: 사망 1장을 이만큼 보여 준 뒤 2장
     int facing = 1;   // 1 = 원본, -1 = 좌우 반전. 멈춰도 마지막 방향을 유지한다
 
     static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
@@ -131,8 +132,7 @@ public class PlayerSpriteAnimator : MonoBehaviour
             if (stun != null && stun.IsActive)
             {
                 stunTimer += Time.deltaTime;
-                float sStep = deathFramesPerSecond > 0f ? 1f / deathFramesPerSecond : 1f;
-                Apply(deathFrames[Mathf.Min(Mathf.FloorToInt(stunTimer / sStep), 1)]);
+                Apply(deathFrames[stunTimer < stunFirstFrameTime ? 0 : 1]);
                 return;
             }
             stunTimer = 0f;
