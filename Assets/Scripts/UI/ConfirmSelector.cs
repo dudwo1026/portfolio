@@ -16,11 +16,25 @@ public class ConfirmSelector : MonoBehaviour
     public bool selectedOutline = true;     // 고른 버튼에 흰 테두리
     public Color outlineColor = Color.white;
     public float outlineWidth = 3f;
+    public bool pressPulse = false;         // 누르면 버튼 실루엣이 퍼지며 사라진다 (UIPulse)
+    public Color pulseColor = new Color(1f, 1f, 1f, 0.8f);
 
     int index; // -1 = 아직 아무것도 안 고름
     // 켜진 프레임에는 입력을 받지 않는다. 앞 화면에서 Enter로 이 창을 열었으면
     // 같은 프레임의 그 Enter가 여기서도 눌린 것으로 잡혀 첫 버튼이 바로 눌린다
     int enabledFrame = -1;
+
+    void Awake()
+    {
+        if (!pressPulse) return;
+        Canvas canvas = GetComponentInParent<Canvas>(true).rootCanvas;
+        // 마우스 클릭도 Enter도 결국 onClick으로 오므로 여기 하나로 둘 다 잡힌다
+        foreach (Button b in buttons)
+        {
+            Button button = b;
+            button.onClick.AddListener(() => { if (button.targetGraphic != null) UIPulse.Play(button.targetGraphic, canvas, pulseColor); });
+        }
+    }
 
     void OnEnable()
     {
