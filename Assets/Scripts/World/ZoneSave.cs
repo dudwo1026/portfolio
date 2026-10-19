@@ -9,6 +9,9 @@ public static class ZoneSave
 {
     public static bool HasSave { get; private set; }
     public static bool Retrying { get; private set; } // 재시도로 씬을 다시 불러온 중 (가이드를 건너뛰는 등)
+    // 재시도로 씬을 다시 불러오기 전까지 흐른 게임 시간. 결과창의 클리어 시간은 실패한 시도까지 합친 총 플레이 시간이다
+    public static float CarriedPlayTime { get; private set; }
+    public static float PlayTime { get { return CarriedPlayTime + Time.timeSinceLevelLoad; } }
 
     public static readonly List<string> ClearedZones = new List<string>();
     public static readonly List<int> UsedElites = new List<int>(); // 미니보스로 나온 순서 = 웨이브에 섞이는 종류
@@ -23,6 +26,7 @@ public static class ZoneSave
     {
         HasSave = false;
         Retrying = false;
+        CarriedPlayTime = 0f;
         ClearedZones.Clear();
         UsedElites.Clear();
     }
@@ -48,6 +52,7 @@ public static class ZoneSave
     // 게임오버에서 "구획 재시도". 저장이 없으면(첫 구획) 처음 상태로 다시 시작한다
     public static void Retry()
     {
+        CarriedPlayTime += Time.timeSinceLevelLoad;
         Retrying = true;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }

@@ -66,7 +66,7 @@ public class EnemyAI : MonoBehaviour
     // special patterns live in their own components (e.g. EliteChargePattern) and drive the enemy through the hooks below
     [System.NonSerialized] public bool patternDriving;
 
-    // 승리 결과창용 처치 수. 씬이 시작할 때 AreaManager가 0으로 되돌린다
+    // 승리 결과창용 처치 수. 새 판이 시작할 때 AreaManager가 0으로 되돌린다 (구획 재시도는 이어서 센다)
     public static int Kills, EliteKills;
     bool counted;
     [System.NonSerialized] public bool roofSpawned; // 옥상 스포너가 낸 몹만 보급키트를 떨군다

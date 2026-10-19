@@ -56,7 +56,7 @@ public class BossDefeat : MonoBehaviour, IBossMotion
         AreaManager.NotifyBossDefeated();
         ClearLeftovers();
         StartDying();
-        VictoryScreen.Show(deathMotionTime + deathHoldTime + victoryExtraDelay, Time.timeSinceLevelLoad);
+        VictoryScreen.Show(deathMotionTime + deathHoldTime + victoryExtraDelay, ZoneSave.PlayTime);
     }
 
     // AI·패턴을 전부 끄고(돌던 코루틴까지), 맞지도 부딪히지도 않게 한 뒤 모션이 끝나면 지운다

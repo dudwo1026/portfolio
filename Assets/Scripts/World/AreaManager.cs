@@ -23,8 +23,7 @@ public class AreaManager : MonoBehaviour
     void Start()
     {
         BossDefeated = false; // static이라 플레이 세션 사이에 남을 수 있다
-        EnemyAI.Kills = 0;
-        EnemyAI.EliteKills = 0;
+        if (!ZoneSave.Retrying) { EnemyAI.Kills = 0; EnemyAI.EliteKills = 0; } // 재시도는 이어서 센다 (결과창 = 이번 판 전체)
 
         if (player == null)
         {
