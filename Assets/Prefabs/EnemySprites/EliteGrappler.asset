@@ -18,6 +18,11 @@ MonoBehaviour:
     charBottomPx: 18
     footCenterPx: 202.5
     sizeScale: 0.7
+  idleFrames: []
+  idleFramesPerSecond: 4
+  idlePingPong: 1
+  breatheAmount: 0
+  breathePeriod: 2.4
   moveFrames:
   - texture: {fileID: 2800000, guid: d0131c08ed0113743a15d6ae85638e95, type: 3}
     charHeightPx: 348
@@ -74,10 +79,41 @@ MonoBehaviour:
     charBottomPx: 0
     footCenterPx: 0
     sizeScale: 1
+  deathFrames:
+  - texture: {fileID: 2800000, guid: 5b4d6b6e8d227a64da89b2bf43a2e4bd, type: 3}
+    charHeightPx: 185
+    charBottomPx: 67
+    footCenterPx: 198.5
+    sizeScale: 0.7
+  - texture: {fileID: 2800000, guid: e564eee0ace140e4dabd73d9909120ce, type: 3}
+    charHeightPx: 185
+    charBottomPx: 63
+    footCenterPx: 194.5
+    sizeScale: 0.7
+  - texture: {fileID: 2800000, guid: 85852cb46077af441b825c3be0782e64, type: 3}
+    charHeightPx: 185
+    charBottomPx: 61
+    footCenterPx: 196.5
+    sizeScale: 0.7
+  - texture: {fileID: 2800000, guid: 3d5789969092021458d0f264f8e35a44, type: 3}
+    charHeightPx: 185
+    charBottomPx: 83
+    footCenterPx: 190.5
+    sizeScale: 0.7
+  - texture: {fileID: 2800000, guid: 9703ea82a6f07954fa73cbaa4a9041af, type: 3}
+    charHeightPx: 185
+    charBottomPx: 83
+    footCenterPx: 194
+    sizeScale: 0.7
+  deathFramesPerSecond: 8
+  deathHoldTime: 0.6
+  motions: []
   characterHeight: 3.718
+  anchorFeetToIdle: 0
   moveFramesPerSecond: 2
   scaleFpsBySpeed: 0
   referenceSpeed: 2.5
   artFacesScreenLeft: 0
+  alwaysFaceScreenLeft: 0
   faceKnockbackDirection: 0
   attackArtFlipped: 0
