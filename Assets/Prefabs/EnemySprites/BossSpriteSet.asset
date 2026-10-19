@@ -322,22 +322,22 @@ MonoBehaviour:
       sizeScale: 1
     - texture: {fileID: 2800000, guid: 28ab4fa6b93b7f44baf315754ee06a1c, type: 3}
       charHeightPx: 373
-      charBottomPx: 5
+      charBottomPx: 39
       footCenterPx: 199
       sizeScale: 1
     - texture: {fileID: 2800000, guid: cdc636170ec72294fa2a2611582865b1, type: 3}
       charHeightPx: 373
-      charBottomPx: 5
+      charBottomPx: 41
       footCenterPx: 199
       sizeScale: 1
     - texture: {fileID: 2800000, guid: 6a2ef0567325c6c438260f3bd039882c, type: 3}
       charHeightPx: 373
-      charBottomPx: 5
+      charBottomPx: 39
       footCenterPx: 199
       sizeScale: 1
     - texture: {fileID: 2800000, guid: dd2bca1396d19cb43aa9eb0a6814f68c, type: 3}
       charHeightPx: 373
-      charBottomPx: 5
+      charBottomPx: 40
       footCenterPx: 199
       sizeScale: 1
     hitFrame: 0
