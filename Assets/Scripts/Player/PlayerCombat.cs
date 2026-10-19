@@ -136,6 +136,7 @@ public class PlayerCombat : MonoBehaviour
     public float reloadTime = 1f; // 실제로 장전되면 이 시간 동안 원거리 사격 불가 (근접은 가능)
     public float secondaryReloadTime = 0.7f; // 권총은 더 빨리 장전한다
     float reloadEndTime;
+    public bool IsReloading => Time.time < reloadEndTime; // 지금 든 무기를 장전하는 중 (탄은 시작할 때 이미 채워진다)
 
 
 
