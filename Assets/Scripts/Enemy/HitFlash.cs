@@ -3,7 +3,7 @@ using UnityEngine;
 // 맞으면 잠깐 하얗게 번쩍인다. 적중했는지 알아볼 정도로만 — 연사·레이저는 초당 8번씩 맞으므로
 // 너무 밝으면 화면이 계속 깜빡여 눈이 아프다.
 //
-// EnemyAI가 Awake에서 붙인다 (모든 몹·정예·보스).
+// EnemyAI가 Awake에서 붙인다 (모든 몹·정예·보스). 플레이어는 PlayerCombat이 붙인다
 //  - 스프라이트(EnemySpriteFlash 셰이더): _FlashAmount로 하얀색을 섞는다
 //  - 그 밖의 메쉬(보스 큐브, URP Lit): 발광(_EmissionColor)을 더한다.
 //    보스는 방어 모드에서 _BaseColor를 바꿔 칠하므로 그쪽은 건드리지 않는다
@@ -31,7 +31,8 @@ public class HitFlash : MonoBehaviour
         health = GetComponent<Health>();
         block = new MaterialPropertyBlock();
 
-        EnemySpriteAnimator anim = GetComponentInChildren<EnemySpriteAnimator>(true);
+        Component anim = GetComponentInChildren<EnemySpriteAnimator>(true);
+        if (anim == null) anim = GetComponentInChildren<PlayerSpriteAnimator>(true); // 플레이어도 같은 셰이더
         if (anim != null)
         {
             Renderer r = anim.GetComponent<Renderer>();

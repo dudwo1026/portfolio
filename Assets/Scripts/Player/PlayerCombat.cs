@@ -177,6 +177,7 @@ public class PlayerCombat : MonoBehaviour
 void Awake()
     {
         mover = GetComponent<TopDownMove>();
+        if (GetComponent<Health>() != null && GetComponent<HitFlash>() == null) gameObject.AddComponent<HitFlash>(); // 맞으면 몹처럼 잠깐 하얗게
         bound = GetComponent<PlayerBound>();
         dash = GetComponent<PlayerDash>();
         if (GameSettings.primaryChosen) primaryWeapon = GameSettings.primary;
