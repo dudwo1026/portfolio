@@ -5,11 +5,11 @@ using UnityEngine.UI;
 // 원본은 그대로 두고, 잔상은 캔버스 맨 위에 따로 만든다
 public class UIPulse : MonoBehaviour
 {
-    float time, duration, endScale;
+    float time, duration, endScale, startAlpha;
     Vector3 startScale;
     CanvasGroup group;
 
-    public static void Play(RectTransform source, Canvas canvas, float duration = 0.45f, float endScale = 1.6f)
+    public static void Play(RectTransform source, Canvas canvas, float duration = 0.45f, float endScale = 1.6f, float startAlpha = 0.5f)
     {
         // 캔버스는 부르는 쪽이 넘긴다. 메뉴가 방금 숨겨졌으면 source에서 캔버스를 못 찾을 수 있다
         if (canvas == null) return;
@@ -37,7 +37,7 @@ public class UIPulse : MonoBehaviour
         g.interactable = false;
 
         UIPulse p = go.AddComponent<UIPulse>();
-        p.group = g; p.duration = duration; p.endScale = endScale; p.startScale = rt.localScale;
+        p.group = g; p.duration = duration; p.endScale = endScale; p.startScale = rt.localScale; p.startAlpha = startAlpha;
     }
 
     void Update()
@@ -46,7 +46,7 @@ public class UIPulse : MonoBehaviour
         float t = Mathf.Clamp01(time / duration);
         float e = 1f - (1f - t) * (1f - t); // 처음엔 빠르게 퍼지고 끝에서 느려진다
         transform.localScale = startScale * Mathf.Lerp(1f, endScale, e);
-        group.alpha = 1f - t;
+        group.alpha = startAlpha * (1f - t); // 처음부터 반투명
         if (t >= 1f) Destroy(gameObject);
     }
 }
