@@ -27,6 +27,7 @@ public class BossClone : MonoBehaviour
     Transform sprite;
     Renderer spriteRend;
     MaterialPropertyBlock spriteBlock;
+    bool faced; // 처음 한 번은 거의 위아래 방향이어도 좌우를 정한다
 
     [Header("바닥 경고 표시")]
     public float warningLength = 60f;
@@ -82,8 +83,7 @@ public class BossClone : MonoBehaviour
         spriteRend = q.GetComponent<Renderer>();
         spriteRend.sharedMaterial = spriteMaterial;
         spriteRend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        // 원본 그림은 보스 그림처럼 화면 오른쪽을 본다. 보스가 늘 화면 왼쪽을 보므로 똑같이 뒤집는다 (재질이 양면)
-        sprite.localScale = new Vector3(-spriteHeight * spriteTexture.width / spriteTexture.height, spriteHeight, 1f);
+        sprite.localScale = new Vector3(spriteHeight * spriteTexture.width / spriteTexture.height, spriteHeight, 1f);
         spriteBlock = new MaterialPropertyBlock();
         spriteRend.GetPropertyBlock(spriteBlock);
         spriteBlock.SetTexture("_BaseMap", spriteTexture);
@@ -91,7 +91,7 @@ public class BossClone : MonoBehaviour
         spriteRend.SetPropertyBlock(spriteBlock);
         if (rend != null) rend.enabled = false;
         Tint(aimColor);
-        LateUpdate();
+        // 자리·방향은 첫 LateUpdate가 잡는다 (그때는 Update가 이미 조준 방향으로 돌려 놓았다)
     }
 
     void Tint(Color c)
@@ -108,7 +108,22 @@ public class BossClone : MonoBehaviour
     {
         if (sprite == null) return;
         Camera cam = Camera.main;
-        if (cam != null) sprite.rotation = cam.transform.rotation;
+        if (cam != null)
+        {
+            sprite.rotation = cam.transform.rotation;
+            // 원본 그림은 화면 오른쪽을 본다. 조준·비행 방향(상자의 앞)이 화면 왼쪽이면 뒤집는다 (재질이 양면).
+            // 거의 위아래로 갈 때는 마지막 방향을 유지해 깜빡이지 않게
+            // 첫 프레임은 FixedUpdate가 아직 조준 방향으로 안 돌렸을 수 있어 플레이어 쪽으로 정한다
+            Vector3 fwd = !faced && target != null ? target.position - transform.position : transform.forward;
+            float side = Vector3.Dot(fwd.normalized, cam.transform.right);
+            if (Mathf.Abs(side) > 0.05f || !faced)
+            {
+                faced = true;
+                Vector3 s = sprite.localScale;
+                s.x = Mathf.Abs(s.x) * (side > 0f ? 1f : -1f);
+                sprite.localScale = s;
+            }
+        }
         float bottom = transform.position.y - transform.lossyScale.y * 0.5f;
         sprite.position = new Vector3(transform.position.x, bottom, transform.position.z) + sprite.up * (spriteHeight * 0.5f);
     }
