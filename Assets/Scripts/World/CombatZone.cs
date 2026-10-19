@@ -163,6 +163,10 @@ public class CombatZone : MonoBehaviour, IChargePad
 
     bool Unlocked { get { return requiredKeys <= 0 || (KeyItemSpawner.Instance != null && KeyItemSpawner.Instance.Collected >= requiredKeys); } }
 
+    // 지금 들어갈 수 있는 구획인지 (안내 화살표용): 아직 안 깼고, 열쇠 조건을 채웠고, 다른 구획에 갇혀 있지 않다
+    public bool Enterable { get { return Status == State.Idle && Current == null && Unlocked && portal != null; } }
+    public Transform PortalTransform { get { return portal != null ? portal.transform : null; } }
+
     bool CanEnter()
     {
         if (Status != State.Idle || Current != null || player == null || !Unlocked) return false;

@@ -23,6 +23,8 @@ public class EliteThreatIndicator : MonoBehaviour
     // 넣어 두면 정예·열쇠 대신 이 포탈들 중 열린 것을 가리킨다
     public Portal[] portals;
     bool TrackPortals { get { return portals != null && portals.Length > 0; } }
+    // 켜면 지금 들어갈 수 있는 구획(CombatZone) 포탈을 가리킨다 (옥상에선 안 띄운다)
+    public bool trackZones = false;
     public float showRadius = 22f;       // 이 안의 정예만 표시. 인지범위(15)보다 넉넉히 잡아 미리 경고한다
     public float refreshInterval = 0.25f; // 정예 목록 재탐색 주기 (위치는 매 프레임 갱신된다)
     public float aimHeight = 1f;          // 몹의 발밑이 아니라 몸통을 기준으로 방향을 잡는다
@@ -84,7 +86,7 @@ public class EliteThreatIndicator : MonoBehaviour
 
     void BuildContainer()
     {
-        GameObject go = new GameObject(TrackPortals ? "PortalArrows" : trackKeys ? "KeyArrows" : "EliteThreatArrows", typeof(RectTransform));
+        GameObject go = new GameObject(TrackPortals ? "PortalArrows" : trackZones ? "ZoneArrows" : trackKeys ? "KeyArrows" : "EliteThreatArrows", typeof(RectTransform));
         container = (RectTransform)go.transform;
         container.SetParent(transform, false);
         container.anchorMin = Vector2.zero;
@@ -120,7 +122,7 @@ public class EliteThreatIndicator : MonoBehaviour
         {
             Transform t = targets[i];
             if (t == null || !t.gameObject.activeInHierarchy) continue; // 주운 열쇠는 꺼진다
-            if (!trackKeys && !TrackPortals)
+            if (!trackKeys && !TrackPortals && !trackZones)
             {
                 EnemyAI e = t.GetComponent<EnemyAI>();
                 if (e == null || !e.isActiveAndEnabled) continue;
@@ -188,6 +190,14 @@ public class EliteThreatIndicator : MonoBehaviour
             if (area == null) area = FindFirstObjectByType<AreaManager>();
             if (area != null && area.PlayerOnRoof) return; // 옥상(보스전)에서는 포탈 안내를 띄우지 않는다
             foreach (Portal p in portals) if (p != null && p.IsOpen) targets.Add(p.transform);
+            return;
+        }
+        if (trackZones)
+        {
+            if (area == null) area = FindFirstObjectByType<AreaManager>();
+            if (area != null && area.PlayerOnRoof) return;
+            foreach (CombatZone z in FindObjectsByType<CombatZone>(FindObjectsSortMode.None))
+                if (z.Enterable) targets.Add(z.PortalTransform);
             return;
         }
         if (trackKeys)
