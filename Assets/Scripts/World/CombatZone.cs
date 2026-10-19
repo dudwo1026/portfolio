@@ -115,6 +115,8 @@ public class CombatZone : MonoBehaviour, IChargePad
             return;
         }
 
+        if (portal != null && Status == State.Idle && portal.activeSelf != Unlocked) portal.SetActive(Unlocked);
+
         bool held = Keyboard.current != null && Keyboard.current.eKey.isPressed;
         if (!held || !CanEnter())
         {
@@ -125,9 +127,13 @@ public class CombatZone : MonoBehaviour, IChargePad
         if (holdProgress >= holdTime) Enter();
     }
 
+    // 열쇠를 이만큼 모아야 포탈이 나타나고 들어갈 수 있다 (0이면 처음부터)
+    public int requiredKeys = 0;
+    bool Unlocked { get { return requiredKeys <= 0 || (KeyItemSpawner.Instance != null && KeyItemSpawner.Instance.Collected >= requiredKeys); } }
+
     bool CanEnter()
     {
-        if (Status != State.Idle || Current != null || player == null) return false;
+        if (Status != State.Idle || Current != null || player == null || !Unlocked) return false;
         Vector3 d = player.position - portalPosition;
         d.y = 0f;
         return d.sqrMagnitude <= interactRadius * interactRadius;
