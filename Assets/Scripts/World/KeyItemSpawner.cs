@@ -37,6 +37,7 @@ public class KeyItemSpawner : MonoBehaviour
     public float portalZoom = 0.8f;    // 포탈 앞을 비출 때 카메라 거리 배율
     public float orbSize = 2.2f;
     public float burstSize = 14f;      // 착지 순간 번지는 빛의 최대 지름
+    public float groupRadius = 4f;     // 이 거리 안에 같이 떨어진 열쇠는 한꺼번에 줍는다 (2개 구획 간격 1.5)
     bool cutsceneRunning;
     // 포탈은 마지막 열쇠가 연출로 밝혀지는 순간 열린다 (그래서 lit 기준)
     public bool HasAllKeys { get { return lit >= keysRequired; } }
@@ -116,18 +117,28 @@ public class KeyItemSpawner : MonoBehaviour
 
     public void Collect(GameObject key)
     {
+        // 같이 떨어진 열쇠(미니보스 2마리 구획)는 하나만 닿아도 함께 줍는다. 연출 한 번에 칸 여러 개가 같이 켜진다
+        var from = new System.Collections.Generic.List<Vector3> { key.transform.position };
         key.SetActive(false);
-        Collected++; // 세이브·포탈 개방은 바로 센다. 보이는 쪽(lit)만 연출 끝에 맞춘다
-        if (pickupCutscene && !cutsceneRunning) StartCoroutine(PickupCutscene(key.transform.position));
+        foreach (Transform k in Keys)
+        {
+            if (k == null || !k.gameObject.activeSelf) continue;
+            if ((k.position - from[0]).sqrMagnitude > groupRadius * groupRadius) continue;
+            from.Add(k.position);
+            k.gameObject.SetActive(false);
+        }
+        Collected += from.Count; // 세이브·포탈 개방은 바로 센다. 보이는 쪽(lit)만 연출 끝에 맞춘다
+        if (pickupCutscene && !cutsceneRunning) StartCoroutine(PickupCutscene(from));
         else if (!cutsceneRunning) { lit = Collected; RefreshLabel(); }
     }
 
     // 열쇠 획득 연출. 세상을 멈춘 채(timeScale 0, 전부 unscaled 시간):
-    // 열쇠가 빛의 구체로 바뀌어 하늘로 솟음 → 페이드아웃 → 포탈 앞 그 칸을 비추며 페이드인 →
+    // 열쇠가 빛의 구체로 바뀌어 하늘로 솟음 → 페이드아웃 → 포탈 앞 그 칸(들)을 비추며 페이드인 →
     // 하늘에서 구체가 칸으로 떨어짐 → 번쩍하며 칸의 열쇠가 밝혀짐 → 잠깐 보여 주고 다시 플레이어로
-    System.Collections.IEnumerator PickupCutscene(Vector3 from)
+    System.Collections.IEnumerator PickupCutscene(System.Collections.Generic.List<Vector3> from)
     {
         cutsceneRunning = true;
+        int n = from.Count;
         float prevScale = Time.timeScale;
         Time.timeScale = 0f;
         GameObject p = GameObject.Find("Player");
@@ -138,52 +149,65 @@ public class KeyItemSpawner : MonoBehaviour
         for (int i = 0; i < controls.Length; i++) if (controls[i] != null) { wasOn[i] = controls[i].enabled; controls[i].enabled = false; }
 
         // 1) 솟는다: 처음엔 천천히, 점점 빨라지며 화면 위로 빠져나간다
-        LightOrb orb = LightOrb.Spawn(from, orbSize);
+        LightOrb[] orbs = new LightOrb[n];
+        for (int i = 0; i < n; i++) orbs[i] = LightOrb.Spawn(from[i], orbSize);
         for (float t = 0f; t < riseTime; t += Time.unscaledDeltaTime)
         {
             float k = t / riseTime;
-            orb.transform.position = from + Vector3.up * riseHeight * k * k;
+            for (int i = 0; i < n; i++) orbs[i].transform.position = from[i] + Vector3.up * riseHeight * k * k;
             yield return null;
         }
-        Destroy(orb.gameObject);
+        foreach (LightOrb o in orbs) Destroy(o.gameObject);
 
-        // 2) 페이드아웃 → 카메라를 포탈 옆 그 칸으로
+        // 2) 페이드아웃 → 카메라를 포탈 옆 그 칸(들)의 가운데로
         UnityEngine.UI.Image fade = WarpBeam.ScreenOverlay(Color.black);
         yield return Fade(fade, 0f, 1f);
-        int slot = Mathf.Clamp(Collected - 1, 0, slotLights != null ? slotLights.Length - 1 : 0);
-        Vector3 target = SlotCenter(slot);
+        int maxSlot = slotLights != null ? slotLights.Length - 1 : 0;
+        int[] slots = new int[n];
+        Vector3[] targets = new Vector3[n];
+        Vector3 focus = Vector3.zero;
+        for (int i = 0; i < n; i++)
+        {
+            slots[i] = Mathf.Clamp(Collected - n + i, 0, maxSlot);
+            targets[i] = SlotCenter(slots[i]);
+            focus += targets[i] / n;
+        }
         Camera cam = Camera.main;
         CameraFollow follow = cam != null ? cam.GetComponent<CameraFollow>() : null;
         if (follow != null)
         {
-            follow.cutFocus = target;
+            follow.cutFocus = focus;
             follow.cutDistance = follow.distance * portalZoom;
             follow.cutWeight = 1f;
         }
         yield return new WaitForSecondsRealtime(0.15f);
         yield return Fade(fade, 1f, 0f);
 
-        // 3) 떨어진다: 가속하며 칸에 꽂힌다
-        orb = LightOrb.Spawn(target + Vector3.up * fallHeight, orbSize);
+        // 3) 떨어진다: 가속하며 칸에 동시에 꽂힌다
+        for (int i = 0; i < n; i++) orbs[i] = LightOrb.Spawn(targets[i] + Vector3.up * fallHeight, orbSize);
         for (float t = 0f; t < fallTime; t += Time.unscaledDeltaTime)
         {
             float k = t / fallTime;
-            orb.transform.position = target + Vector3.up * fallHeight * (1f - k * k);
+            for (int i = 0; i < n; i++) orbs[i].transform.position = targets[i] + Vector3.up * fallHeight * (1f - k * k);
             yield return null;
         }
-        Destroy(orb.gameObject);
+        foreach (LightOrb o in orbs) Destroy(o.gameObject);
 
         // 4) 번쩍: 화면이 하얗게 튀고, 빛이 크게 번지며 칸의 열쇠가 켜진다
         lit = Collected;
         RefreshLabel();
-        if (slotGlows != null && slot < slotGlows.Length && slotGlows[slot] != null)
-            foreach (ParticleSystem ps in slotGlows[slot].GetComponentsInChildren<ParticleSystem>())
-            {
-                ParticleSystem.MainModule m = ps.main;
-                m.useUnscaledTime = true; // 멈춘 동안에도 빛 번짐이 보이게
-                ps.Play();
-            }
-        LightOrb.Burst(target, orbSize, burstSize, 0.7f);
+        for (int i = 0; i < n; i++)
+        {
+            int s = slots[i];
+            if (slotGlows != null && s < slotGlows.Length && slotGlows[s] != null)
+                foreach (ParticleSystem ps in slotGlows[s].GetComponentsInChildren<ParticleSystem>())
+                {
+                    ParticleSystem.MainModule m = ps.main;
+                    m.useUnscaledTime = true; // 멈춘 동안에도 빛 번짐이 보이게
+                    ps.Play();
+                }
+            LightOrb.Burst(targets[i], orbSize, burstSize, 0.7f);
+        }
         UnityEngine.UI.Image flash = WarpBeam.ScreenOverlay(Color.white);
         for (float t = 0f; t < 0.35f; t += Time.unscaledDeltaTime) { flash.color = new Color(1f, 1f, 1f, 0.8f * (1f - t / 0.35f)); yield return null; }
         Destroy(flash.canvas.gameObject);
