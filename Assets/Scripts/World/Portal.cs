@@ -34,6 +34,13 @@ public class Portal : MonoBehaviour, IChargePad
     public UnityEngine.Rendering.Volume blurVolume;  // 묻는 동안 weight 1 (약한 가우시안 피사계심도)
     Transform pending;
 
+    [Header("워프 이펙트")]
+    public GameObject departEffect;   // 들어갈 때 출발 자리에
+    public GameObject arriveEffect;   // 도착 자리에
+    public float warpDelay = 0.8f;    // 출발 이펙트를 보여 주고 넘어가기까지
+    public float effectLifetime = 3f;
+    bool warping;
+
     float readyTime = 0f;
     Material runtimeMat;
     bool wasOpen;
@@ -148,8 +155,35 @@ public class Portal : MonoBehaviour, IChargePad
 
     void Teleport(Transform player)
     {
+        if (warping) return;
+        if (departEffect == null) { MovePlayer(player); return; }
+        StartCoroutine(Warp(player));
+    }
+
+    // 출발 이펙트가 차오르는 동안 제자리에 묶어 뒀다가 넘긴다. 바로 넘기면 카메라가 따라가서 출발 이펙트가 안 보인다
+    System.Collections.IEnumerator Warp(Transform player)
+    {
+        warping = true;
+        SpawnEffect(departEffect, player.position);
+        TopDownMove mover = player.GetComponent<TopDownMove>();
+        bool wasLocked = mover != null && mover.movementLocked;
+        if (mover != null) mover.movementLocked = true;
+        yield return new WaitForSeconds(warpDelay);
+        if (mover != null) mover.movementLocked = wasLocked;
+        MovePlayer(player);
+        warping = false;
+    }
+
+    void SpawnEffect(GameObject prefab, Vector3 at)
+    {
+        if (prefab != null) Destroy(Instantiate(prefab, at, Quaternion.identity), effectLifetime);
+    }
+
+    void MovePlayer(Transform player)
+    {
         Vector3 dir = destinationPortal != null ? destinationPortal.exitDirection : destination.forward;
         player.position = destination.position + dir.normalized * 2f;
+        SpawnEffect(arriveEffect, player.position);
 
         readyTime = Time.time + cooldown;
         if (destinationPortal != null)
