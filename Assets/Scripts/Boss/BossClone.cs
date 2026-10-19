@@ -82,7 +82,8 @@ public class BossClone : MonoBehaviour
         spriteRend = q.GetComponent<Renderer>();
         spriteRend.sharedMaterial = spriteMaterial;
         spriteRend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        sprite.localScale = new Vector3(spriteHeight * spriteTexture.width / spriteTexture.height, spriteHeight, 1f);
+        // 원본 그림은 보스 그림처럼 화면 오른쪽을 본다. 보스가 늘 화면 왼쪽을 보므로 똑같이 뒤집는다 (재질이 양면)
+        sprite.localScale = new Vector3(-spriteHeight * spriteTexture.width / spriteTexture.height, spriteHeight, 1f);
         spriteBlock = new MaterialPropertyBlock();
         spriteRend.GetPropertyBlock(spriteBlock);
         spriteBlock.SetTexture("_BaseMap", spriteTexture);
