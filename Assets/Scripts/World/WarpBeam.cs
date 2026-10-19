@@ -83,10 +83,10 @@ public class WarpBeam : MonoBehaviour
         if (t >= 1f) Destroy(gameObject);
     }
 
-    // 화면 전체를 잠깐 하얗게 덮었다가 걷는다
-    public static void ScreenFlash(float alpha, float duration)
+    // 화면 전체를 덮는 판 (처음엔 투명). 부르는 쪽이 알파를 올렸다 내리고 다 쓰면 캔버스째 지운다
+    public static Image ScreenOverlay(Color color)
     {
-        GameObject go = new GameObject("WarpFlash");
+        GameObject go = new GameObject("WarpFade");
         Canvas c = go.AddComponent<Canvas>();
         c.renderMode = RenderMode.ScreenSpaceOverlay;
         c.sortingOrder = 500;
@@ -95,21 +95,7 @@ public class WarpBeam : MonoBehaviour
         RectTransform rt = img.rectTransform;
         rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = rt.offsetMax = Vector2.zero;
         img.raycastTarget = false;
-        go.AddComponent<WarpFlash>().Init(img, alpha, duration);
-    }
-}
-
-public class WarpFlash : MonoBehaviour
-{
-    Image img; float alpha, duration, time;
-
-    public void Init(Image i, float a, float d) { img = i; alpha = a; duration = d; Update(); }
-
-    void Update()
-    {
-        time += Time.unscaledDeltaTime;
-        float t = Mathf.Clamp01(time / duration);
-        img.color = new Color(1f, 1f, 1f, alpha * (1f - t));
-        if (t >= 1f) Destroy(gameObject);
+        img.color = new Color(color.r, color.g, color.b, 0f);
+        return img;
     }
 }

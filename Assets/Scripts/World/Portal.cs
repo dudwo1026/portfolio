@@ -38,7 +38,9 @@ public class Portal : MonoBehaviour, IChargePad
     public bool warpBeam = true;
     public float stretchTime = 0.45f;  // 캐릭터가 가늘고 길게 늘어나며 빛기둥으로 솟는 시간 (그 뒤 이동)
     public float landTime = 0.35f;     // 도착해서 납작했다가 원래대로 튕겨 돌아오는 시간
-    public GameObject departAura;      // 늘어나는 동안 캐릭터를 감는 이펙트 (얼음 회오리)
+    public float fadeTime = 0.4f;      // 화면이 검게 닫히는 / 다시 열리는 시간
+    public float blackHoldTime = 0.2f; // 검은 화면으로 멈춰 있는 시간
+    public GameObject departAura;     // 늘어나는 동안 캐릭터를 감는 이펙트 (얼음 회오리)
     public GameObject arriveBurst;     // 착지 순간 터지는 이펙트 (파란 임팩트)
     bool warping;
 
@@ -162,7 +164,7 @@ public class Portal : MonoBehaviour, IChargePad
         StartCoroutine(Warp(player, sprite));
     }
 
-    // 출발: 제자리에 묶인 채 캐릭터가 가늘고 길게 늘어나며 빛기둥으로 솟는다 → 흰 플래시와 함께 이동
+    // 출발: 제자리에 묶인 채 캐릭터가 가늘고 길게 늘어나며 빛기둥으로 솟고 사라진다 → 페이드아웃 → 이동 → 페이드인
     // 도착: 빛기둥이 굵게 꽂혔다 가늘어지고, 캐릭터는 납작했다가 튕기듯 원래대로
     System.Collections.IEnumerator Warp(Transform player, PlayerSpriteAnimator sprite)
     {
@@ -181,8 +183,16 @@ public class Portal : MonoBehaviour, IChargePad
             yield return null;
         }
 
-        WarpBeam.ScreenFlash(0.85f, 0.35f);
+        // 캐릭터를 지우고 화면을 검게 닫았다가, 옥상으로 옮긴 뒤 다시 연다. 다 열린 다음에 도착 연출
+        sprite.warpScale = Vector2.zero;
+        UnityEngine.UI.Image fade = WarpBeam.ScreenOverlay(Color.black);
+        for (float t = 0f; t < fadeTime; t += Time.deltaTime) { fade.color = new Color(0f, 0f, 0f, t / fadeTime); yield return null; }
+        fade.color = Color.black;
         MovePlayer(player);
+        yield return new WaitForSeconds(blackHoldTime); // 카메라가 옥상에 자리 잡을 시간
+        for (float t = 0f; t < fadeTime; t += Time.deltaTime) { fade.color = new Color(0f, 0f, 0f, 1f - t / fadeTime); yield return null; }
+        Destroy(fade.canvas.gameObject);
+
         if (mover != null) mover.movementLocked = wasLocked;
         WarpBeam.Spawn(Feet(player), 0.45f, 2.2f, 14f, true);
         SpawnFx(arriveBurst, player.position, 2f);
