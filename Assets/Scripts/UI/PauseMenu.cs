@@ -15,7 +15,8 @@ public class PauseMenu : MonoBehaviour
         if (kb == null || !kb.escapeKey.wasPressedThisFrame) return;
 
         if (panel.activeSelf) Resume();
-        else if (Time.timeScale > 0f) Open(); // 게임오버·포탈 확인창으로 이미 멈춰 있으면 열지 않는다
+        // 게임오버·포탈 확인창·열쇠 연출·결과창으로 이미 멈춰 있거나, 시간을 직접 다루는 연출(워프·보스 등장·처치 슬로) 중엔 열지 않는다
+        else if (Time.timeScale > 0f && !Portal.Warping && !BossIntro.Playing && !HitStop.Active) Open();
     }
 
     void Open()

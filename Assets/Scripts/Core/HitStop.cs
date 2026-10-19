@@ -9,6 +9,9 @@ public class HitStop : MonoBehaviour
     float baseFixedDelta = -1f;
     float lastSet = -1f; // 이 연출이 마지막으로 넣은 timeScale. -1이면 돌고 있지 않다
 
+    // 처치 연출이 도는 중인지 (그 사이 일시정지를 열면 느린 화면이 끊긴다)
+    public static bool Active { get { return runner != null && runner.lastSet >= 0f; } }
+
     public static void Play(float stopTime, float startScale, float recoverTime)
     {
         if (Time.timeScale <= 0f) return; // 이미 멈춰 있으면(게임오버·확인창·다른 히트스톱) 건드리지 않는다

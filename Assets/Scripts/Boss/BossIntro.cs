@@ -24,6 +24,8 @@ public class BossIntro : MonoBehaviour, IBossMotion
     public float MotionProgress { get { return 0f; } }
 
     bool played, roaring;
+    // 등장 연출(카메라가 보스로 넘어갔다 돌아올 때까지) 중인지. 그 사이엔 일시정지를 열지 않는다
+    public static bool Playing { get; private set; }
     static Texture2D ringTex;
     static Material ringMat;
 
@@ -42,6 +44,7 @@ public class BossIntro : MonoBehaviour, IBossMotion
         while (Portal.Warping) yield return null;
         yield return new WaitForSeconds(arriveDelay);
         played = true;
+        Playing = true;
 
         float total = panTime * 2f + roarTime + 0.5f;
         HoldFightFor(total);
@@ -89,6 +92,12 @@ public class BossIntro : MonoBehaviour, IBossMotion
         if (combat != null) combat.enabled = true;
         if (dash != null) dash.enabled = true;
         if (ai != null) ai.patternDriving = false;
+        Playing = false;
+    }
+
+    void OnDisable()
+    {
+        Playing = false; // 연출 도중 꺼지거나 씬이 바뀌어도 남지 않게
     }
 
     // 연출 동안 보스 패턴·평타와 옥상 몹 소환을 미룬다 (AreaManager의 도착 유예와 같은 방식)
