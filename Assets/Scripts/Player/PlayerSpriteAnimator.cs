@@ -73,6 +73,9 @@ public class PlayerSpriteAnimator : MonoBehaviour
     [Tooltip("이 값보다 좌우 성분이 작으면(거의 위아래로만 이동) 보던 방향을 유지한다")]
     public float flipDeadzone = 0.15f;
 
+    // 워프 연출이 캐릭터를 늘이거나 눌러 찌그러뜨릴 때 쓴다 (발 위치는 그대로). 평소엔 1
+    [System.NonSerialized] public Vector2 warpScale = Vector2.one;
+
     Renderer rend;
     MaterialPropertyBlock mpb;
     float timer;
@@ -248,7 +251,8 @@ public class PlayerSpriteAnimator : MonoBehaviour
         float texH = f.texture.height;
         float charPx = Mathf.Max(1f, f.charHeightPx);
         float quadH = characterHeight * Mathf.Max(0.01f, f.sizeScale) * texH / charPx;
-        float quadW = quadH * texW / texH;
+        float quadW = quadH * texW / texH * warpScale.x;
+        quadH *= warpScale.y;
         float localY = quadH * 0.5f - (f.charBottomPx / texH) * quadH - 1.0f;
         float offsetX = -((f.footCenterPx - texW * 0.5f) / texW) * quadW;
 

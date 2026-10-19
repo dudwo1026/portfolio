@@ -34,11 +34,10 @@ public class Portal : MonoBehaviour, IChargePad
     public UnityEngine.Rendering.Volume blurVolume;  // 묻는 동안 weight 1 (약한 가우시안 피사계심도)
     Transform pending;
 
-    [Header("워프 이펙트")]
-    public GameObject departEffect;   // 들어갈 때 출발 자리에
-    public GameObject arriveEffect;   // 도착 자리에
-    public float warpDelay = 0.8f;    // 출발 이펙트를 보여 주고 넘어가기까지
-    public float effectLifetime = 3f;
+    [Header("워프 연출 (WarpBeam)")]
+    public bool warpBeam = true;
+    public float stretchTime = 0.45f;  // 캐릭터가 가늘고 길게 늘어나며 빛기둥으로 솟는 시간 (그 뒤 이동)
+    public float landTime = 0.35f;     // 도착해서 납작했다가 원래대로 튕겨 돌아오는 시간
     bool warping;
 
     float readyTime = 0f;
@@ -156,34 +155,55 @@ public class Portal : MonoBehaviour, IChargePad
     void Teleport(Transform player)
     {
         if (warping) return;
-        if (departEffect == null) { MovePlayer(player); return; }
-        StartCoroutine(Warp(player));
+        PlayerSpriteAnimator sprite = player.GetComponentInChildren<PlayerSpriteAnimator>();
+        if (!warpBeam || sprite == null) { MovePlayer(player); return; }
+        StartCoroutine(Warp(player, sprite));
     }
 
-    // 출발 이펙트가 차오르는 동안 제자리에 묶어 뒀다가 넘긴다. 바로 넘기면 카메라가 따라가서 출발 이펙트가 안 보인다
-    System.Collections.IEnumerator Warp(Transform player)
+    // 출발: 제자리에 묶인 채 캐릭터가 가늘고 길게 늘어나며 빛기둥으로 솟는다 → 흰 플래시와 함께 이동
+    // 도착: 빛기둥이 굵게 꽂혔다 가늘어지고, 캐릭터는 납작했다가 튕기듯 원래대로
+    System.Collections.IEnumerator Warp(Transform player, PlayerSpriteAnimator sprite)
     {
         warping = true;
-        SpawnEffect(departEffect, player.position);
         TopDownMove mover = player.GetComponent<TopDownMove>();
         bool wasLocked = mover != null && mover.movementLocked;
         if (mover != null) mover.movementLocked = true;
-        yield return new WaitForSeconds(warpDelay);
-        if (mover != null) mover.movementLocked = wasLocked;
+
+        WarpBeam.Spawn(Feet(player), stretchTime + 0.25f, 1.6f, 14f, false);
+        for (float t = 0f; t < stretchTime; t += Time.deltaTime)
+        {
+            float k = t / stretchTime;
+            k *= k; // 처음엔 천천히, 끝에 확 빨려 올라간다
+            sprite.warpScale = new Vector2(Mathf.Lerp(1f, 0.05f, k), Mathf.Lerp(1f, 2.2f, k));
+            yield return null;
+        }
+
+        WarpBeam.ScreenFlash(0.85f, 0.35f);
         MovePlayer(player);
+        if (mover != null) mover.movementLocked = wasLocked;
+        WarpBeam.Spawn(Feet(player), 0.45f, 2.2f, 14f, true);
+
+        for (float t = 0f; t < landTime; t += Time.deltaTime)
+        {
+            float k = t / landTime;
+            float bounce = Mathf.Cos(k * Mathf.PI * 1.5f) * (1f - k); // 납작 → 살짝 길게 → 원래대로
+            sprite.warpScale = new Vector2(1f + 0.45f * bounce, 1f - 0.45f * bounce);
+            yield return null;
+        }
+        sprite.warpScale = Vector2.one;
         warping = false;
     }
 
-    void SpawnEffect(GameObject prefab, Vector3 at)
+    // 플레이어 중심은 발에서 1 위다 (PlayerSpriteAnimator와 같은 기준)
+    static Vector3 Feet(Transform player)
     {
-        if (prefab != null) Destroy(Instantiate(prefab, at, Quaternion.identity), effectLifetime);
+        return player.position + Vector3.down;
     }
 
     void MovePlayer(Transform player)
     {
         Vector3 dir = destinationPortal != null ? destinationPortal.exitDirection : destination.forward;
         player.position = destination.position + dir.normalized * 2f;
-        SpawnEffect(arriveEffect, player.position);
 
         readyTime = Time.time + cooldown;
         if (destinationPortal != null)
