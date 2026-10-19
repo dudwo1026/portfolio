@@ -17,6 +17,8 @@ public class KeyItemSpawner : MonoBehaviour
     // 켜 두면 표시등 큐브 대신 열쇠 모델을 세운다: 못 모은 칸은 slotOff 한 가지 색, 모은 칸은 원래 열쇠 색
     public bool slotKeyModels = true;
     public float slotKeyHeight = 1.7f; // 표시등 열쇠 높이(월드)
+    public float slotKeySpinSpeed = 30f; // 모은 칸 열쇠가 천천히 돈다 (도/초)
+    Transform[] slotKeys;
     Renderer[][] slotParts;
     Material[][] slotPartMats;
 
@@ -43,6 +45,7 @@ public class KeyItemSpawner : MonoBehaviour
     void BuildSlotKeys()
     {
         if (slotLights == null) return;
+        slotKeys = new Transform[slotLights.Length];
         slotParts = new Renderer[slotLights.Length][];
         slotPartMats = new Material[slotLights.Length][];
         for (int i = 0; i < slotLights.Length; i++)
@@ -61,9 +64,17 @@ public class KeyItemSpawner : MonoBehaviour
             k.transform.position += Vector3.up * (cb.min.y - (k.transform.position.y + (kb.min.y - k.transform.position.y) * s)); // 바닥을 큐브 바닥에
             k.transform.SetParent(cube.transform.parent, true);
             cube.enabled = false;
+            slotKeys[i] = k.transform;
             slotParts[i] = parts;
             slotPartMats[i] = System.Array.ConvertAll(parts, r => r.sharedMaterial);
         }
+    }
+
+    void Update()
+    {
+        if (slotKeys == null) return;
+        for (int i = 0; i < slotKeys.Length && i < Collected; i++)
+            if (slotKeys[i] != null) slotKeys[i].Rotate(0f, slotKeySpinSpeed * Time.deltaTime, 0f, Space.World);
     }
 
     // 원하는 자리에 열쇠 하나를 세운다. 닿으면 줍는다
