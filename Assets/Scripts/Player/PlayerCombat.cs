@@ -132,6 +132,7 @@ public class PlayerCombat : MonoBehaviour
     public int primaryMaxReserveMags = 11;  // 예비 330발 → 장전 30 + 예비 = 전체 360
     public int secondaryMagSize = 8;   // 권총: 예비탄 무제한, 탄창만 있다
     [System.NonSerialized] public bool infiniteAmmo; // 테스트용: 쏴도 탄창·유탄이 줄지 않는다 (KillGauge의 0 키)
+    [System.NonSerialized] public bool debugPistolDamage; // 테스트용: 권총 피해 1000 (KillGauge의 ; 키)
     public float reloadTime = 1f; // 실제로 장전되면 이 시간 동안 원거리 사격 불가 (근접은 가능)
     public float secondaryReloadTime = 0.7f; // 권총은 더 빨리 장전한다
     float reloadEndTime;
@@ -561,7 +562,7 @@ void Fire()
         }
         else
         {
-            SpawnBullet(pistolDamage, transform.forward);
+            SpawnBullet(debugPistolDamage ? 1000f : pistolDamage, transform.forward);
             rate = secondaryFireCooldown;
         }
         LastRangedFireTime = Time.time; // 공격 모션이 이 시각을 보고 자세를 바꾼다

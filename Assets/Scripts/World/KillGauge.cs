@@ -68,6 +68,7 @@ public class KillGauge : MonoBehaviour
     //   ] : 주무기 돌격소총 → 레이저 → 산탄총 순환 (임시)
     //   숫자패드 1~6 : 정예 a~f를 플레이어 남쪽 10유닛에 소환 (패턴을 하나씩 확인할 때)
     //   ' : 열쇠를 전부 모은 것으로 처리해 옥상 포탈을 바로 연다
+    //   ; : 보조무기(권총) 피해 1000 켜기/끄기
     //   (\ : 들어가 있는 구획을 클리어 처리 — CombatZone)
     void HandleDebugKeys()
     {
@@ -100,6 +101,15 @@ public class KillGauge : MonoBehaviour
             }
         }
         if (kb.quoteKey.wasPressedThisFrame && KeyItemSpawner.Instance != null) KeyItemSpawner.Instance.DebugCollectAll();
+        if (kb.semicolonKey.wasPressedThisFrame)
+        {
+            PlayerCombat pc = FindFirstObjectByType<PlayerCombat>();
+            if (pc != null)
+            {
+                pc.debugPistolDamage = !pc.debugPistolDamage;
+                Debug.Log("[Debug] 권총 피해 1000: " + (pc.debugPistolDamage ? "ON" : "OFF"));
+            }
+        }
 
         if (kb.numpad1Key.wasPressedThisFrame) DebugSpawnElite(0);
         if (kb.numpad2Key.wasPressedThisFrame) DebugSpawnElite(1);
