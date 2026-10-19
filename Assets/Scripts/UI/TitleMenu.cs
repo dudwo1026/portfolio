@@ -14,10 +14,14 @@ public class TitleMenu : MonoBehaviour
     public Graphic background;                // 새 게임을 누르면 이 배경을 검게 바꾼 뒤 난이도 선택을 띄운다
     public float fadeToBlackTime = 2f;
 
+    bool starting;
+
     public void NewGame()
     {
-        if (menu != null) menu.SetActive(false);
-        // 이 스크립트는 방금 숨긴 메뉴에 붙어 있어 코루틴을 못 돌린다. 켜져 있는 배경에서 돌린다
+        // 메뉴는 화면이 검게 바뀌는 동안 그대로 두고, 난이도 선택이 뜰 때 숨긴다
+        if (starting) return;
+        starting = true;
+        // 이 스크립트는 곧 숨길 메뉴에 붙어 있어 코루틴을 못 돌린다. 켜져 있는 배경에서 돌린다
         if (background != null) background.StartCoroutine(FadeThenChoose());
         else ShowDifficulty();
     }
@@ -36,6 +40,7 @@ public class TitleMenu : MonoBehaviour
 
     void ShowDifficulty()
     {
+        if (menu != null) menu.SetActive(false);
         if (difficultySelectPanel != null) { difficultySelectPanel.SetActive(true); return; }
         GameSettings.difficulty = Difficulty.Hard;
         OpenWeaponSelect();

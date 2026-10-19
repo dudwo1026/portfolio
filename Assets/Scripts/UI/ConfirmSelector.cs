@@ -16,8 +16,7 @@ public class ConfirmSelector : MonoBehaviour
     public bool selectedOutline = true;     // 고른 버튼에 흰 테두리
     public Color outlineColor = Color.white;
     public float outlineWidth = 3f;
-    public bool pressPulse = false;         // 누르면 버튼 실루엣이 퍼지며 사라진다 (UIPulse)
-    public Color pulseColor = new Color(1f, 1f, 1f, 0.8f);
+    public bool pressPulse = false;         // 누르면 버튼 잔상이 퍼지며 사라진다 (UIPulse)
 
     int index; // -1 = 아직 아무것도 안 고름
     // 켜진 프레임에는 입력을 받지 않는다. 앞 화면에서 Enter로 이 창을 열었으면
@@ -32,7 +31,7 @@ public class ConfirmSelector : MonoBehaviour
         foreach (Button b in buttons)
         {
             Button button = b;
-            button.onClick.AddListener(() => { if (button.targetGraphic != null) UIPulse.Play(button.targetGraphic, canvas, pulseColor); });
+            button.onClick.AddListener(() => UIPulse.Play((RectTransform)button.transform, canvas));
         }
     }
 
