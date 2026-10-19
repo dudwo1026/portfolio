@@ -16,6 +16,10 @@ public class ConfirmSelector : MonoBehaviour
     public bool selectedOutline = true;     // 고른 버튼에 흰 테두리
     public Color outlineColor = Color.white;
     public float outlineWidth = 3f;
+    // 넣으면 Outline 대신 이 테두리 그림(9-slice)을 고른 버튼 위에 얹는다. 그림 카드는 Outline이 안 보인다
+    public Sprite selectedFrame;
+    public float framePadding = 8f;         // 버튼 바깥으로 튀어나오는 정도
+    public float frameScale = 1f;           // 테두리 굵기 배율 (큰 카드는 2쯤)
     public bool pressPulse = false;         // 누르면 버튼 잔상이 퍼지며 사라진다 (UIPulse)
 
     int index; // -1 = 아직 아무것도 안 고름
@@ -82,7 +86,9 @@ public class ConfirmSelector : MonoBehaviour
         for (int i = 0; i < buttons.Length; i++)
         {
             buttons[i].transform.localScale = Vector3.one * (i == index ? selectedScale : 1f);
-            if (!selectedOutline || buttons[i].targetGraphic == null) continue;
+            if (!selectedOutline) continue;
+            if (selectedFrame != null) { Frame(buttons[i]).SetActive(i == index); continue; }
+            if (buttons[i].targetGraphic == null) continue;
             // 버튼 바탕 그림에만 단다 (글자에 달면 글자가 두꺼워진다)
             Outline o = buttons[i].targetGraphic.GetComponent<Outline>();
             if (o == null)
@@ -94,5 +100,22 @@ public class ConfirmSelector : MonoBehaviour
             o.effectDistance = new Vector2(outlineWidth, -outlineWidth);
             o.enabled = i == index;
         }
+    }
+
+    GameObject Frame(Button b)
+    {
+        Transform t = b.transform.Find("SelectFrame");
+        if (t != null) return t.gameObject;
+        GameObject go = new GameObject("SelectFrame", typeof(RectTransform));
+        RectTransform rt = (RectTransform)go.transform;
+        rt.SetParent(b.transform, false);
+        rt.SetAsLastSibling(); // 글자보다 위
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = new Vector2(-framePadding, -framePadding); rt.offsetMax = new Vector2(framePadding, framePadding);
+        Image img = go.AddComponent<Image>();
+        img.sprite = selectedFrame; img.type = Image.Type.Sliced; img.color = outlineColor; img.raycastTarget = false;
+        img.pixelsPerUnitMultiplier = 1f / frameScale;
+        go.AddComponent<LayoutElement>().ignoreLayout = true;
+        return go;
     }
 }

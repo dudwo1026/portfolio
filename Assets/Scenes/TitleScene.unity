@@ -1020,8 +1020,10 @@ MonoBehaviour:
   selectedOutline: 1
   outlineColor: {r: 1, g: 1, b: 1, a: 1}
   outlineWidth: 3
+  selectedFrame: {fileID: 21300000, guid: c544b21d8afd7404c865b3c11c31e640, type: 3}
+  framePadding: 14
+  frameScale: 2
   pressPulse: 1
-  pulseColor: {r: 1, g: 1, b: 1, a: 0.8}
 --- !u!1 &338592433
 GameObject:
   m_ObjectHideFlags: 0
@@ -1061,8 +1063,10 @@ MonoBehaviour:
   selectedOutline: 1
   outlineColor: {r: 1, g: 1, b: 1, a: 1}
   outlineWidth: 3
+  selectedFrame: {fileID: 21300000, guid: c544b21d8afd7404c865b3c11c31e640, type: 3}
+  framePadding: 14
+  frameScale: 2
   pressPulse: 1
-  pulseColor: {r: 1, g: 1, b: 1, a: 0.8}
 --- !u!224 &338592435
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2967,8 +2971,10 @@ MonoBehaviour:
   selectedOutline: 1
   outlineColor: {r: 1, g: 1, b: 1, a: 1}
   outlineWidth: 3
+  selectedFrame: {fileID: 21300000, guid: c544b21d8afd7404c865b3c11c31e640, type: 3}
+  framePadding: 8
+  frameScale: 1
   pressPulse: 1
-  pulseColor: {r: 1, g: 1, b: 1, a: 0.8}
 --- !u!114 &1937793389
 MonoBehaviour:
   m_ObjectHideFlags: 0
