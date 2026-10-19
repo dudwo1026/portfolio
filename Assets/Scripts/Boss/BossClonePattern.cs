@@ -15,6 +15,9 @@ public class BossClonePattern : MonoBehaviour
     public float cooldownFloor = 5f;
     public float cloneDamage = 20f;
     public Vector3 cloneScale = new Vector3(4f, 4f, 4f);
+    public Texture2D cloneSprite;          // 넣으면 상자 대신 이 그림 (BossClone이 카메라를 보게 세운다)
+    public Material cloneSpriteMaterial;   // EnemySpriteFlash 재질
+    public float cloneSpriteHeight = 6f;
     public float cloneSpeed = 60f;
     public float cloneLifeTime = 6f;
     public float aimDuration = 2f;
@@ -207,6 +210,9 @@ public class BossClonePattern : MonoBehaviour
         if (src != null) go.GetComponent<Renderer>().sharedMaterial = src.sharedMaterial;
 
         BossClone clone = go.AddComponent<BossClone>();
+        clone.spriteTexture = cloneSprite;
+        clone.spriteMaterial = cloneSpriteMaterial;
+        clone.spriteHeight = cloneSpriteHeight;
         clone.aimDuration = aimDuration;
         clone.speed = cloneSpeed;
         clone.lifeTime = cloneLifeTime;

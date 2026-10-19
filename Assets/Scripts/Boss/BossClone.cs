@@ -19,6 +19,15 @@ public class BossClone : MonoBehaviour
     public Color aimColor = new Color(0.35f, 0.02f, 0.08f);
     public Color lockedColor = new Color(1f, 0.3f, 0.1f);
 
+    // 그림을 넣으면 상자 대신 카메라를 보는 그림으로 그린다. 조준·확정 색은 그림 위에 살짝 섞는다
+    public Texture2D spriteTexture;
+    public Material spriteMaterial;   // EnemySpriteFlash 재질 (몹 스프라이트와 같은 것)
+    public float spriteHeight = 6f;   // 그림 세로 길이(월드)
+    public float spriteTint = 0.35f;
+    Transform sprite;
+    Renderer spriteRend;
+    MaterialPropertyBlock spriteBlock;
+
     [Header("바닥 경고 표시")]
     public float warningLength = 60f;
     public float warningThickness = 0.08f;
@@ -59,8 +68,50 @@ public class BossClone : MonoBehaviour
 
     void Start()
     {
+        BuildSprite();
         BuildWarning();
     }
+
+    void BuildSprite()
+    {
+        if (spriteTexture == null || spriteMaterial == null) return;
+        GameObject q = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        q.name = "CloneSprite";
+        Destroy(q.GetComponent<Collider>());
+        sprite = q.transform; // 부모(상자)에 붙이지 않는다: 상자는 날아가는 방향으로 돌고 크기도 다르다
+        spriteRend = q.GetComponent<Renderer>();
+        spriteRend.sharedMaterial = spriteMaterial;
+        spriteRend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        sprite.localScale = new Vector3(spriteHeight * spriteTexture.width / spriteTexture.height, spriteHeight, 1f);
+        spriteBlock = new MaterialPropertyBlock();
+        spriteRend.GetPropertyBlock(spriteBlock);
+        spriteBlock.SetTexture("_BaseMap", spriteTexture);
+        spriteBlock.SetTexture("_MainTex", spriteTexture);
+        spriteRend.SetPropertyBlock(spriteBlock);
+        if (rend != null) rend.enabled = false;
+        Tint(aimColor);
+        LateUpdate();
+    }
+
+    void Tint(Color c)
+    {
+        if (spriteRend == null) { if (rend != null) rend.material.color = c; return; }
+        spriteRend.GetPropertyBlock(spriteBlock);
+        spriteBlock.SetColor("_FlashColor", c);
+        spriteBlock.SetFloat("_FlashAmount", spriteTint);
+        spriteRend.SetPropertyBlock(spriteBlock);
+    }
+
+    // 바닥(상자 밑면)에 발을 두고 카메라를 마주 본다
+    void LateUpdate()
+    {
+        if (sprite == null) return;
+        Camera cam = Camera.main;
+        if (cam != null) sprite.rotation = cam.transform.rotation;
+        float bottom = transform.position.y - transform.lossyScale.y * 0.5f;
+        sprite.position = new Vector3(transform.position.x, bottom, transform.position.z) + sprite.up * (spriteHeight * 0.5f);
+    }
+
 
     void BuildWarning()
     {
@@ -197,7 +248,7 @@ public class BossClone : MonoBehaviour
         transform.rotation = Quaternion.LookRotation(dir);
         phase = 1;
         timer = 0f;
-        if (rend != null) rend.material.color = lockedColor;
+        Tint(lockedColor);
         if (warning != null) warning.GetComponent<Renderer>().sharedMaterial.color = warningLockedColor;
         UpdateWarning();
     }
@@ -243,5 +294,6 @@ public class BossClone : MonoBehaviour
     void OnDestroy()
     {
         if (warning != null) Destroy(warning.gameObject);
+        if (sprite != null) Destroy(sprite.gameObject);
     }
 }
