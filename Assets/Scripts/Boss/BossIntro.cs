@@ -1,11 +1,16 @@
 using System.Collections;
 using UnityEngine;
 
-// 보스 등장 연출. 옥상에서 깨어나면(OnEnable) 잠깐 뒤 등장 그림(모션 "Spawn") 한 장으로 roarTime 동안 포효한다.
-// 그동안 제자리에 서 있고, 화면이 흔들리며 머리에서 충격파 고리가 연달아 퍼져 나간다 (할로우나이트 보스 포효 느낌)
+// 보스 등장 연출. 옥상에서 깨어나면(OnEnable) 플레이어의 워프 도착 연출이 끝나길 기다렸다가 arriveDelay 뒤에
+// 카메라가 보스 쪽으로 넘어가며 당겨지고, 등장 그림(모션 "Spawn") 한 장으로 roarTime 동안 포효한 뒤 플레이어로 돌아온다.
+// 포효 중엔 화면이 흔들리고 머리에서 충격파 고리가 연달아 퍼져 나간다 (할로우나이트 보스 포효 느낌).
+// 연출 동안 플레이어는 움직이거나 쏠 수 없고, 보스·옥상 스포너도 기다린다
 public class BossIntro : MonoBehaviour, IBossMotion
 {
-    public float startDelay = 0.7f;   // 워프 페이드인이 끝나고 플레이어가 내려앉은 뒤에 시작하도록
+    public float arriveDelay = 1f;      // 플레이어가 완전히 나타난 뒤 연출 시작까지
+    public float panTime = 0.6f;        // 카메라가 보스로 넘어가는 / 돌아오는 시간
+    public float zoom = 0.6f;           // 보스를 비출 때 카메라 거리 배율 (작을수록 당겨진다)
+    public float focusHeight = 2.5f;    // 보스 중심에서 카메라가 볼 높이
     public float roarTime = 1.5f;
     public float shakeAmplitude = 0.45f;
     public float ringInterval = 0.22f;
@@ -29,17 +34,39 @@ public class BossIntro : MonoBehaviour, IBossMotion
 
     IEnumerator Roar()
     {
-        // 씬을 켤 때 보스가 잠깐 켜졌다가 AreaManager가 바로 끄므로, 기다림이 끝나야 본 것으로 친다 (꺼지면 코루틴도 같이 멈춘다)
-        yield return new WaitForSeconds(startDelay);
-        played = true;
-
         EnemyAI ai = GetComponent<EnemyAI>();
         Rigidbody rb = GetComponent<Rigidbody>();
-        if (ai != null) ai.patternDriving = true; // 포효하는 동안 제자리
+        if (ai != null) ai.patternDriving = true; // 연출이 끝날 때까지 제자리
+
+        // 씬을 켤 때 보스가 잠깐 켜졌다가 AreaManager가 바로 끄므로, 기다림이 끝나야 본 것으로 친다 (꺼지면 코루틴도 같이 멈춘다)
+        while (Portal.Warping) yield return null;
+        yield return new WaitForSeconds(arriveDelay);
+        played = true;
+
+        float total = panTime * 2f + roarTime + 0.5f;
+        HoldFightFor(total);
+        GameObject p = GameObject.Find("Player");
+        TopDownMove mover = p != null ? p.GetComponent<TopDownMove>() : null;
+        PlayerCombat combat = p != null ? p.GetComponent<PlayerCombat>() : null;
+        PlayerDash dash = p != null ? p.GetComponent<PlayerDash>() : null;
+        bool wasLocked = mover != null && mover.movementLocked;
+        if (mover != null) mover.movementLocked = true;
+        if (combat != null) combat.enabled = false;
+        if (dash != null) dash.enabled = false;
         if (rb != null) rb.linearVelocity = Vector3.zero;
+
+        Camera cam = Camera.main;
+        CameraFollow follow = cam != null ? cam.GetComponent<CameraFollow>() : null;
+        if (follow != null)
+        {
+            follow.cutFocus = transform.position + Vector3.up * focusHeight;
+            follow.cutDistance = follow.distance * zoom;
+            for (float t = 0f; t < panTime; t += Time.deltaTime) { follow.cutWeight = Mathf.SmoothStep(0f, 1f, t / panTime); yield return null; }
+            follow.cutWeight = 1f;
+        }
+
         roaring = true;
         CameraFollow.Shake(shakeAmplitude, roarTime);
-
         float nextRing = 0f;
         for (float t = 0f; t < roarTime; t += Time.deltaTime)
         {
@@ -50,9 +77,31 @@ public class BossIntro : MonoBehaviour, IBossMotion
             }
             yield return null;
         }
-
         roaring = false;
+
+        if (follow != null)
+        {
+            for (float t = 0f; t < panTime; t += Time.deltaTime) { follow.cutWeight = 1f - Mathf.SmoothStep(0f, 1f, t / panTime); yield return null; }
+            follow.cutWeight = 0f;
+        }
+
+        if (mover != null) mover.movementLocked = wasLocked;
+        if (combat != null) combat.enabled = true;
+        if (dash != null) dash.enabled = true;
         if (ai != null) ai.patternDriving = false;
+    }
+
+    // 연출 동안 보스 패턴·평타와 옥상 몹 소환을 미룬다 (AreaManager의 도착 유예와 같은 방식)
+    void HoldFightFor(float seconds)
+    {
+        BossActionLock actionLock = GetComponent<BossActionLock>();
+        if (actionLock == null) actionLock = gameObject.AddComponent<BossActionLock>();
+        actionLock.LockFor(seconds);
+        BossMeleeAttack melee = GetComponent<BossMeleeAttack>();
+        if (melee != null) melee.DelayFor(seconds);
+        EnemySpawner[] spawners = Object.FindObjectsByType<EnemySpawner>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < spawners.Length; i++)
+            if (spawners[i].roofSpawner) spawners[i].DelayNextSpawn(seconds);
     }
 
     void SpawnRing()

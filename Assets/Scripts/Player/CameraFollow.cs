@@ -36,6 +36,11 @@ public class CameraFollow : MonoBehaviour
 
     Vector2 aimWant, aimShift, aimVel;
 
+    // 연출(보스 등장 등)이 잠깐 다른 곳을 비출 때 쓴다. cutWeight 0 = 평소, 1 = cutFocus를 cutDistance 거리에서
+    [System.NonSerialized] public Vector3 cutFocus;
+    [System.NonSerialized] public float cutDistance;
+    [System.NonSerialized] public float cutWeight;
+
     [Header("화면 흔들림")]
     [Tooltip("초당 흔들리는 횟수 정도. 높을수록 잘게 떤다")]
     public float shakeFrequency = 22f;
@@ -93,9 +98,10 @@ public class CameraFollow : MonoBehaviour
     {
         if (target == null) return;
 
-        Vector3 focus = target.position + lookOffset;
+        Vector3 focus = Vector3.Lerp(target.position + lookOffset, cutFocus, cutWeight);
+        float dist = Mathf.Lerp(distance, cutDistance, cutWeight);
         Quaternion rot = Quaternion.Euler(pitch, yaw, 0f);
-        transform.position = focus - rot * Vector3.forward * distance + AimOffset(rot) + ShakeOffset(rot);
+        transform.position = focus - rot * Vector3.forward * dist + AimOffset(rot) * (1f - cutWeight) + ShakeOffset(rot);
         transform.rotation = rot;
     }
 

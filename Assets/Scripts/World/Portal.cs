@@ -43,6 +43,8 @@ public class Portal : MonoBehaviour, IChargePad
     public GameObject departAura;     // 늘어나는 동안 캐릭터를 감는 이펙트 (얼음 회오리)
     public GameObject arriveBurst;     // 착지 순간 터지는 이펙트 (파란 임팩트)
     bool warping;
+    // 워프 연출(도착해서 원래 모습으로 돌아올 때까지) 중인지. 보스 등장 연출이 이게 끝나길 기다린다
+    public static bool Warping { get; private set; }
 
     float readyTime = 0f;
     Material runtimeMat;
@@ -50,6 +52,7 @@ public class Portal : MonoBehaviour, IChargePad
 
     void Start()
     {
+        Warping = false; // static이라 플레이 세션 사이에 남을 수 있다
         wasOpen = IsOpen; // 처음부터 열려 있는 포탈은 알리지 않는다
     }
 
@@ -169,6 +172,7 @@ public class Portal : MonoBehaviour, IChargePad
     System.Collections.IEnumerator Warp(Transform player, PlayerSpriteAnimator sprite)
     {
         warping = true;
+        Warping = true;
         TopDownMove mover = player.GetComponent<TopDownMove>();
         bool wasLocked = mover != null && mover.movementLocked;
         if (mover != null) mover.movementLocked = true;
@@ -206,6 +210,7 @@ public class Portal : MonoBehaviour, IChargePad
         }
         sprite.warpScale = Vector2.one;
         warping = false;
+        Warping = false;
     }
 
     static void SpawnFx(GameObject prefab, Vector3 at, float life)
