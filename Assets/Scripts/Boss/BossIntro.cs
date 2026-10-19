@@ -9,7 +9,7 @@ public class BossIntro : MonoBehaviour, IBossMotion
 {
     public float arriveDelay = 1f;      // 플레이어가 완전히 나타난 뒤 연출 시작까지
     public float panTime = 0.6f;        // 카메라가 보스로 넘어가는 / 돌아오는 시간
-    public float zoom = 0.6f;           // 보스를 비출 때 카메라 거리 배율 (작을수록 당겨진다)
+    public float zoom = 0.7f;           // 보스를 비출 때 카메라 거리 배율 (작을수록 당겨진다)
     public float focusHeight = 2.5f;    // 보스 중심에서 카메라가 볼 높이
     public float roarTime = 1.5f;
     public float shakeAmplitude = 0.45f;

@@ -234,7 +234,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c1c216a880e9d4ba1c2b4646694567, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossIntro
-  startDelay: 0.7
+  arriveDelay: 1
+  panTime: 0.6
+  zoom: 0.7
+  focusHeight: 2.5
   roarTime: 1.5
   shakeAmplitude: 0.45
   ringInterval: 0.22
