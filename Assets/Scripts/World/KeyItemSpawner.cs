@@ -14,6 +14,11 @@ public class KeyItemSpawner : MonoBehaviour
     public Renderer[] slotLights;
     public Material slotOff;
     public Material slotOn;
+    // 켜 두면 표시등 큐브 대신 열쇠 모델을 세운다: 못 모은 칸은 slotOff 한 가지 색, 모은 칸은 원래 열쇠 색
+    public bool slotKeyModels = true;
+    public float slotKeyHeight = 1.7f; // 표시등 열쇠 높이(월드)
+    Renderer[][] slotParts;
+    Material[][] slotPartMats;
 
     public int Collected { get; private set; }
     public bool HasAllKeys { get { return Collected >= keysRequired; } }
@@ -30,7 +35,35 @@ public class KeyItemSpawner : MonoBehaviour
     {
         keyMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
         keyMat.color = keyColor;
+        if (slotKeyModels && keyPrefab != null) BuildSlotKeys();
         RefreshLabel();
+    }
+
+    // 표시등 큐브 자리마다 열쇠를 세우고 큐브는 숨긴다. 큐브가 보던 방향(카메라 쪽)을 그대로 본다
+    void BuildSlotKeys()
+    {
+        if (slotLights == null) return;
+        slotParts = new Renderer[slotLights.Length][];
+        slotPartMats = new Material[slotLights.Length][];
+        for (int i = 0; i < slotLights.Length; i++)
+        {
+            Renderer cube = slotLights[i];
+            if (cube == null) continue;
+            Bounds cb = cube.bounds;
+            GameObject k = Instantiate(keyPrefab, cb.center, Quaternion.Euler(0f, cube.transform.eulerAngles.y, 0f));
+            k.name = "SlotKey" + (i + 1);
+            foreach (Collider c in k.GetComponentsInChildren<Collider>()) Destroy(c);
+            Bounds kb = new Bounds(k.transform.position, Vector3.zero);
+            Renderer[] parts = k.GetComponentsInChildren<Renderer>();
+            foreach (Renderer r in parts) kb.Encapsulate(r.bounds);
+            float s = slotKeyHeight / Mathf.Max(0.01f, kb.size.y);
+            k.transform.localScale *= s;
+            k.transform.position += Vector3.up * (cb.min.y - (k.transform.position.y + (kb.min.y - k.transform.position.y) * s)); // 바닥을 큐브 바닥에
+            k.transform.SetParent(cube.transform.parent, true);
+            cube.enabled = false;
+            slotParts[i] = parts;
+            slotPartMats[i] = System.Array.ConvertAll(parts, r => r.sharedMaterial);
+        }
     }
 
     // 원하는 자리에 열쇠 하나를 세운다. 닿으면 줍는다
@@ -77,7 +110,15 @@ public class KeyItemSpawner : MonoBehaviour
         if (countLabel != null) countLabel.text = "열쇠 " + Collected + "/" + keysRequired;
         if (slotLights == null) return;
         for (int i = 0; i < slotLights.Length; i++)
+        {
+            if (slotParts != null && slotParts[i] != null)
+            {
+                for (int j = 0; j < slotParts[i].Length; j++)
+                    slotParts[i][j].sharedMaterial = i < Collected ? slotPartMats[i][j] : slotOff;
+                continue;
+            }
             if (slotLights[i] != null) slotLights[i].sharedMaterial = i < Collected ? slotOn : slotOff;
+        }
     }
 }
 
