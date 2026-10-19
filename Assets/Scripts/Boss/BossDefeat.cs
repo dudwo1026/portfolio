@@ -92,7 +92,13 @@ public class BossDefeat : MonoBehaviour, IBossMotion
         // 남은 몹도 전부 (보스 자신은 사망 모션 뒤에 StartDying이 지운다)
         EnemyAI[] mobs = Object.FindObjectsByType<EnemyAI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         for (int i = 0; i < mobs.Length; i++)
-            if (mobs[i] != null && mobs[i].gameObject != gameObject) Destroy(mobs[i].gameObject);
+        {
+            if (mobs[i] == null || mobs[i].gameObject == gameObject) continue;
+            // 처치(TakeDamage)로 쓰러뜨리면 옥상 몹이 보급상자를 떨군다. 사망 모션만 남기고 지운다
+            EnemySpriteAnimator anim = mobs[i].GetComponentInChildren<EnemySpriteAnimator>();
+            if (anim != null) anim.PlayDeathDetached();
+            Destroy(mobs[i].gameObject);
+        }
 
         // 나머지는 이름으로. 씬을 한 번만 훑고 끝낸다
         Transform[] all = Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);

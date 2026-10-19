@@ -178,11 +178,15 @@ public class EliteThreatIndicator : MonoBehaviour
         return true;
     }
 
+    AreaManager area;
+
     void RefreshEliteList()
     {
         targets.Clear();
         if (TrackPortals)
         {
+            if (area == null) area = FindFirstObjectByType<AreaManager>();
+            if (area != null && area.PlayerOnRoof) return; // 옥상(보스전)에서는 포탈 안내를 띄우지 않는다
             foreach (Portal p in portals) if (p != null && p.IsOpen) targets.Add(p.transform);
             return;
         }
