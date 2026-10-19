@@ -201,7 +201,7 @@ public class CombatZone : MonoBehaviour, IChargePad
         if (NavMesh.SamplePosition(at, out hit, 3f, NavMesh.AllAreas)) at = hit.position;
         for (int i = 0; i < keyReward; i++)
         {
-            Vector3 p = at + Vector3.right * (i - (keyReward - 1) * 0.5f) * keySpacing + Vector3.up * 0.8f;
+            Vector3 p = at + Vector3.right * (i - (keyReward - 1) * 0.5f) * keySpacing + Vector3.up * 1.4f; // 열쇠 모델 바닥이 땅 위에 오게
             keys.Add(KeyItemSpawner.Instance.SpawnKeyAt(p));
         }
     }
