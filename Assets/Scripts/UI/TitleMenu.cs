@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 // 타이틀 화면 메뉴. 지금은 새 게임과 종료만 동작한다.
@@ -6,13 +8,34 @@ using UnityEngine.SceneManagement;
 public class TitleMenu : MonoBehaviour
 {
     public string gameSceneName = "SampleScene";
-    public GameObject menu;                   // 오른쪽 메뉴 (선택 화면 중에는 숨긴다)
+    public GameObject menu;                   // 메뉴 (선택 화면 중에는 숨긴다)
     public GameObject difficultySelectPanel;  // 비워 두면 난이도 선택 없이 하드
     public GameObject weaponSelectPanel;      // 비워 두면 예전처럼 바로 시작
+    public Graphic background;                // 새 게임을 누르면 이 배경을 검게 바꾼 뒤 난이도 선택을 띄운다
+    public float fadeToBlackTime = 2f;
 
     public void NewGame()
     {
         if (menu != null) menu.SetActive(false);
+        // 이 스크립트는 방금 숨긴 메뉴에 붙어 있어 코루틴을 못 돌린다. 켜져 있는 배경에서 돌린다
+        if (background != null) background.StartCoroutine(FadeThenChoose());
+        else ShowDifficulty();
+    }
+
+    IEnumerator FadeThenChoose()
+    {
+        Color from = background.color;
+        for (float t = 0f; t < fadeToBlackTime; t += Time.unscaledDeltaTime)
+        {
+            background.color = Color.Lerp(from, Color.black, t / fadeToBlackTime);
+            yield return null;
+        }
+        background.color = Color.black;
+        ShowDifficulty();
+    }
+
+    void ShowDifficulty()
+    {
         if (difficultySelectPanel != null) { difficultySelectPanel.SetActive(true); return; }
         GameSettings.difficulty = Difficulty.Hard;
         OpenWeaponSelect();

@@ -2936,6 +2936,8 @@ MonoBehaviour:
   menu: {fileID: 1937793384}
   difficultySelectPanel: {fileID: 338592433}
   weaponSelectPanel: {fileID: 302154847}
+  background: {fileID: 1083247632}
+  fadeToBlackTime: 2
 --- !u!114 &1937793388
 MonoBehaviour:
   m_ObjectHideFlags: 0
