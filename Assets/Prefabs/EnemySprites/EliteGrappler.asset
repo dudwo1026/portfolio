@@ -105,7 +105,7 @@ MonoBehaviour:
     charBottomPx: 83
     footCenterPx: 194
     sizeScale: 0.7
-  deathFramesPerSecond: 8
+  deathFramesPerSecond: 6.1538463
   deathHoldTime: 0.6
   motions: []
   characterHeight: 3.718
