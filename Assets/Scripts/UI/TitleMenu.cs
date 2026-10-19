@@ -13,9 +13,10 @@ public class TitleMenu : MonoBehaviour
     public GameObject weaponSelectPanel;      // 비워 두면 예전처럼 바로 시작
     public Graphic background;                // 새 게임을 누르면 이 배경을 검게 바꾼 뒤 난이도 선택을 띄운다
     public float fadeToBlackTime = 2f;
-    public float weaponStartDelay = 0.25f;    // 무기 카드가 한 번 깜빡이고 넘어갈 시간
+    [UnityEngine.Serialization.FormerlySerializedAs("weaponStartDelay")]
+    public float flashDelay = 0.25f;          // 난이도/무기 카드가 한 번 깜빡이고 넘어갈 시간
 
-    bool starting, launching;
+    bool starting, choosing, launching;
 
     public void NewGame()
     {
@@ -59,9 +60,14 @@ public class TitleMenu : MonoBehaviour
 
     void ChooseDifficulty(Difficulty d)
     {
+        if (choosing) return; // 깜빡이는 동안 또 눌러도 무시
+        choosing = true;
         GameSettings.difficulty = d;
-        if (difficultySelectPanel != null) difficultySelectPanel.SetActive(false);
-        OpenWeaponSelect();
+        AfterFlash(() =>
+        {
+            if (difficultySelectPanel != null) difficultySelectPanel.SetActive(false);
+            OpenWeaponSelect();
+        });
     }
 
     void OpenWeaponSelect()
@@ -80,15 +86,20 @@ public class TitleMenu : MonoBehaviour
         launching = true;
         GameSettings.primary = weapon;
         GameSettings.primaryChosen = true;
-        // 카드 깜빡임(ConfirmSelector.pressFlash)이 보이게 잠깐 기다렸다 넘어간다
-        if (background != null) background.StartCoroutine(StartAfter(weaponStartDelay));
-        else StartGame();
+        AfterFlash(StartGame);
     }
 
-    IEnumerator StartAfter(float delay)
+    // 카드 깜빡임(ConfirmSelector.pressFlash)이 보이게 잠깐 기다렸다 넘어간다
+    void AfterFlash(System.Action next)
+    {
+        if (background != null) background.StartCoroutine(After(flashDelay, next));
+        else next();
+    }
+
+    IEnumerator After(float delay, System.Action next)
     {
         yield return new WaitForSecondsRealtime(delay);
-        StartGame();
+        next();
     }
 
     public void StartGame()

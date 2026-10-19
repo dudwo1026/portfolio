@@ -1068,8 +1068,8 @@ MonoBehaviour:
   selectedFrame: {fileID: 21300000, guid: c544b21d8afd7404c865b3c11c31e640, type: 3}
   framePadding: 14
   frameScale: 2
-  pressPulse: 1
-  pressFlash: 0
+  pressPulse: 0
+  pressFlash: 1
   flashTime: 0.2
 --- !u!224 &338592435
 RectTransform:
@@ -2950,7 +2950,7 @@ MonoBehaviour:
   weaponSelectPanel: {fileID: 302154847}
   background: {fileID: 1083247632}
   fadeToBlackTime: 2
-  weaponStartDelay: 0.25
+  flashDelay: 0.25
 --- !u!114 &1937793388
 MonoBehaviour:
   m_ObjectHideFlags: 0
