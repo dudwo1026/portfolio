@@ -109,6 +109,11 @@ public class TitleMenu : MonoBehaviour
         SceneManager.LoadScene(gameSceneName);
     }
 
+    public void OpenOptions()
+    {
+        OptionsPanel.Open(menu != null ? menu.GetComponent<ConfirmSelector>() : null);
+    }
+
     public void QuitGame()
     {
 #if UNITY_EDITOR

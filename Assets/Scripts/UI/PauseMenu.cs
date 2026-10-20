@@ -13,6 +13,7 @@ public class PauseMenu : MonoBehaviour
     {
         Keyboard kb = Keyboard.current;
         if (kb == null || !kb.escapeKey.wasPressedThisFrame) return;
+        if (OptionsPanel.IsOpen || OptionsPanel.ClosedFrame == Time.frameCount) return; // ESC는 옵션 창이 먼저 쓴다
 
         if (panel.activeSelf) Resume();
         // 게임오버·포탈 확인창·열쇠 연출·결과창으로 이미 멈춰 있거나, 시간을 직접 다루는 연출(워프·보스 등장·처치 슬로) 중엔 열지 않는다
@@ -29,6 +30,11 @@ public class PauseMenu : MonoBehaviour
     {
         panel.SetActive(false);
         Time.timeScale = 1f;
+    }
+
+    public void OpenOptions()
+    {
+        OptionsPanel.Open(panel.GetComponentInChildren<ConfirmSelector>());
     }
 
     public void ToTitle()
