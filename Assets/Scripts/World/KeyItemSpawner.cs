@@ -266,6 +266,7 @@ public class KeyItemSpawner : MonoBehaviour
     {
         Collected = n;
         lit = n;
+        shownIcons = -1; // 복구는 반짝임 없이
         RefreshLabel();
     }
 
@@ -277,9 +278,54 @@ public class KeyItemSpawner : MonoBehaviour
         RefreshLabel();
     }
 
+    // 우상단 열쇠 현황: 글자 대신 열쇠 아이콘을 keysRequired개 늘어놓고, 모은 만큼 앞에서부터 금색으로 켠다
+    UnityEngine.UI.Image[] icons;
+    int shownIcons = -1;
+    public float iconSize = 38f;
+    public float iconGap = 4f;
+
+    void BuildIcons()
+    {
+        countLabel.enabled = false;
+        RectTransform src = countLabel.rectTransform;
+        RectTransform row = new GameObject("KeyIcons", typeof(RectTransform)).GetComponent<RectTransform>();
+        row.SetParent(src.parent, false);
+        row.anchorMin = src.anchorMin; row.anchorMax = src.anchorMax; row.pivot = src.pivot;
+        row.anchoredPosition = src.anchoredPosition;
+        row.sizeDelta = new Vector2(keysRequired * iconSize + (keysRequired - 1) * iconGap, iconSize);
+        icons = new UnityEngine.UI.Image[keysRequired];
+        for (int i = 0; i < keysRequired; i++)
+        {
+            UnityEngine.UI.Image img = new GameObject("Key" + (i + 1), typeof(RectTransform)).AddComponent<UnityEngine.UI.Image>();
+            img.rectTransform.SetParent(row, false);
+            img.rectTransform.anchorMin = img.rectTransform.anchorMax = new Vector2(0f, 0.5f);
+            img.rectTransform.pivot = new Vector2(0f, 0.5f);
+            img.rectTransform.anchoredPosition = new Vector2(i * (iconSize + iconGap), 0f);
+            img.rectTransform.sizeDelta = new Vector2(iconSize, iconSize);
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+            icons[i] = img;
+        }
+    }
+
+    void RefreshIcons()
+    {
+        if (countLabel == null) return;
+        if (icons == null) BuildIcons();
+        Sprite on = Resources.Load<Sprite>("UI/KeyIconOn"), off = Resources.Load<Sprite>("UI/KeyIconOff");
+        Canvas canvas = countLabel.canvas != null ? countLabel.canvas.rootCanvas : null;
+        for (int i = 0; i < icons.Length; i++)
+        {
+            icons[i].sprite = i < lit ? on : off;
+            // 방금 켜진 칸은 금빛 잔상이 퍼지며 반짝인다 (세이브 복구로 한꺼번에 켜질 때는 조용히)
+            if (shownIcons >= 0 && i >= shownIcons && i < lit) UIPulse.Play(icons[i].rectTransform, canvas, 0.6f, 2.4f, 0.9f);
+        }
+        shownIcons = lit;
+    }
+
     void RefreshLabel()
     {
-        if (countLabel != null) countLabel.text = "열쇠 " + lit + "/" + keysRequired;
+        RefreshIcons();
         if (slotLights == null) return;
         for (int i = 0; i < slotLights.Length; i++)
         {
