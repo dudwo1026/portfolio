@@ -21,6 +21,8 @@ public class ConfirmSelector : MonoBehaviour
     public float framePadding = 8f;         // 버튼 바깥으로 튀어나오는 정도
     public float frameScale = 1f;           // 테두리 굵기 배율 (큰 카드는 2쯤)
     public bool pressPulse = false;         // 누르면 버튼 잔상이 퍼지며 사라진다 (UIPulse)
+    // 버튼과 같은 순서. 고른 버튼 것만 켠다 (무기 설명처럼 고른 동안만 보일 것)
+    public GameObject[] showWhenSelected;
     public bool pressFlash = false;         // 누르면 버튼이 한 번 하얗게 깜빡인다
     public float flashTime = 0.2f;
 
@@ -106,6 +108,7 @@ public class ConfirmSelector : MonoBehaviour
         for (int i = 0; i < buttons.Length; i++)
         {
             buttons[i].transform.localScale = Vector3.one * (i == index ? selectedScale : 1f);
+            if (showWhenSelected != null && i < showWhenSelected.Length && showWhenSelected[i] != null) showWhenSelected[i].SetActive(i == index);
             if (!selectedOutline) continue;
             if (selectedFrame != null) { Frame(buttons[i]).SetActive(i == index); continue; }
             if (buttons[i].targetGraphic == null) continue;

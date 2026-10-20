@@ -60,14 +60,20 @@ public class TitleMenu : MonoBehaviour
 
     void ChooseDifficulty(Difficulty d)
     {
-        if (choosing) return; // 깜빡이는 동안 또 눌러도 무시
+        if (choosing) return; // 깜빡이는 동안·확인창이 떠 있는 동안 또 눌러도 무시
         choosing = true;
-        GameSettings.difficulty = d;
-        AfterFlash(() =>
+        string name = d == Difficulty.Normal ? "노말" : "하드";
+        AfterFlash(() => ConfirmPopup.Show(name + " 난이도로 진행할까요?", () =>
         {
+            GameSettings.difficulty = d;
             if (difficultySelectPanel != null) difficultySelectPanel.SetActive(false);
             OpenWeaponSelect();
-        });
+        }, Selector(difficultySelectPanel), () => choosing = false));
+    }
+
+    static ConfirmSelector Selector(GameObject panel)
+    {
+        return panel != null ? panel.GetComponent<ConfirmSelector>() : null;
     }
 
     void OpenWeaponSelect()
@@ -82,11 +88,15 @@ public class TitleMenu : MonoBehaviour
 
     void StartWith(PrimaryWeapon weapon)
     {
-        if (launching) return; // 깜빡이는 동안 또 눌러도 무시
+        if (launching) return; // 깜빡이는 동안·확인창이 떠 있는 동안 또 눌러도 무시
         launching = true;
-        GameSettings.primary = weapon;
-        GameSettings.primaryChosen = true;
-        AfterFlash(StartGame);
+        string name = weapon == PrimaryWeapon.Laser ? "레이저로" : weapon == PrimaryWeapon.Shotgun ? "산탄총으로" : "돌격소총으로";
+        AfterFlash(() => ConfirmPopup.Show(name + " 시작할까요?", () =>
+        {
+            GameSettings.primary = weapon;
+            GameSettings.primaryChosen = true;
+            StartGame();
+        }, Selector(weaponSelectPanel), () => launching = false));
     }
 
     // 카드 깜빡임(ConfirmSelector.pressFlash)이 보이게 잠깐 기다렸다 넘어간다
