@@ -44,6 +44,7 @@ public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
     public float blastMarkerLifetime = 0.5f;
     public GameObject blastEffect;        // 자폭 순간 가운데에서 터지는 이펙트 (바닥 원판은 범위 표시)
     public float blastEffectScale = 1.5f;
+    public float blastEffectHeight = 1f;  // 위쪽(세로)만 이 비율로 눌러 화면을 덜 가린다
     public bool blastShockwave = true;    // 바닥 충격파 고리가 폭발 범위 끝까지 번지고, 가장자리 쪽에 작은 폭발이 빙 둘러 터진다
     public int blastRingCount = 8;
     public float blastRingScale = 1.4f;
@@ -196,7 +197,7 @@ public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
             Vector3 at = transform.position;
             if (body != null) at.y = body.bounds.min.y; // 바닥에서 터진다
             GameObject fx = Instantiate(blastEffect, at, Quaternion.identity);
-            fx.transform.localScale = Vector3.one * blastEffectScale;
+            fx.transform.localScale = new Vector3(blastEffectScale, blastEffectScale * blastEffectHeight, blastEffectScale);
             Destroy(fx, 4f);
         }
         if (blastShockwave)
