@@ -44,6 +44,9 @@ public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
     public float blastMarkerLifetime = 0.5f;
     public GameObject blastEffect;        // 자폭 순간 가운데에서 터지는 이펙트 (바닥 원판은 범위 표시)
     public float blastEffectScale = 1.5f;
+    public bool blastShockwave = true;    // 바닥 충격파 고리가 폭발 범위 끝까지 번지고, 가장자리 쪽에 작은 폭발이 빙 둘러 터진다
+    public int blastRingCount = 8;
+    public float blastRingScale = 1.4f;
     public float blinkStartInterval = 0.35f;
     public float blinkEndInterval = 0.05f;
 
@@ -195,6 +198,13 @@ public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
             GameObject fx = Instantiate(blastEffect, at, Quaternion.identity);
             fx.transform.localScale = Vector3.one * blastEffectScale;
             Destroy(fx, 4f);
+        }
+        if (blastShockwave)
+        {
+            Collider body = GetComponent<Collider>();
+            Vector3 at = transform.position;
+            if (body != null) at.y = body.bounds.min.y;
+            GroundShockwave.Spawn(at, blastRadius, new Color(1f, 0.55f, 0.15f, 0.95f), 0.45f, blastEffect, blastRingCount, blastRingScale);
         }
 
         if (rend != null && normalMaterial != null) rend.sharedMaterial = normalMaterial;
