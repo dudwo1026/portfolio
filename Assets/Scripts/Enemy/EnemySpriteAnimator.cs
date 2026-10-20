@@ -39,6 +39,7 @@ public class EnemySpriteAnimator : MonoBehaviour
     MaterialPropertyBlock mpb;
     Vector3 lastParentPos;
     float speed;        // 측정된 이동 속도 (월드 단위/초)
+    float measureTime;  // 마지막으로 위치 변화를 잰 뒤 흐른 시간
     float timer;
     int index;
     int facing = 1;     // 1 = 원본, -1 = 좌우 반전. 멈춰도 마지막 방향을 유지한다
@@ -86,6 +87,7 @@ public class EnemySpriteAnimator : MonoBehaviour
         set = PickSet();
         lastParentPos = ParentPos();
         speed = 0f;
+        measureTime = 0f;
         timer = 0f;
         index = 0;
         if (set != null) ApplyIdle();
@@ -153,9 +155,17 @@ public class EnemySpriteAnimator : MonoBehaviour
         lastParentPos = now;
 
         renderFlip = 1; // 공격 분기에서만 다시 켠다
+        // 몹은 물리 틱(FixedUpdate)에서 움직이므로 화면 프레임이 물리보다 잦으면(빌드에서 수백 fps)
+        // 대부분의 프레임에서 이동량이 0으로 잡혀 대기·이동이 번갈아 깜빡인다.
+        // 실제로 위치가 바뀐 프레임에서만, 그 사이 흐른 시간 전체로 나눠 속도를 잰다
         float dt = Application.isPlaying ? Time.deltaTime : 0f;
-        float measured = dt > 0.0001f ? delta.magnitude / dt : 0f;
-        speed = Mathf.Lerp(speed, measured, 0.35f); // 프레임마다 튀는 값을 눌러 준다
+        measureTime += dt;
+        if (delta.sqrMagnitude > 1e-8f || measureTime >= Time.fixedDeltaTime * 1.5f)
+        {
+            float measured = measureTime > 0.0001f ? delta.magnitude / measureTime : 0f;
+            speed = Mathf.Lerp(speed, measured, 0.35f); // 튀는 값을 눌러 준다
+            measureTime = 0f;
+        }
 
         // 보스 사망 모션은 무엇보다 위다. 끊긴 패턴이 켜진 채 남아 있어도, 기절 중이어도 이긴다
         if (bossMotions != null && set.motions != null)
