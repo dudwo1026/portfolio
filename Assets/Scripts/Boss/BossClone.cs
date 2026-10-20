@@ -27,6 +27,7 @@ public class BossClone : MonoBehaviour
     Transform sprite;
     Renderer spriteRend;
     MaterialPropertyBlock spriteBlock;
+    Color baseColor = Color.white; // 상자로 그릴 때 원래 색
     bool faced; // 처음 한 번은 거의 위아래 방향이어도 좌우를 정한다
 
     [Header("바닥 경고 표시")]
@@ -64,7 +65,8 @@ public class BossClone : MonoBehaviour
     void Awake()
     {
         rend = GetComponent<Renderer>();
-        if (rend != null) rend.material.color = aimColor;
+        baseColor = aimColor; // 상자 모드의 원래 색
+        if (rend != null) rend.material.color = lockedColor; // 조준 중엔 붉게
     }
 
     void Start()
@@ -90,8 +92,16 @@ public class BossClone : MonoBehaviour
         spriteBlock.SetTexture("_MainTex", spriteTexture);
         spriteRend.SetPropertyBlock(spriteBlock);
         if (rend != null) rend.enabled = false;
-        Tint(aimColor);
+        Tint(lockedColor); // 조준하는 동안 붉게. 방향이 확정되면 원래 색으로 돌아온다
         // 자리·방향은 첫 LateUpdate가 잡는다 (그때는 Update가 이미 조준 방향으로 돌려 놓았다)
+    }
+
+    void ClearTint()
+    {
+        if (spriteRend == null) { if (rend != null) rend.material.color = baseColor; return; }
+        spriteRend.GetPropertyBlock(spriteBlock);
+        spriteBlock.SetFloat("_FlashAmount", 0f);
+        spriteRend.SetPropertyBlock(spriteBlock);
     }
 
     void Tint(Color c)
@@ -264,7 +274,7 @@ public class BossClone : MonoBehaviour
         transform.rotation = Quaternion.LookRotation(dir);
         phase = 1;
         timer = 0f;
-        Tint(lockedColor);
+        ClearTint();
         if (warning != null) warning.GetComponent<Renderer>().sharedMaterial.color = warningLockedColor;
         UpdateWarning();
     }
