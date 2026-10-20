@@ -54,9 +54,7 @@ public class BossShockwavePattern : MonoBehaviour, IBossMotion
     public float waveVisualHeight = 4f;     // 보이는 높이. 판정(waveHeight)과 따로
     public float waveSizeJitter = 0.15f;    // 파도마다 크기를 이 비율만큼 들쭉날쭉하게
     public float waveYaw = -60f;            // -90이면 파도 끝이 정동쪽(진행 방향)으로 말린다. 여기서 시계 방향 30도
-    public float waveBrightness = 1.15f;    // 색 밝기 배율
-    public float waveGlow = 0.2f;           // 그림자 속에서도 어둡지 않게 텍스처 그대로 빛낸다. 0이면 없음
-    Material waveMat;
+    // 밝기·발광은 PurpleStarWave.mat에 구워 둠. 런타임에 _EMISSION을 켜면 빌드에서 그 변형이 빠져 파도가 안 보였다
 
     [Header("충격파 이펙트 (비워 두면 없음)")]
     public GameObject trailEffect;              // 파도마다 하나씩 발밑에 달아 뒤로 남긴다 (먼지)
@@ -230,7 +228,6 @@ public class BossShockwavePattern : MonoBehaviour, IBossMotion
             Vector3 want = root.position + new Vector3(0f, 0f, (i + 0.5f) * cell - size.z * 0.5f);
             Bounds b = r.bounds;
             holder.position += new Vector3(want.x - b.center.x, groundY - b.min.y, want.z - b.center.z);
-            r.sharedMaterial = WaveMaterial(r.sharedMaterial);
         }
     }
 
@@ -258,21 +255,5 @@ public class BossShockwavePattern : MonoBehaviour, IBossMotion
                 ps.Play();
             }
         }
-    }
-
-    Material WaveMaterial(Material src)
-    {
-        if (waveMat != null) return waveMat;
-        waveMat = new Material(src);
-        Color c = src.color * waveBrightness;
-        c.a = 1f;
-        waveMat.color = c;
-        if (waveGlow > 0f && src.mainTexture != null)
-        {
-            waveMat.EnableKeyword("_EMISSION");
-            waveMat.SetTexture("_EmissionMap", src.mainTexture);
-            waveMat.SetColor("_EmissionColor", Color.white * waveGlow);
-        }
-        return waveMat;
     }
 }
