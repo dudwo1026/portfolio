@@ -32,6 +32,8 @@ public class ResupplyPad : MonoBehaviour, IChargePad
     float progress;
 
     static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+    static readonly int ColorId = Shader.PropertyToID("_Color"); // 바닥 문양(PadDecal, 스프라이트 셰이더)은 이 색을 쓴다
+    bool decalChecked;
 
     void Awake()
     {
@@ -84,11 +86,18 @@ public class ResupplyPad : MonoBehaviour, IChargePad
     // 진행도를 색으로 보여 준다. 3초를 아무 표시 없이 누르고 있으면 되는지 알 수 없다
     void Tint(bool usable)
     {
+        if (!decalChecked)
+        {
+            decalChecked = true;
+            PadDecal d = GetComponent<PadDecal>();
+            if (d != null && d.Decal != null) rend = d.Decal; // 원기둥 대신 문양을 칠한다
+        }
         if (rend == null) return;
 
         Color c = usable ? Color.Lerp(idleColor, chargingColor, Progress) : fullColor;
         rend.GetPropertyBlock(block);
         block.SetColor(BaseColorId, c);
+        block.SetColor(ColorId, c);
         rend.SetPropertyBlock(block); // 재질 인스턴스를 만들지 않아 에셋이 더러워지지 않는다
     }
 
