@@ -42,6 +42,8 @@ public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
     public Material castMaterial;     // shared "casting" tint, blinked during the fuse
     public Color blastColor = new Color(1f, 0.35f, 0.05f, 1f);
     public float blastMarkerLifetime = 0.5f;
+    public GameObject blastEffect;        // 자폭 순간 가운데에서 터지는 이펙트 (바닥 원판은 범위 표시)
+    public float blastEffectScale = 1.5f;
     public float blinkStartInterval = 0.35f;
     public float blinkEndInterval = 0.05f;
 
@@ -185,6 +187,15 @@ public class EliteSelfDestructPattern : MonoBehaviour, IElitePatternVisual
         }
 
         SpawnBlastMarker(blastRadius, blastColor);
+        if (blastEffect != null)
+        {
+            Collider body = GetComponent<Collider>();
+            Vector3 at = transform.position;
+            if (body != null) at.y = body.bounds.min.y; // 바닥에서 터진다
+            GameObject fx = Instantiate(blastEffect, at, Quaternion.identity);
+            fx.transform.localScale = Vector3.one * blastEffectScale;
+            Destroy(fx, 4f);
+        }
 
         if (rend != null && normalMaterial != null) rend.sharedMaterial = normalMaterial;
         if (stunAfterBlast > 0f && selfHealth != null && selfHealth.CurrentHealth > 0f)
