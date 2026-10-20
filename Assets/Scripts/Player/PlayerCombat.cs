@@ -65,7 +65,7 @@ public class PlayerCombat : MonoBehaviour
 
     [Header("레이저 (주무기 대안, 좌클릭 홀드)")]
     // 소총 순간 DPS(20 x 8발 = 160)의 1.2배. 탄은 소총과 같은 탄창을 같은 속도(초당 primaryFireRate발)로 쓴다
-    public float laserDps = 192f;
+    public float laserDps = 153.6f; // 192의 80%
     public float laserRange = 60f;      // 소총 사거리(탄속 45 x 수명 1.33)와 같게
     public float laserRadius = 0.3f;    // 판정 굵기 (반지름)
     // 보이는 굵기. 1단 laserMinWidth에서 시작해 최대 차지 laserWidth까지, 피해 배율(laserRampBySecond)과
