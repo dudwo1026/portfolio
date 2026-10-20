@@ -588,7 +588,7 @@ void Fire()
         g.name = "Grenade";
         g.transform.position = transform.position + transform.forward * 0.8f;
         g.transform.localScale = Vector3.one * 0.35f;
-        g.GetComponent<Renderer>().material.color = new Color(0.2f, 0.35f, 0.15f); // 군용 녹색
+        g.GetComponent<Renderer>().sharedMaterial = LitMat(ref grenadeMat, new Color(0.2f, 0.35f, 0.15f)); // 군용 녹색
         g.GetComponent<Collider>().isTrigger = true;
 
         PlayerGrenade pg = g.AddComponent<PlayerGrenade>();
@@ -608,13 +608,21 @@ void Fire()
         return transform.position + dir * 0.8f + Vector3.up * muzzleLift;
     }
 
+    // 빌드에선 CreatePrimitive 기본 머티리얼이 URP가 아니라 마젠타로 나온다 → URP Lit을 한 번 만들어 공유
+    static Material bulletMat, grenadeMat;
+    static Material LitMat(ref Material m, Color c)
+    {
+        if (m == null) { m = new Material(Shader.Find("Universal Render Pipeline/Lit")); m.color = c; }
+        return m;
+    }
+
     void SpawnBullet(float damage, Vector3 dir)
     {
         GameObject bullet = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         bullet.name = "Bullet";
         bullet.transform.position = Muzzle(transform.forward);
         bullet.transform.localScale = Vector3.one * 0.2f;
-        bullet.GetComponent<Renderer>().material.color = Color.black;
+        bullet.GetComponent<Renderer>().sharedMaterial = LitMat(ref bulletMat, Color.black);
 
         Collider col = bullet.GetComponent<Collider>();
         col.isTrigger = true;
