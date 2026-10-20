@@ -374,6 +374,6 @@ MonoBehaviour:
   blastColor: {r: 1, g: 0.35, b: 0.05, a: 1}
   blastMarkerLifetime: 0.5
   blastEffect: {fileID: 4593184484909914552, guid: 2e1e9506f5904a64b81744324fb7cd50, type: 3}
-  blastEffectScale: 1.5
+  blastEffectScale: 3.5
   blinkStartInterval: 0.35
   blinkEndInterval: 0.05
