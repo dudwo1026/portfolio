@@ -140,7 +140,6 @@ public class KeyItemSpawner : MonoBehaviour
     {
         cutsceneRunning = true;
         int n = from.Count;
-        float prevScale = Time.timeScale;
         Time.timeScale = 0f;
         GameObject p = GameObject.Find("Player");
         Behaviour[] controls = p != null
@@ -224,7 +223,7 @@ public class KeyItemSpawner : MonoBehaviour
         Destroy(fade.canvas.gameObject);
 
         for (int i = 0; i < controls.Length; i++) if (controls[i] != null) controls[i].enabled = wasOn[i];
-        Time.timeScale = prevScale > 0f ? prevScale : 1f;
+        Time.timeScale = 1f; // 처치 슬로모션 중에 먹어도 느린 값으로 되돌리지 않는다 (HitStop은 이미 손을 뗐다)
         cutsceneRunning = false;
         if (lit < Collected) { lit = Collected; RefreshLabel(); } // 연출 중에 하나 더 주운 경우
     }
