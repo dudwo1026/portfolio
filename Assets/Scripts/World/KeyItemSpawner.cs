@@ -281,8 +281,8 @@ public class KeyItemSpawner : MonoBehaviour
     // 우상단 열쇠 현황: 글자 대신 열쇠 아이콘을 keysRequired개 늘어놓고, 모은 만큼 앞에서부터 금색으로 켠다
     UnityEngine.UI.Image[] icons;
     int shownIcons = -1;
-    public float iconSize = 38f;
-    public float iconGap = 4f;
+    public float iconSize = 70f;
+    public float iconGap = 0f; // 아이콘 그림 좌우에 이미 여백이 있다
 
     void BuildIcons()
     {
