@@ -95,6 +95,12 @@ public class BossGuardPattern : MonoBehaviour, IBossMotion
 
     public bool Guarding { get { return totems.Count > 0; } }
 
+    [Header("무적 표시: 토템이 서 있는 동안 보스를 감싼다")]
+    public GameObject guardShieldEffect;
+    public float guardShieldScale = 2.6f;
+    public float guardShieldHeight = 1f; // 보스 발밑에서 띄우는 높이
+    GameObject shield;
+
     Health health;
     EnemyAI ai;
     BossObstaclePattern obstacles;
@@ -125,6 +131,27 @@ public class BossGuardPattern : MonoBehaviour, IBossMotion
     }
 
     // 재발동은 체력과 무관하므로 피격 이벤트가 아니라 시간으로 본다
+    void LateUpdate()
+    {
+        bool want = Guarding && guardShieldEffect != null && health.CurrentHealth > 0f;
+        if (want && shield == null)
+        {
+            shield = Instantiate(guardShieldEffect, transform.position, Quaternion.identity);
+            shield.transform.localScale = Vector3.one * guardShieldScale;
+            foreach (ParticleSystem ps in shield.GetComponentsInChildren<ParticleSystem>()) { ParticleSystem.MainModule m = ps.main; m.scalingMode = ParticleSystemScalingMode.Hierarchy; }
+            // 보스 그림과 같은 자리라 거리 정렬로는 뒤에 그려질 수 있다. 정렬 순서로 항상 앞에 그린다
+            foreach (Renderer r in shield.GetComponentsInChildren<Renderer>()) r.sortingOrder = 10;
+        }
+        else if (!want && shield != null) { Destroy(shield); shield = null; }
+        if (shield != null)
+        {
+            Collider body = GetComponent<Collider>();
+            Vector3 p = transform.position;
+            if (body != null) p.y = body.bounds.min.y;
+            shield.transform.position = p + Vector3.up * guardShieldHeight; // 보스를 따라다닌다
+        }
+    }
+
     void Update()
     {
         if (casting)
@@ -165,6 +192,7 @@ public class BossGuardPattern : MonoBehaviour, IBossMotion
     void OnDisable()
     {
         health.Damaged -= OnDamaged;
+        if (shield != null) { Destroy(shield); shield = null; }
         casting = false;
         castCount = 0;
         ClearTotems();
